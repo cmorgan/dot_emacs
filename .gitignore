@@ -1,0 +1,17 @@
+*~
+*.cache
+*.eld
+*.elc
+# autogenerates from org
+configuration.el
+elpa
+*~
+auto-save-list
+smex-items
+recentf
+bookmarks
+projectile.cache
+projectile-bookmarks.eld
+places
+snippets
+

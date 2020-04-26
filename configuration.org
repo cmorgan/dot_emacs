@@ -1,0 +1,1198 @@
+#+TITLE: Emacs Configuration
+#+OPTIONS: toc:nil num:nil
+
+https://gist.github.com/yaodong/532e5b31781724ea2566503edcc498c3
+https://github.com/pcorey/.emacs.d/blob/master/init.el#L279
+https://github.com/hrs/dotfiles/blob/master/emacs/.emacs.d/configuration.org
+
+(byte-recompile-directory (expand-file-name "~/.emacs.d") 0)
+* Configure =use-package=
+
+I use =use-package= to install and configure my packages. My =init.el= includes
+the initial setup for =package.el= and ensures that =use-package= is installed,
+since I wanna do that right away.
+
+This makes sure that =use-package= will install the package if it's not already
+available. It also means that I should be able to open Emacs for the first time
+on a fresh Debian box and have my whole environment automatically installed. I'm
+not /totally/ sure about that, but we're gettin' close.
+
+#+begin_src emacs-lisp
+  (require 'use-package-ensure)
+  (setq use-package-always-ensure t)
+#+end_src
+
+Always compile packages, and use the newest version available.
+
+#+begin_src emacs-lisp
+  (use-package auto-compile
+    :config (auto-compile-on-load-mode))
+
+  (setq load-prefer-newer t)
+#+end_src
+
+* =evil-mode=
+
+I'd prefer not to expand abbrevs when I hit escape. That's always jarring and
+usually not what I want. In particular, it makes working with Coq really
+frustrating.
+
+#+begin_src emacs-lisp
+  (setq evil-want-abbrev-expand-on-insert-exit nil)
+#+end_src
+
+Use =evil=.
+
+#+begin_src emacs-lisp
+    (setq evil-want-keybinding nil)
+  (use-package evil
+    :config
+    (evil-mode 1)
+
+)
+#+end_src
+
+Install =evil-collection=, which provides evil-friendly bindings for many modes.
+
+#+begin_src emacs-lisp
+  (use-package evil-collection
+    :after evil
+ :config
+  (setq evil-collection-mode-list '(dired))
+  (evil-collection-init)   
+    
+)
+#+end_src
+
+Enable =surround= everywhere.
+
+#+begin_src emacs-lisp
+  (use-package evil-surround
+    :config
+    (global-evil-surround-mode 1))
+#+end_src
+
+Use =evil= with Org agendas.
+
+#+begin_src emacs-lisp
+  (use-package evil-org
+    :after org
+    :config
+    (add-hook 'org-mode-hook 'evil-org-mode)
+    (add-hook 'evil-org-mode-hook
+              (lambda () (evil-org-set-key-theme)))
+    (require 'evil-org-agenda)
+    (evil-org-agenda-set-keys))
+#+end_src
+
+* UI preferences
+  
+** to file
+#+begin_src emacs-lisp
+  (defalias 'yes-or-no-p 'y-or-n-p)
+  (blink-cursor-mode -1)
+  (show-paren-mode t)
+
+  (setq-default mode-line-format nil)
+
+  (use-package exec-path-from-shell
+    :ensure t
+    :config
+    (when (memq window-system '(mac ns x))
+      (exec-path-from-shell-initialize)))
+    
+  (use-package writeroom-mode
+    :ensure t
+  )
+
+    (use-package which-key
+    :ensure t
+    :init
+    (setq which-key-separator " ")
+    (setq which-key-prefix-prefix "+")
+    :config
+    (which-key-mode))
+  
+    (use-package ivy 
+    :ensure t
+    :config
+    (setq ivy-use-virtual-buffers t)
+)
+
+;; fuzzy
+;; https://oremacs.com/2016/01/06/ivy-flx/
+;; (setq ivy-re-builders-alist
+;;       '((t . ivy--regex-fuzzy)))
+(setq ivy-initial-inputs-alist nil)
+(setq ivy-re-builders-alist
+      '((ivy-switch-buffer . ivy--regex-plus)
+        (t . ivy--regex-fuzzy)))
+
+(use-package flx :ensure t)
+    
+  (use-package counsel :ensure t)
+    
+    (use-package evil-nerd-commenter :ensure t)
+
+    (use-package key-chord
+    :ensure t
+    :config
+    (key-chord-mode 1)
+    (key-chord-define evil-insert-state-map "kj" 'evil-normal-state)
+    (key-chord-define evil-insert-state-map "Kj" 'evil-normal-state)
+    (key-chord-define evil-insert-state-map "KJ" 'evil-normal-state)
+    (key-chord-define evil-insert-state-map "kJ" 'evil-normal-state))
+  
+    (defun toggle-buffers ()
+    (interactive)
+    (switch-to-buffer nil))
+  
+    (use-package ranger
+  :ensure t)
+
+#+end_src
+
+** Key bindings
+#+begin_src emacs-lisp
+  (use-package general
+    :ensure t
+    :config 
+    (general-define-key
+     "M-x" 'counsel-M-x)
+    (general-define-key
+     :states '(normal visual)
+     "C-u" 'scroll-down-command
+     "C-d" 'scroll-up-command)
+    (general-define-key
+     :states '(normal visual insert emacs)
+     :states '(normal visual insert emacs)
+     :prefix "SPC"
+     :non-normal-prefix "C-SPC"
+     "'"   'multi-term
+     "/"   'counsel-rg
+     ":"   'counsel-M-x
+     "."   'edit-emacs-configuration
+     "\""  'split-window-below
+     "%"  'split-window-right
+     "TAB" 'toggle-buffers   
+   
+     "b" '(:ignore t :which-key "Buffers")
+     "bb"  'ivy-switch-buffer
+   
+     "p" '(:ignore t :which-key "Projectile")
+     ;;"p" 'projectile-command-map
+     "pi" 'projectile-invalidate-cache
+     "pp" 'projectile-switch-project
+     "pf" 'counsel-projectile-find-file
+     "pb" 'persp-counsel-switch-buffer
+   
+     "f" '(:ignore t :which-key "Files")
+     "ff" 'find-file
+     "fr" 'counsel-recentf
+     "fb" 'counsel-bookmark
+     
+     "c" '(:ignore t :which-key "Comment")
+     "cl" 'evilnc-comment-or-uncomment-lines
+     
+     "a" '(:ignore t :which-key "Applications")
+    "ar" 'ranger
+
+     "w" '(:ignore t :which-key "Window")
+     "wl"  'windmove-right
+     "wh"  'windmove-left
+     "wk"  'windmove-up
+     "wj"  'windmove-down
+     "w\""  'split-window-below
+     "w%"  'split-window-right
+     "wx"  'delete-window
+
+     "s" '(:ignore t :which-key "Search")
+     "sc" 'evil-ex-nohighlight
+     "sl" 'ivy-resume
+     )
+    ;; (general-define-key
+    ;;  :states '(visual)
+    ;;  "gc" 'evilnc-comment-or-uncomment-lines)
+)
+
+(define-key evil-motion-state-map (kbd "C-h") 'evil-window-left)
+(define-key evil-motion-state-map (kbd "C-j") 'evil-window-down)
+(define-key evil-motion-state-map (kbd "C-k") 'evil-window-up)
+(define-key evil-motion-state-map (kbd "C-l") 'evil-window-right)
+
+(define-key evil-normal-state-map (kbd "C-h") 'evil-window-left)
+(define-key evil-normal-state-map (kbd "C-j") 'evil-window-down)
+(define-key evil-normal-state-map (kbd "C-k") 'evil-window-up)
+(define-key evil-normal-state-map (kbd "C-l") 'evil-window-right)
+
+(define-key global-map (kbd "C-h") #'evil-window-left)
+(define-key global-map (kbd "C-j") #'evil-window-down)
+(define-key global-map (kbd "C-k") #'evil-window-up)
+(define-key global-map (kbd "C-l") #'evil-window-right)
+
+
+(use-package evil-escape
+:config
+(evil-escape-mode 1)
+(setq evil-escape-key-sequence (kbd "jk"))
+)
+(global-set-key (kbd "M-o") 'next-multiframe-window)
+
+
+(use-package perspective
+:config
+(persp-mode))
+(use-package persp-projectile)
+
+#+end_src
+** Tweak window chrome
+
+I don't usually use the menu or scroll bar, and they take up useful space.
+
+#+begin_src emacs-lisp
+  (tool-bar-mode 0)
+  (menu-bar-mode 0)
+  (scroll-bar-mode -1)
+#+end_src
+
+There's a tiny scroll bar that appears in the minibuffer window. This disables
+that:
+
+#+begin_src emacs-lisp
+  (set-window-scroll-bars (minibuffer-window) nil nil)
+#+end_src
+
+The default frame title isn't useful. This binds it to the name of the current
+project:
+
+#+begin_src emacs-lisp
+  (setq frame-title-format '((:eval (projectile-project-name))))
+#+end_src
+
+** Use fancy lambdas
+
+Why not?
+
+#+begin_src emacs-lisp
+  (global-prettify-symbols-mode t)
+#+end_src
+
+** Theme
+
+#+begin_src emacs-lisp
+;;   (use-package solarized-theme
+;;     :config
+;;     (setq solarized-use-variable-pitch nil
+;;           solarized-height-plus-1 1.0
+;;           solarized-height-plus-2 1.0
+;;           solarized-height-plus-3 1.0
+;;           solarized-height-plus-4 1.0)
+
+;;     (let ((line (face-attribute 'mode-line :underline)))
+;;       (set-face-attribute 'mode-line          nil :overline   line)
+;;       (set-face-attribute 'mode-line-inactive nil :overline   line)
+;;       (set-face-attribute 'mode-line-inactive nil :underline  line)
+;;       (set-face-attribute 'mode-line          nil :box        nil)
+;;       (set-face-attribute 'mode-line-inactive nil :box        nil)
+;;       (set-face-attribute 'mode-line-inactive nil :background "#f9f2d9"))
+      
+;;       (load-theme 'solarized-dark t)
+;; )
+
+(use-package spacemacs-theme
+  :defer t
+  :init (load-theme 'spacemacs-dark t))
+
+
+#+end_src
+
+ (defun hrs/apply-theme ()
+   "Apply the `solarized-light' theme and make frames just slightly transparent."
+   (interactive)
+   (load-theme 'solarized-light t)
+)
+
+If this code is being evaluated by =emacs --daemon=, ensure that each subsequent
+frame is themed appropriately.
+
+#+begin_src 
+  (if (daemonp)
+      (add-hook 'after-make-frame-functions
+                (lambda (frame)
+                  (with-selected-frame frame (hrs/apply-theme))))
+    (hrs/apply-theme))
+#+end_src
+
+** Use =moody= for a beautiful modeline
+
+This gives me a truly lovely ribbon-based modeline.
+
+#+begin_src emacs-lisp
+  (use-package moody
+    :config
+    (setq x-underline-at-descent-line t)
+    (moody-replace-mode-line-buffer-identification)
+    ;;(moody-replace-vc-mode)
+)
+#+end_src
+
+** Use =minions= to hide all minor modes
+
+I never want to see a minor mode, and manually adding =:diminish= to every
+use-package declaration is a hassle. This uses =minions= to hide all the minor
+modes in the modeline. Nice!
+
+By default there's a =;-)= after the major mode; that's an adorable default, but
+I'd rather skip it.
+
+#+begin_src emacs-lisp
+   (use-package minions
+     :config
+     (setq minions-mode-line-lighter ""
+           minions-mode-line-delimiters '("" . ""))
+     (minions-mode 1))
+#+end_src
+
+** Disable visual bell
+
+=sensible-defaults= replaces the audible bell with a visual one, but I really
+don't even want that (and my Emacs/Mac pair renders it poorly). This disables
+the bell altogether.
+
+#+begin_src emacs-lisp
+  (setq ring-bell-function 'ignore)
+#+end_src
+
+** Scroll conservatively
+
+When point goes outside the window, Emacs usually recenters the buffer point.
+I'm not crazy about that. This changes scrolling behavior to only scroll as far
+as point goes.
+
+#+begin_src emacs-lisp
+  (setq scroll-conservatively 100)
+#+end_src
+
+** Set default font and configure font resizing
+
+I'm partial to Inconsolata.
+
+The standard =text-scale-= functions just resize the text in the current buffer;
+I'd generally like to resize the text in /every/ buffer, and I usually want to
+change the size of the modeline, too (this is especially helpful when
+presenting). These functions and bindings let me resize everything all together!
+
+Note that this overrides the default font-related keybindings from
+=sensible-defaults=.
+
+#+begin_src emacs-lisp
+  (setq hrs/default-font "Source Code Pro")
+  (setq hrs/default-font-size 11)
+  (setq hrs/current-font-size hrs/default-font-size)
+
+  (setq hrs/font-change-increment 1.1)
+
+  (defun hrs/font-code ()
+    "Return a string representing the current font (like \"Inconsolata-14\")."
+    (concat hrs/default-font "-" (number-to-string hrs/current-font-size)))
+
+  (defun hrs/set-font-size ()
+    "Set the font to `hrs/default-font' at `hrs/current-font-size'.
+  Set that for the current frame, and also make it the default for
+  other, future frames."
+    (let ((font-code (hrs/font-code)))
+      (if (assoc 'font default-frame-alist)
+          (setcdr (assoc 'font default-frame-alist) font-code)
+        (add-to-list 'default-frame-alist (cons 'font font-code)))
+      (set-frame-font font-code)))
+
+  (defun hrs/reset-font-size ()
+    "Change font size back to `hrs/default-font-size'."
+    (interactive)
+    (setq hrs/current-font-size hrs/default-font-size)
+    (hrs/set-font-size))
+
+  (defun hrs/increase-font-size ()
+    "Increase current font size by a factor of `hrs/font-change-increment'."
+    (interactive)
+    (setq hrs/current-font-size
+          (ceiling (* hrs/current-font-size hrs/font-change-increment)))
+    (hrs/set-font-size))
+
+  (defun hrs/decrease-font-size ()
+    "Decrease current font size by a factor of `hrs/font-change-increment', down to a minimum size of 1."
+    (interactive)
+    (setq hrs/current-font-size
+          (max 1
+               (floor (/ hrs/current-font-size hrs/font-change-increment))))
+    (hrs/set-font-size))
+
+  (define-key global-map (kbd "C-)") 'hrs/reset-font-size)
+  (define-key global-map (kbd "C-+") 'hrs/increase-font-size)
+  (define-key global-map (kbd "C-=") 'hrs/increase-font-size)
+  (define-key global-map (kbd "C-_") 'hrs/decrease-font-size)
+  (define-key global-map (kbd "C--") 'hrs/decrease-font-size)
+
+  (hrs/reset-font-size)
+#+end_src
+
+** Highlight the current line
+
+=global-hl-line-mode= softly highlights the background color of the line
+containing point. It makes it a bit easier to find point, and it's useful when
+pairing or presenting code.
+
+#+begin_src emacs-lisp
+  (global-hl-line-mode)
+#+end_src
+
+** Highlight uncommitted changes
+
+Use the =diff-hl= package to highlight changed-and-uncommitted lines when
+programming.
+
+#+begin_src emacs-lisp
+  (use-package diff-hl
+    :config
+    (add-hook 'prog-mode-hook 'turn-on-diff-hl-mode)
+    (add-hook 'vc-dir-mode-hook 'turn-on-diff-hl-mode))
+#+end_src
+
+* Project management
+
+I use a few packages in virtually every programming or writing environment to
+manage the project, handle auto-completion, search for terms, and deal with
+version control. That's all in here.
+
+** =ag=
+
+Install =ag= to provide search within projects (usually through
+=projectile-ag=).
+
+#+begin_src emacs-lisp
+  (use-package ag)
+#+end_src
+
+** =company=
+
+Company gives text completion in buffers etc. Use =company-mode= everywhere.
+
+#+begin_src emacs-lisp
+  (use-package company)
+  (add-hook 'after-init-hook 'global-company-mode)
+#+end_src
+
+Use =M-/= for completion.
+
+#+begin_src emacs-lisp
+  (global-set-key (kbd "M-/") 'company-complete-common)
+#+end_src
+
+** =dumb-jump=
+
+The =dumb-jump= package works well enough in a [[https://github.com/jacktasia/dumb-jump#supported-languages][ton of environments]], and it
+doesn't require any additional setup. I've bound its most useful command to
+=M-.=.
+
+#+begin_src emacs-lisp
+  (use-package dumb-jump
+    :config
+    (define-key evil-normal-state-map (kbd "M-.") 'dumb-jump-go)
+    (setq dumb-jump-selector 'ivy))
+#+end_src
+
+** =flycheck=
+
+ #+begin_src emacs-lisp
+   (use-package let-alist)
+   (use-package flycheck
+:config
+(setq flycheck-idle-change-delay 7)
+
+(setq-default flycheck-flake8-maximum-line-length 89)
+)
+ #+end_src
+
+** =projectile=
+
+Projectile's default binding of =projectile-ag= to =C-c p s s= is clunky enough
+that I rarely use it (and forget it when I need it). This binds it to the
+easier-to-type =C-c v= to useful searches.
+
+Bind =C-p= to fuzzy-finding files in the current project. We also need to
+explicitly set that in a few other modes.
+
+I use =ivy= as my completion system.
+
+When I visit a project with =projectile-switch-project=, the default action is
+to search for a file in that project. I'd rather just open up the top-level
+directory of the project in =dired= and find (or create) new files from there.
+
+I'd like to /always/ be able to recursively fuzzy-search for files, not just
+when I'm in a Projectile-defined project. I use the current directory as a
+project root (if I'm not in a "real" project).
+
+#+begin_src emacs-lisp
+  (use-package projectile
+    :config
+    (setq projectile-completion-system 'ivy)
+    (setq projectile-indexing-method 'alien)
+)
+
+(use-package counsel-projectile)
+
+    
+#+end_src
+
+** =restclient=
+
+#+begin_src emacs-lisp
+  (use-package restclient)
+  (use-package company-restclient
+    :config
+    (add-to-list 'company-backends 'company-restclient))
+#+end_src
+
+** =undo-tree=
+
+I like tree-based undo management. I only rarely need it, but when I do, oh boy.
+
+#+begin_src emacs-lisp
+  (use-package undo-tree)
+#+end_src
+
+* Editing settings
+** General 
+#+begin_src emacs-lisp
+  (setq make-backup-files nil) ; stop creating backup~ files
+  (setq auto-save-default nil) ; stop creating #autosave# files
+  (setq delete-old-versions -1 )
+  ;;(setq inhibit-startup-screen t )
+  (setq ring-bell-function 'ignore )
+  ;;(setq coding-system-for-read 'utf-8 )
+  ;;(setq coding-system-for-write 'utf-8 )
+  (setq sentence-end-double-space nil)
+  (setq default-fill-column 80)
+  (setq initial-scratch-message "")
+  (setq word-wrap t)
+#+end_src emacs-lisp
+** Quickly visit Emacs configuration
+
+I futz around with my dotfiles a lot. This binds =C-c e= to quickly open my
+Emacs configuration file.
+
+#+begin_src emacs-lisp
+  (defun hrs/visit-emacs-config ()
+    (interactive)
+    (find-file "~/.emacs.d/configuration.org"))
+
+  (global-set-key (kbd "C-c e") 'hrs/visit-emacs-config)
+#+end_src
+
+** Always kill current buffer
+
+Assume that I always want to kill the current buffer when hitting =C-x k=.
+
+#+begin_src emacs-lisp
+  (global-set-key (kbd "C-x k") 'hrs/kill-current-buffer)
+#+end_src
+
+** Set up =helpful=
+
+The =helpful= package provides, among other things, more context in Help
+buffers.
+
+#+begin_src emacs-lisp
+  (use-package helpful)
+
+  ;; (global-set-key (kbd "C-h f") #'helpful-callable)
+  ;; (global-set-key (kbd "C-h v") #'helpful-variable)
+  ;; (global-set-key (kbd "C-h k") #'helpful-key)
+  (evil-define-key 'normal helpful-mode-map (kbd "q") 'quit-window)
+#+end_src
+
+** Look for executables in =/usr/local/bin=
+
+#+begin_src
+  (hrs/append-to-path "/usr/local/bin")
+#+end_src
+
+** Save my location within a file
+
+Using =save-place-mode= saves the location of point for every file I visit. If I
+close the file or close the editor, then later re-open it, point will be at the
+last place I visited.
+
+#+begin_src emacs-lisp
+  (save-place-mode t)
+#+end_src
+
+** Always indent with spaces
+
+Never use tabs. Tabs are the devil’s whitespace.
+
+#+begin_src emacs-lisp
+  (setq-default indent-tabs-mode nil)
+#+end_src
+
+** Install and configure =which-key=
+
+=which-key= displays the possible completions for a long keybinding. That's
+really helpful for some modes (like =projectile=, for example).
+
+#+begin_src emacs-lisp
+  (use-package which-key
+    :config (which-key-mode))
+#+end_src
+
+** Configure =yasnippet=
+
+#+begin_src
+  (use-package yasnippet)
+#+end_src
+
+I keep my snippets in =~/.emacs/snippets/text-mode=, and I always want =yasnippet=
+enabled.
+
+#+begin_src
+  (setq yas-snippet-dirs '("~/.emacs.d/snippets/text-mode"))
+  (yas-global-mode 1)
+#+end_src
+
+I /don’t/ want =yas= to automatically indent the snippets it inserts. Sometimes
+this looks pretty bad (when indenting org-mode, for example, or trying to guess
+at the correct indentation for Python).
+
+#+begin_src
+  (setq yas-indent-line 'auto)
+#+end_src
+
+** Configure =ivy= and =counsel=
+
+I use =ivy= and =counsel= as my completion framework.
+
+This configuration:
+
+- Uses =counsel-M-x= for command completion,
+- Replaces =isearch= with =swiper=,
+- Uses =smex= to maintain history,
+- Enables fuzzy matching everywhere except swiper (where it's thoroughly
+  unhelpful), and
+- Includes recent files in the switch buffer.
+
+#+begin_src emacs-lisp
+  (use-package counsel
+    :bind
+    ("M-x" . 'counsel-M-x)
+    ("C-s" . 'swiper)
+
+    :config
+    (use-package flx)
+    (use-package smex)
+
+    (ivy-mode 1)
+    (setq ivy-use-virtual-buffers t)
+    (setq ivy-count-format "(%d/%d) ")
+    (setq ivy-initial-inputs-alist nil)
+    (setq ivy-re-builders-alist
+          '((swiper . ivy--regex-plus)
+            (t . ivy--regex-fuzzy))))
+#+end_src
+
+** Switch and rebalance windows when splitting
+
+When splitting a window, I invariably want to switch to the new window. This
+makes that automatic.
+
+#+begin_src emacs-lisp
+  (defun hrs/split-window-below-and-switch ()
+    "Split the window horizontally, then switch to the new pane."
+    (interactive)
+    (split-window-below)
+    (balance-windows)
+    (other-window 1))
+
+  (defun hrs/split-window-right-and-switch ()
+    "Split the window vertically, then switch to the new pane."
+    (interactive)
+    (split-window-right)
+    (balance-windows)
+    (other-window 1))
+
+  (global-set-key (kbd "C-x 2") 'hrs/split-window-below-and-switch)
+  (global-set-key (kbd "C-x 3") 'hrs/split-window-right-and-switch)
+#+end_src
+
+** Mass editing of =grep= results
+
+I like the idea of mass editing =grep= results the same way I can edit filenames
+in =dired=. These keybindings allow me to use =C-x C-q= to start editing =grep=
+results and =C-c C-c= to stop, just like in =dired=.
+
+#+begin_src emacs-lisp
+  (use-package wgrep)
+
+  (eval-after-load 'grep
+    '(define-key grep-mode-map
+      (kbd "C-x C-q") 'wgrep-change-to-wgrep-mode))
+
+  (eval-after-load 'wgrep
+    '(define-key grep-mode-map
+      (kbd "C-c C-c") 'wgrep-finish-edit))
+
+  (setq wgrep-auto-save-buffer t)
+#+end_src
+
+** Use projectile everywhere
+
+#+begin_src emacs-lisp
+  (projectile-mode)
+#+end_src
+
+* Utility functions
+  
+#+begin_src emacs-lisp
+ (defun cjm/kill-current-buffer ()
+  "Kill the current buffer without prompting."
+  (interactive)
+  (kill-buffer (current-buffer))) 
+  
+  
+(defun cjm/kill-other-buffers ()
+      "Kill all other buffers."
+      (interactive)
+      (mapc 'kill-buffer (delq (current-buffer) (buffer-list))))
+      
+    (defun hrs/append-to-path (path)
+    "Add a path both to the $PATH variable and to Emacs' exec-path."
+    (setenv "PATH" (concat (getenv "PATH") ":" path))
+    (add-to-list 'exec-path path))
+
+      
+#+end_src
+* Orgmode
+
+#+begin_src emacs-lisp
+;; use / in dired mode to
+(use-package dired-narrow
+  :ensure t
+  :bind (:map dired-mode-map
+              ("/" . dired-narrow)))
+
+(setq org-agenda-start-day nil)
+(setq org-agenda-span 'week)
+(setq org-agenda-start-on-weekday nil)
+
+;; set maximum indentation for description lists
+(setq org-list-description-max-indent 5)
+
+;; prevent demoting heading also shifting text inside sections
+(setq org-adapt-indentation nil)
+
+;; (setq cjm/home-dir "h:/")
+;; (setq org-directory (concat cjm/home-dir "org/"))
+(setq org-directory "c:/dev/docs/org/")
+
+;;(setq cjm-org-directory (concat cjm/home-dir "/org/"))
+;; org-default-notes-file gets set by org-projectile to project root
+(setq cjm-org-default-notes-file (concat org-directory "inbox.org"))
+(setq cjm-dig-capture-file (concat org-directory "dig.org"))
+(setq cjm-quat-data-capture-file (concat org-directory "quant_data.org"))
+
+(require 'org)
+(setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
+
+(setq org-enforce-todo-dependencies t)
+(setq org-agenda-dim-blocked-tasks 'invisible)
+(setq org-todo-keywords '((sequence "TODO" "IN-PROGRESS" "DONE")))
+
+;;; where to open links
+;; default: (setq org-link-frame-setup '((file . find-file-other-window)))
+;; this has a nice snippet for maybe opening links depedning on extension https://stackoverflow.com/questions/17590784/how-to-let-org-mode-open-a-link-like-file-file-org-in-current-window-inste
+;; open links in same window
+(setq org-link-frame-setup '((file . find-file)))
+
+(defun copy-current-line-position-to-clipboard ()
+  "Copy current line in file to clipboard as 'file:</path/to/file>::<line-number>'."
+  (interactive)
+  (let ((path-with-line-number
+         (concat "file:" (dired-replace-in-string (getenv "HOME") "~" (buffer-file-name)) "::" (number-to-string (line-number-at-pos)))))
+    (kill-new path-with-line-number)
+    (message (concat path-with-line-number " copied to clipboard"))))
+
+(defun my/org-mode-hook ()
+  "Stop the org-level headers from increasing in height relative to the other text."
+  (dolist (face '(
+                  org-document-title
+                  org-level-1
+                  org-level-2
+                  org-level-3
+                  org-level-4
+                  org-level-5))
+    (set-face-attribute face nil :weight 'semi-bold :height 1.0))
+
+  ;; (org-document-title ((t (:weight 'semi-bold :height 1.1))))
+
+  )
+
+(add-hook 'org-mode-hook 'my/org-mode-hook)
+
+
+;; should be able to do the above with this, didn't work though
+;; (setq theming-modifications
+;;       '((spacemacs-dark
+;;          (org-document-title ((t (:weight 'semi-bold :height 1.1))))
+;;          (org-level-1 :weight 'semi-bold :height 1.0)
+;;          (org-level-2 :weight 'semi-bold :height 1.0)
+;;          (org-level-3 :weight 'semi-bold :height 1.0)
+;;          (org-level-4 :weight 'semi-bold :height 1.0)
+;;          (org-level-5 :weight 'semi-bold :height 1.0))))
+
+
+
+;; (setq org-agenda-files (list org-directory))
+(setq org-agenda-files (list
+                        (concat org-directory "quantdb.org")
+                        (concat org-directory "index.org")
+                        (concat org-directory "research.org")
+                        (concat org-directory "todo.org")
+                        )
+      )
+(setq org-agenda-skip-scheduled-if-done t)
+(setq org-agenda-skip-deadline-if-done t)
+(setq org-closed-keep-when-no-todo t)
+
+(setq org-adapt-indent nil)
+
+;; tags
+;; Tags with fast selection keys
+(setq org-tag-alist (quote (
+                            ;; (:startgroup)
+                            ;; ("@errand" . ?e)
+                            ;; ("@office" . ?o)
+                            ;; ("@home" . ?H)
+                            ;; (:endgroup)
+                            ("WAITING" . ?w)
+                            ("HOLD" . ?h)
+                            ("IDEA" . ?i)
+                            ("reading" . ?r)
+                            ;; ("PERSONAL" . ?P)
+                            ;; ("DRAFT" . ?D)
+                            ;; ("WORK" . ?W)
+                            ("NOTE" . ?n)
+                            ("export" . ?e)
+
+                            ("data" . ?d)
+                            ("model" . ?m)
+                            ("bot" . ?b)
+                            ;; ("CANCELLED" . ?c)
+                            ;; ("FLAGGED" . ??)
+                            )))
+
+(setq org-capture-templates
+      (quote (
+              ;; ("p" "project todo" entry (file org-default-notes-file)
+              ;;   "* TODO %?\n%U\n%a\n")
+              ("t" "todo" entry (file cjm-org-default-notes-file)
+              "* TODO %?\n%T\n%a\n")
+                      ;; "* TODO %?\n  %i\n  %a")
+              ;; ("m" "meeting" entry (file org-default-notes-file)
+              ;;  "* MEETING with %? :MEETING:\n%U")
+              ("i" "idea" entry (file cjm-org-default-notes-file)
+                "* %? :IDEA:\n%U\n%a\n")
+              ("n" "note" entry (file cjm-org-default-notes-file)
+                "* %? :NOTE:\n%U\n%a\n")
+              ("d" "dig totdo" entry (file cjm-dig-capture-file)
+               "* TODO %?\n %t\n %a\n")
+              ("q" "quant_data totdo" entry (file cjm-quant-data-capture-file)
+               ;; "* TODO %?\n%T\n%a\n")
+              "* TODO %?\n %t\n %a\n")
+
+              ;; ("h" "habit" entry (file cjm/org-default-habits-file)
+              ;;  "* NEXT %?\n%U\n%a\nSCHEDULED: %(format-time-string \"%<<%Y-%m-%d %a .+1d/3d>>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n"))))
+              )))
+
+;; refiling
+(setq org-refile-targets (quote ((nil :maxlevel . 9)
+                                  (org-agenda-files :maxlevel . 9))))
+
+(defun cjm-org-skip-subtree-if-priority (priority)
+  "Skip an agenda subtree if it has a priority of PRIORITY.
+    PRIORITY may be one of the characters ?A, ?B, or ?C."
+  (let ((subtree-end (save-excursion (org-end-of-subtree t)))
+        (pri-value (* 1000 (- org-lowest-priority priority)))
+        (pri-current (org-get-priority (thing-at-point 'line t))))
+    (if (= pri-value pri-current)
+        subtree-end
+      nil)))
+
+
+; custom agenda view
+; composite agenda: supply list of types to show up in agenda
+(setq org-agenda-custom-commands
+'(("c" "Custom agenda"
+    ((tags "PRIORITY=\"A\""
+          ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+            (org-agenda-overriding-header "High-priority:")))
+    (tags "DEADLINE>=\"<today>\""
+          ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+            (org-agenda-overriding-header "Deadlines:")))
+    ;; (agenda "")
+    (agenda . " %i %-12:c%?-12t% s")
+    (todo "IN-PROGRESS" ((org-agenda-overriding-header "In-progress")))
+
+    (alltodo ""
+              ((org-agenda-skip-function
+                '(or (cjm-org-skip-subtree-if-priority ?A)
+                    (org-agenda-skip-if nil '(scheduled deadline))
+                    (org-agenda-skip-entry-if 'todo '("IN-PROGRESS"))
+                    ))
+              (org-agenda-overriding-header "Other:")
+              ))
+    ))))
+
+;; https://stackoverflow.com/questions/22888785/is-it-possible-to-get-org-mode-to-show-breadcrumbs-in-agenda-todo-list
+(setq org-agenda-prefix-format '(
+                                 (agenda .
+                                         ;; TODO replace this with %b
+                                         ;; https://emacs.stackexchange.com/questions/19091/how-to-set-org-agenda-prefix-format-before-org-agenda-starts
+                                         " %i %-12:c %(concat \"[ \"(org-format-outline-path (org-get-outline-path)) \" ]\") "
+                                         )
+                                 (todo .
+                                       " %i %-12:c %(concat \"[ \"(org-format-outline-path (org-get-outline-path)) \" ]\") "
+                                       )
+                                 )
+      )
+
+(defun org-agenda-show-custom (&optional arg)
+  (interactive "P")
+  (org-agenda arg "c"))
+
+;; (define-key org-mode-map (kbd "<f8>") 'org-agenda-show-unscheduled)
+(evil-define-key 'normal org-mode-map (kbd "<f8>") 'org-agenda-show-custom)
+
+; defines filter shown on org agenda screen
+(add-to-list 'org-agenda-custom-commands
+              '("D" "Deadlines"
+                tags "DEADLINE>=\"<today>\""))
+
+(evil-define-key 'normal evil-org-mode-map "t" 'org-todo)
+
+
+(setq org-treat-insert-todo-heading-as-state-change t)
+
+(defun insert-created-date(&rest ignore)
+  (insert (format-time-string
+           (concat "\nCREATED: "
+                   (cdr org-time-stamp-formats))
+           ))
+  ; in org-capture, this folds the entry; when inserting a heading, this moves point back to the heading line
+  (org-back-to-heading)
+  ; when inserting a heading, this moves point to the end of the line
+  (move-end-of-line())
+  )
+
+; add to the org-capture hook
+;; (add-hook 'org-capture-before-finalize-hook
+;;           #'insert-created-date
+;;           )
+
+; hook it to adding headings with M-S-RET
+; do not add this to org-insert-heading-hook, otherwise this also works in non-TODO items
+; and Org-mode has no org-insert-todo-heading-hook
+;; (advice-add 'org-insert-todo-heading :after #'insert-created-date)
+
+;; --- calendar stuff
+;; start on a monday
+(setq calendar-week-start-day 1)
+
+;; display week number
+(copy-face font-lock-constant-face 'calendar-iso-week-face)
+(set-face-attribute 'calendar-iso-week-face nil
+                    :height 0.7)
+(setq calendar-intermonth-text
+      '(propertize
+        (format "%2d"
+                (car
+                 (calendar-iso-from-absolute
+                  (calendar-absolute-from-gregorian (list month day year)))))
+        'font-lock-face 'calendar-iso-week-face))
+
+(copy-face 'default 'calendar-iso-week-header-face)
+(set-face-attribute 'calendar-iso-week-header-face nil
+                    :height 0.7)
+(setq calendar-intermonth-header
+      (propertize "Wk"                  ; or e.g. "KW" in Germany
+                  'font-lock-face 'calendar-iso-week-header-face))
+(set-face-attribute 'calendar-iso-week-face nil
+                    :height 1.0 :foreground "salmon")
+#+end_src
+* Programming environments
+
+I like shallow indentation, but tabs are displayed as 8 characters by default.
+This reduces that.
+
+#+begin_src emacs-lisp
+  (setq-default tab-width 4)
+#+end_src
+
+Treating terms in CamelCase symbols as separate words makes editing a little
+easier for me, so I like to use =subword-mode= everywhere.
+
+#+begin_src emacs-lisp
+  (use-package subword
+    :config (global-subword-mode 1))
+#+end_src
+
+Compilation output goes to the =*compilation*= buffer. I rarely have that window
+selected, so the compilation output disappears past the bottom of the window.
+This automatically scrolls the compilation window so I can always see the
+output.
+
+#+begin_src emacs-lisp
+  (setq compilation-scroll-output t)
+#+end_src
+
+** Python
+
+#+begin_src 
+  (use-package python-mode)
+#+end_src
+
+Add =~/.local/bin= to load path. That's where =virtualenv= is installed, and
+we'll need that for =jedi=.
+#+begin_src emacs-lisp
+  (hrs/append-to-path "~/.local/bin")
+#+end_src
+
+
+#+begin_src 
+  (hrs/append-to-path "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev")
+#+end_src
+
+code folding
+https://emacs.stackexchange.com/questions/45883/fold-all-methods-in-a-python-class-with-evil
+#+begin_src emacs-lisp
+
+  (use-package anaconda-mode
+)
+(add-hook 'python-mode-hook 'anaconda-mode)
+(add-hook 'python-mode-hook 'hs-minor-mode)
+
+ ;;  (use-package company-anaconda
+ ;;    :ensure t
+ ;;    :init
+ ;;    (eval-after-load "company"
+ ;; '(add-to-list 'company-backends 'company-anaconda))
+ ;; )
+
+ (setq history-length 100)
+(put 'minibuffer-history 'history-length 50)
+(put 'evil-ex-history 'history-length 50)
+(put 'kill-ring 'history-length 25)
+
+#+end_src
+
+Enable =elpy=. This provides automatic indentation, auto-completion, syntax
+checking, etc.
+
+(setq python-shell-interpreter "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/python.exe")
+
+this is very slow
+#+begin_src 
+(pyvenv-activate "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev")
+
+  (use-package elpy)
+  (elpy-enable)
+  (setq elpy-rpc-virtualenv-path "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev") 
+  (setq elpy-rpc-python-command "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/python.exe") 
+  
+#+end_src
+
+Use =flycheck= for syntax checking:
+
+#+begin_src 
+  (add-hook 'elpy-mode-hook 'flycheck-mode)
+#+end_src
+
+Format code according to PEP8 on save:
+
+#+begin_src 
+  (use-package py-autopep8)
+  (require 'py-autopep8)
+  (add-hook 'elpy-mode-hook 'py-autopep8-enable-on-save)
+#+end_src
+
+Configure Jedi along with the associated =company= mode:
+
+#+begin_src 
+  (use-package company-jedi)
+  (add-to-list 'company-backends 'company-jedi)
+
+  (add-hook 'python-mode-hook 'jedi:setup)
+  (setq jedi:complete-on-dot t)
+#+end_src
+
+** TODO tidy this
+
+#+begin_src 
+(defun cjm/hs-hide-all ()
+  "Hide all top level blocks, displaying only first and last lines.
+Move point to the beginning of the line, and run the normal hook
+`hs-hide-hook'.  See documentation for `run-hooks'.
+If `hs-hide-comments-when-hiding-all' is non-nil, also hide the comments."
+  (interactive)
+  (hs-life-goes-on
+   (save-excursion
+     (unless hs-allow-nesting
+       (hs-discard-overlays (point-min) (point-max)))
+     (goto-char (point-min))
+     (syntax-propertize (point-max))
+     (let ((spew (make-progress-reporter "Hiding all blocks..."
+                                         (point-min) (point-max)))
+           (re (concat "\\("
+                       hs-block-start-regexp
+                       "\\)"
+                       (if hs-hide-comments-when-hiding-all
+                           (concat "\\|\\("
+                                   hs-c-start-regexp
+                                   "\\)")
+                         ""))))
+       (while (progn
+                (unless hs-hide-comments-when-hiding-all
+                  (forward-comment (point-max)))
+                (re-search-forward re (point-max) t))
+         (if (match-beginning 1)
+             ;; We have found a block beginning.
+             (progn
+               (goto-char (match-beginning 1))
+               (unless (if 'ttn-hs-hide-level-1
+                           (funcall 'ttn-hs-hide-level-1)
+       (hs-hide-block-at-point t))
+     ;; Go to end of matched data to prevent from getting stuck
+     ;; with an endless loop.
+                 (when (looking-at hs-block-start-regexp)
+       (goto-char (match-end 0)))))
+           ;; found a comment, probably
+           (let ((c-reg (hs-inside-comment-p)))
+             (when (and c-reg (car c-reg))
+               (if (> (count-lines (car c-reg) (nth 1 c-reg)) 1)
+                   (hs-hide-block-at-point t c-reg)
+                 (goto-char (nth 1 c-reg))))))
+         (progress-reporter-update spew (point)))
+       (progress-reporter-done spew)))
+   (beginning-of-line)
+   (run-hooks 'hs-hide-hook)))
+
+(defun ttn-hs-hide-level-1 ()
+  (hs-hide-level 1)
+  (forward-sexp 1))
+
+;; if defined, this is called by regular hs-hide-all,
+;; https://github.com/emacs-mirror/emacs/blob/master/lisp/progmodes/hideshow.el#L99
+(setq hs-hide-all-non-comment-function nil)
+
+(define-key evil-normal-state-map (kbd "zl") 'cjm/hs-hide-all)
+
+;; (define-key evil-normal-state-map (kbd "zl") 'hs-hide-leafs)
+#+end_src
