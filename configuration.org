@@ -5,6 +5,8 @@ https://gist.github.com/yaodong/532e5b31781724ea2566503edcc498c3
 https://github.com/pcorey/.emacs.d/blob/master/init.el#L279
 https://github.com/hrs/dotfiles/blob/master/emacs/.emacs.d/configuration.org
 
+https://github.com/felixSchl/.emacs.d/blob/master/init.el
+
 (byte-recompile-directory (expand-file-name "~/.emacs.d") 0)
 * Configure =use-package=
 
@@ -153,6 +155,8 @@ Use =evil= with Org agendas.
 #+end_src
 
 ** Key bindings
+
+https://github.com/noctuid/general.el#evil-examples
 #+begin_src emacs-lisp
   (use-package general
     :ensure t
@@ -161,10 +165,16 @@ Use =evil= with Org agendas.
      "M-x" 'counsel-M-x)
     (general-define-key
      :states '(normal visual)
-     "C-u" 'scroll-down-command
-     "C-d" 'scroll-up-command)
+     "C-k" 'scroll-down-command
+     "C-j" 'scroll-up-command)
+     
+    ;; (general-define-key
+    ;;  :states '(normal visual insert emacs)
+    ;;  :prefix ","
+    ;;  :keymaps 'evil-org-mode-map
+    ;;  "c" '(:ignore t :wich-key "Comment")
+    ;;  )
     (general-define-key
-     :states '(normal visual insert emacs)
      :states '(normal visual insert emacs)
      :prefix "SPC"
      :non-normal-prefix "C-SPC"
@@ -229,7 +239,6 @@ Use =evil= with Org agendas.
 (define-key global-map (kbd "C-j") #'evil-window-down)
 (define-key global-map (kbd "C-k") #'evil-window-up)
 (define-key global-map (kbd "C-l") #'evil-window-right)
-
 
 (use-package evil-escape
 :config
@@ -301,10 +310,32 @@ Why not?
 
 (use-package spacemacs-theme
   :defer t
-  :init (load-theme 'spacemacs-dark t))
+  :init (load-theme 'spacemacs-dark t)
+  :config 
+  
+  (let ((line (face-attribute 'mode-line :underline)))
+    (set-face-attribute 'mode-line          nil :overline   line)
+    (set-face-attribute 'mode-line-inactive nil :overline   line)
+    (set-face-attribute 'mode-line-inactive nil :underline  line)
+    (set-face-attribute 'mode-line          nil :box        nil)
+    (set-face-attribute 'mode-line-inactive nil :box        nil)
+    (set-face-attribute 'mode-line-inactive nil :background "#f9f2d9"))
+)
 
 
 #+end_src
+#
+
+(use-package spacemacs-theme
+  :config (load-theme 'spacemacs-dark t)
+  (let ((line (face-attribute 'mode-line :underline)))
+    (set-face-attribute 'mode-line          nil :overline   line)
+    (set-face-attribute 'mode-line-inactive nil :overline   line)
+    (set-face-attribute 'mode-line-inactive nil :underline  line)
+    (set-face-attribute 'mode-line          nil :box        nil)
+    (set-face-attribute 'mode-line-inactive nil :box        nil)
+    (set-face-attribute 'mode-line-inactive nil :background "#f9f2d9"))
+)
 
  (defun hrs/apply-theme ()
    "Apply the `solarized-light' theme and make frames just slightly transparent."
@@ -323,35 +354,26 @@ frame is themed appropriately.
     (hrs/apply-theme))
 #+end_src
 
-** Use =moody= for a beautiful modeline
-
-This gives me a truly lovely ribbon-based modeline.
 
 #+begin_src emacs-lisp
-  (use-package moody
-    :config
-    (setq x-underline-at-descent-line t)
-    (moody-replace-mode-line-buffer-identification)
-    ;;(moody-replace-vc-mode)
-)
+(use-package spaceline
+  :ensure t
+  :init
+  (require 'spaceline-config)
+  (setq spaceline-highlight-face-func 'spaceline-highlight-face-evil-state)
+  :config
+  (progn
+    (spaceline-define-segment buffer-id
+      (if (buffer-file-name)
+          (let ((project-root (projectile-project-p)))
+            (if project-root
+                (file-relative-name (buffer-file-name) project-root)
+              (abbreviate-file-name (buffer-file-name))))
+        (powerline-buffer-id)))
+    (spaceline-spacemacs-theme)
+    (spaceline-toggle-minor-modes-off)))
 #+end_src
 
-** Use =minions= to hide all minor modes
-
-I never want to see a minor mode, and manually adding =:diminish= to every
-use-package declaration is a hassle. This uses =minions= to hide all the minor
-modes in the modeline. Nice!
-
-By default there's a =;-)= after the major mode; that's an adorable default, but
-I'd rather skip it.
-
-#+begin_src emacs-lisp
-   (use-package minions
-     :config
-     (setq minions-mode-line-lighter ""
-           minions-mode-line-delimiters '("" . ""))
-     (minions-mode 1))
-#+end_src
 
 ** Disable visual bell
 
@@ -750,7 +772,7 @@ results and =C-c C-c= to stop, just like in =dired=.
 #+end_src
 
 * Utility functions
-  
+
 #+begin_src emacs-lisp
  (defun cjm/kill-current-buffer ()
   "Kill the current buffer without prompting."
@@ -778,6 +800,13 @@ results and =C-c C-c= to stop, just like in =dired=.
   :ensure t
   :bind (:map dired-mode-map
               ("/" . dired-narrow)))
+              
+              
+
+(add-hook 'org-mode-hook
+          '(lambda ()
+             (delete '("\\.pdf\\'" . default) org-file-apps)
+             (add-to-list 'org-file-apps '("\\.pdf\\'" . "evince %s"))))
 
 (setq org-agenda-start-day nil)
 (setq org-agenda-span 'week)
@@ -1028,6 +1057,30 @@ results and =C-c C-c= to stop, just like in =dired=.
                     :height 1.0 :foreground "salmon")
 #+end_src
 * Programming environments
+
+
+Evil treat an Emacs symbol as a word. This has the advantage that it
+changes depending on the language: foo-bar is one symbol in lisp-mode
+but two symbols (separated by -) in c-mode.
+
+#+begin_src emacs-lisp
+(with-eval-after-load 'evil
+    (defalias #'forward-evil-word #'forward-evil-symbol)
+    ;; make evil-search-word look for symbol rather than word boundaries
+    (setq-default evil-symbol-word-search t))
+#+end_src
+
+Flycheck will have you visit all warnings and whatnot, only visit errors.
+
+#+begin_src emacs-lisp
+(setq flycheck-navigation-minimum-level 'error)
+#+end_src
+
+Check syntax on save or idle.
+
+#+begin_src emacs-lisp
+(setq flycheck-check-syntax-automatically '(mode-enabled save idle-change))
+#+end_src
 
 I like shallow indentation, but tabs are displayed as 8 characters by default.
 This reduces that.
