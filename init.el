@@ -10,8 +10,7 @@
 ;; If use-package isn't already installed, it's extremely likely that this is a
 ;; fresh installation! So we'll want to update the package repository and
 ;; install use-package before loading the literate configuration.
-(when (not (package-installed-p 'use-package))
-  (package-refresh-contents)
+(when (not (package-installed-p 'use-package)) (package-refresh-contents)
   (package-install 'use-package))
 
 (org-babel-load-file "~/.emacs.d/configuration.org")
@@ -27,7 +26,7 @@
     ("bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" default)))
  '(package-selected-packages
    (quote
-    (highlight-indent-guides company-anaconda anaconda-mode anaconda spacemacs-theme dired-narrow persp-projectile perspective evil-escape counsel-projectile moody solarized-theme undo-tree evil-org evil-surround evil-collection evil use-package goto-chg auto-compile))))
+    (magit yasnippet restart-emacs company-jedi eshell-bookmark hl-todo fic-mode python-black aweshell highlight-indent-guides company-anaconda anaconda-mode anaconda spacemacs-theme dired-narrow persp-projectile perspective evil-escape counsel-projectile moody solarized-theme undo-tree evil-org evil-surround evil-collection evil use-package goto-chg auto-compile))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

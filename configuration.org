@@ -4,8 +4,8 @@
 https://gist.github.com/yaodong/532e5b31781724ea2566503edcc498c3
 https://github.com/pcorey/.emacs.d/blob/master/init.el#L279
 https://github.com/hrs/dotfiles/blob/master/emacs/.emacs.d/configuration.org
-
 https://github.com/felixSchl/.emacs.d/blob/master/init.el
+https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
 
 (byte-recompile-directory (expand-file-name "~/.emacs.d") 0)
 * Configure =use-package=
@@ -35,35 +35,26 @@ Always compile packages, and use the newest version available.
 
 * =evil-mode=
 
-I'd prefer not to expand abbrevs when I hit escape. That's always jarring and
-usually not what I want. In particular, it makes working with Coq really
-frustrating.
-
-#+begin_src emacs-lisp
-  (setq evil-want-abbrev-expand-on-insert-exit nil)
-#+end_src
-
 Use =evil=.
 
 #+begin_src emacs-lisp
-    (setq evil-want-keybinding nil)
-  (use-package evil
-    :config
-    (evil-mode 1)
-
-)
+(use-package evil
+  :ensure t
+  :init
+  (setq evil-want-keybinding nil)
+  :config
+  (evil-mode 1))
 #+end_src
 
 Install =evil-collection=, which provides evil-friendly bindings for many modes.
 
 #+begin_src emacs-lisp
-  (use-package evil-collection
-    :after evil
- :config
+(use-package evil-collection
+  :after evil
+  :ensure t
+  :config
   (setq evil-collection-mode-list '(dired))
-  (evil-collection-init)   
-    
-)
+  (evil-collection-init))
 #+end_src
 
 Enable =surround= everywhere.
@@ -80,17 +71,29 @@ Use =evil= with Org agendas.
   (use-package evil-org
     :after org
     :config
+    (evil-define-key 'normal evil-org-mode-map "t" 'org-todo)
+    ;; (evil-define-key 'normal evil-org-mode-map (kbd "RET" 'org-)
     (add-hook 'org-mode-hook 'evil-org-mode)
     (add-hook 'evil-org-mode-hook
               (lambda () (evil-org-set-key-theme)))
     (require 'evil-org-agenda)
+    
+    (with-eval-after-load 'evil-maps
+  (define-key evil-motion-state-map (kbd "SPC") nil)
+  (define-key evil-motion-state-map (kbd "RET") nil)
+  (define-key evil-motion-state-map (kbd "TAB") nil))
+    
     (evil-org-agenda-set-keys))
+    
 #+end_src
 
 * UI preferences
-  
+
 ** to file
 #+begin_src emacs-lisp
+    (add-hook 'after-init-hook '(lambda () (w32-send-sys-command #xf030)))
+
+
   (defalias 'yes-or-no-p 'y-or-n-p)
   (blink-cursor-mode -1)
   (show-paren-mode t)
@@ -156,102 +159,151 @@ Use =evil= with Org agendas.
 
 ** Key bindings
 
+Inspired by Spacemacs use SPC as main keybinding and comma as mode specific menu.
+
 https://github.com/noctuid/general.el#evil-examples
+https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
+
 #+begin_src emacs-lisp
-  (use-package general
-    :ensure t
-    :config 
-    (general-define-key
-     "M-x" 'counsel-M-x)
-    (general-define-key
-     :states '(normal visual)
-     "C-k" 'scroll-down-command
-     "C-j" 'scroll-up-command)
+  ;; (define-key dired-mode-map (kbd ",") nil)
+
+    (use-package general
+      :ensure t
+      :config 
+      (general-define-key "M-x" 'counsel-M-x)
+      
+      ;; mode specific
+      (general-define-key
+       :states '(normal)
+       :keymaps 'org-mode-map
+       :prefix ","
+       "s" '(:ignore t :wich-key "Section")
+       "sh" 'org-insert-heading
+       "dt" 'org-time-stamp-inactive
+       "ns" 'org-narrow-to-subtree
+       
+       "w" 'widen
+       
+       "t" 'org-toggle-blocks
+       
+       )
+      
+      (general-define-key
+       :states '(normal)
+       :keymaps 'anaconda-mode-map
+       :prefix ","
+       
+       "b" 'python-black-buffer
+       "s" 'python-isort-buffer
+       "i" '(:ignore t :wich-key "Insert")
+       "ib" 'cjm/python-insert-breakpoint
+       )
      
-    ;; (general-define-key
-    ;;  :states '(normal visual insert emacs)
-    ;;  :prefix ","
-    ;;  :keymaps 'evil-org-mode-map
-    ;;  "c" '(:ignore t :wich-key "Comment")
-    ;;  )
-    (general-define-key
-     :states '(normal visual insert emacs)
-     :prefix "SPC"
-     :non-normal-prefix "C-SPC"
-     "'"   'multi-term
-     "/"   'counsel-rg
-     ":"   'counsel-M-x
-     "."   'edit-emacs-configuration
-     "\""  'split-window-below
-     "%"  'split-window-right
-     "TAB" 'toggle-buffers   
+      ;; Main menu
+      (general-define-key
+       :states '(normal visual insert emacs)
+       :prefix "SPC"
+       :keymaps 'override
+       :non-normal-prefix "C-SPC"
+       "/"   'counsel-rg
+       "SPC" 'counsel-M-x
+       "."   'edit-emacs-configuration
+       "\""  'split-window-below
+       "%"  'split-window-right
+       "TAB" 'toggle-buffers   
+       "k" 'cjm/kill-current-buffer
    
-     "b" '(:ignore t :which-key "Buffers")
-     "bb"  'ivy-switch-buffer
+       ;; buffers
+       "b" '(:ignore t :which-key "Buffers")
+       "bb"  'ivy-switch-buffer
+       
+       ;; emacs
+       "e" '(:ignore t :which-key "Emacs")
+       "er"  'restart-emacs  
+       ;; projectile
+       "p" '(:ignore t :which-key "Projectile")
+       "pi" 'projectile-invalidate-cache
+       "pp" 'projectile-switch-project
+       "pf" 'counsel-projectile-find-file
+       "pb" 'persp-counsel-switch-buffer
+       "pa" 'projectile-find-file-in-known-projects
    
-     "p" '(:ignore t :which-key "Projectile")
-     ;;"p" 'projectile-command-map
-     "pi" 'projectile-invalidate-cache
-     "pp" 'projectile-switch-project
-     "pf" 'counsel-projectile-find-file
-     "pb" 'persp-counsel-switch-buffer
-   
-     "f" '(:ignore t :which-key "Files")
-     "ff" 'find-file
-     "fr" 'counsel-recentf
-     "fb" 'counsel-bookmark
+       ;; files
+       "f" '(:ignore t :which-key "Files")
+       "ff" 'find-file
+       "fr" 'counsel-recentf
+       "fb" 'counsel-bookmark
+       "fa" 'bookmark-set
+       "fs" 'save-buffer
+       "fp" 'cjm/copy-current-line-position-to-clipboard
+       "fc" 'cjm/copy-file-name-to-clipboard
      
-     "c" '(:ignore t :which-key "Comment")
-     "cl" 'evilnc-comment-or-uncomment-lines
-     
-     "a" '(:ignore t :which-key "Applications")
-    "ar" 'ranger
+       ;; code
+       "c" '(:ignore t :which-key "Code")
+       "cl" 'evilnc-comment-or-uncomment-lines
+       "cn" 'flycheck-next-error
+       "cp" 'flycheck-previous-error
+       
+       ;; hide
+       "h" '(:ignore t :which-key "Hide")
+       "hh" 'hs-toggle-hiding
+       "hs" 'hs-show-all
+       
+       ;; apps
+       "a" '(:ignore t :which-key "Applications")
+       "ar" 'ranger
+       "ac" 'calendar
 
-     "w" '(:ignore t :which-key "Window")
-     "wl"  'windmove-right
-     "wh"  'windmove-left
-     "wk"  'windmove-up
-     "wj"  'windmove-down
-     "w\""  'split-window-below
-     "w%"  'split-window-right
-     "wx"  'delete-window
+       ;; window
+       "w" '(:ignore t :which-key "Window")
+       "wl"  'windmove-right
+       "wh"  'windmove-left
+       "wk"  'windmove-up
+       "wj"  'windmove-down
+       "w\""  'split-window-below
+       "w%"  'split-window-right
+       "wx"  'delete-window
+       "wf" 'new-frame
+       "wo" 'other-frame
 
-     "s" '(:ignore t :which-key "Search")
-     "sc" 'evil-ex-nohighlight
-     "sl" 'ivy-resume
-     )
-    ;; (general-define-key
-    ;;  :states '(visual)
-    ;;  "gc" 'evilnc-comment-or-uncomment-lines)
-)
-
-(define-key evil-motion-state-map (kbd "C-h") 'evil-window-left)
-(define-key evil-motion-state-map (kbd "C-j") 'evil-window-down)
-(define-key evil-motion-state-map (kbd "C-k") 'evil-window-up)
-(define-key evil-motion-state-map (kbd "C-l") 'evil-window-right)
-
-(define-key evil-normal-state-map (kbd "C-h") 'evil-window-left)
-(define-key evil-normal-state-map (kbd "C-j") 'evil-window-down)
-(define-key evil-normal-state-map (kbd "C-k") 'evil-window-up)
-(define-key evil-normal-state-map (kbd "C-l") 'evil-window-right)
-
-(define-key global-map (kbd "C-h") #'evil-window-left)
-(define-key global-map (kbd "C-j") #'evil-window-down)
-(define-key global-map (kbd "C-k") #'evil-window-up)
-(define-key global-map (kbd "C-l") #'evil-window-right)
-
-(use-package evil-escape
-:config
-(evil-escape-mode 1)
-(setq evil-escape-key-sequence (kbd "jk"))
-)
-(global-set-key (kbd "M-o") 'next-multiframe-window)
+       ;; search
+       "s" '(:ignore t :which-key "Search")
+       "sc" 'evil-ex-nohighlight
+       "sl" 'ivy-resume
+  )
+  )
 
 
-(use-package perspective
-:config
-(persp-mode))
-(use-package persp-projectile)
+  ;; (global-set-key (kbd "C-x k") 'cjm/kill-current-buffer)
+
+  (define-key evil-motion-state-map (kbd "C-h") 'evil-window-left)
+  (define-key evil-motion-state-map (kbd "C-j") 'evil-window-down)
+  (define-key evil-motion-state-map (kbd "C-k") 'evil-window-up)
+  (define-key evil-motion-state-map (kbd "C-l") 'evil-window-right)
+
+  (define-key evil-normal-state-map (kbd "C-h") 'evil-window-left)
+  (define-key evil-normal-state-map (kbd "C-j") 'evil-window-down)
+  (define-key evil-normal-state-map (kbd "C-k") 'evil-window-up)
+  (define-key evil-normal-state-map (kbd "C-l") 'evil-window-right)
+
+  (define-key global-map (kbd "C-h") #'evil-window-left)
+  (define-key global-map (kbd "C-j") #'evil-window-down)
+  (define-key global-map (kbd "C-k") #'evil-window-up)
+  (define-key global-map (kbd "C-l") #'evil-window-right)
+
+  (use-package evil-escape
+  :config
+  (evil-escape-mode 1)
+  (setq evil-escape-key-sequence (kbd "jk"))
+  )
+
+  (global-set-key (kbd "M-o") 'next-multiframe-window)
+
+
+  (use-package perspective
+  :config
+  (persp-mode))
+  (use-package persp-projectile)
 
 #+end_src
 ** Tweak window chrome
@@ -310,7 +362,7 @@ Why not?
 
 (use-package spacemacs-theme
   :defer t
-  :init (load-theme 'spacemacs-dark t)
+  :init (load-theme 'spacemacs-light t)
   :config 
   
   (let ((line (face-attribute 'mode-line :underline)))
@@ -373,7 +425,6 @@ frame is themed appropriately.
     (spaceline-spacemacs-theme)
     (spaceline-toggle-minor-modes-off)))
 #+end_src
-
 
 ** Disable visual bell
 
@@ -473,14 +524,23 @@ pairing or presenting code.
 Use the =diff-hl= package to highlight changed-and-uncommitted lines when
 programming.
 
-#+begin_src emacs-lisp
+#+begin_src 
   (use-package diff-hl
     :config
     (add-hook 'prog-mode-hook 'turn-on-diff-hl-mode)
     (add-hook 'vc-dir-mode-hook 'turn-on-diff-hl-mode))
 #+end_src
 
+
+#+begin_src emacs-lisp
+(message "UI preferences")
+#+end_src
 * Project management
+
+#+begin_src emacs-lisp
+(message "Project management")
+#+end_src
+
 
 I use a few packages in virtually every programming or writing environment to
 manage the project, handle auto-completion, search for terms, and deal with
@@ -525,15 +585,22 @@ doesn't require any additional setup. I've bound its most useful command to
 
 ** =flycheck=
 
+Flycheck will have you visit all warnings and whatnot, only visit errors.
  #+begin_src emacs-lisp
-   (use-package let-alist)
-   (use-package flycheck
-:config
-(setq flycheck-idle-change-delay 7)
+(use-package let-alist)
+(use-package flycheck
+  :config
+  (setq flycheck-idle-change-delay 7)
+  (setq-default flycheck-flake8-maximum-line-length 89)
+  (setq flycheck-python-flake8-executable "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/Scripts/flake8.exe")
+   (setq flycheck-check-syntax-automatically '(save)
+         flycheck-idle-change-delay 2
+         ;; flycheck-error-list-minimum-level 'warning
+         flycheck-navigation-minimum-level 'error)
 
-(setq-default flycheck-flake8-maximum-line-length 89)
 )
  #+end_src
+ 
 
 ** =projectile=
 
@@ -559,6 +626,8 @@ project root (if I'm not in a "real" project).
     :config
     (setq projectile-completion-system 'ivy)
     (setq projectile-indexing-method 'alien)
+    (setq projectile-sort-order 'recently-active)
+
 )
 
 (use-package counsel-projectile)
@@ -584,20 +653,123 @@ I like tree-based undo management. I only rarely need it, but when I do, oh boy.
 #+end_src
 
 * Editing settings
-** General 
+
 #+begin_src emacs-lisp
+(message "Editing settings")
+#+end_src
+** General 
+
+#+BEGIN_SRC 
+(use-package magit)
+(use-package evil-magit)
+
+#+END_SRC
+
+
+#+begin_src emacs-lisp
+
+
+;; restart emacs in emacs
+(use-package restart-emcas)
+
   (setq make-backup-files nil) ; stop creating backup~ files
   (setq auto-save-default nil) ; stop creating #autosave# files
   (setq delete-old-versions -1 )
   ;;(setq inhibit-startup-screen t )
   (setq ring-bell-function 'ignore )
-  ;;(setq coding-system-for-read 'utf-8 )
-  ;;(setq coding-system-for-write 'utf-8 )
   (setq sentence-end-double-space nil)
   (setq default-fill-column 80)
   (setq initial-scratch-message "")
   (setq word-wrap t)
+  
+  (use-package eshell-bookmark
+  :after eshell
+  :config
+  (add-hook 'eshell-mode-hook #'eshell-bookmark-setup))
 #+end_src emacs-lisp
+  
+UTF-8 everywhere.
+
+#+begin_src emacs-lisp
+(setq utf-translate-cjk-mode nil) ; disable CJK coding/encoding (Chinese/Japanese/Korean characters)
+  (set-language-environment 'utf-8)
+  (set-keyboard-coding-system 'utf-8-mac) ; For old Carbon emacs on OS X only
+  (setq locale-coding-system 'utf-8)
+  (set-default-coding-systems 'utf-8)
+  (set-terminal-coding-system 'utf-8)
+  (set-selection-coding-system
+    (if (eq system-type 'windows-nt)
+        'utf-16-le  ;; https://rufflewind.com/2014-07-20/pasting-unicode-in-emacs-on-windows
+      'utf-8))
+  (prefer-coding-system 'utf-8)
+#+end_src emacs-lisp
+
+** Hide-show
+
+Add hide leafs to hide show bindings to add method for hidding methods of a class.
+
+#+begin_src emacs-lisp
+(defun cjm/hs-hide-all ()
+  "Hide all top level blocks, displaying only first and last lines.
+Move point to the beginning of the line, and run the normal hook
+`hs-hide-hook'.  See documentation for `run-hooks'.
+If `hs-hide-comments-when-hiding-all' is non-nil, also hide the comments."
+  (interactive)
+  (hs-life-goes-on
+   (save-excursion
+     (unless hs-allow-nesting
+       (hs-discard-overlays (point-min) (point-max)))
+     (goto-char (point-min))
+     (syntax-propertize (point-max))
+     (let ((spew (make-progress-reporter "Hiding all blocks..."
+                                         (point-min) (point-max)))
+           (re (concat "\\("
+                       hs-block-start-regexp
+                       "\\)"
+                       (if hs-hide-comments-when-hiding-all
+                           (concat "\\|\\("
+                                   hs-c-start-regexp
+                                   "\\)")
+                         ""))))
+       (while (progn
+                (unless hs-hide-comments-when-hiding-all
+                  (forward-comment (point-max)))
+                (re-search-forward re (point-max) t))
+         (if (match-beginning 1)
+             ;; We have found a block beginning.
+             (progn
+               (goto-char (match-beginning 1))
+               (unless (if 'ttn-hs-hide-level-1
+                           (funcall 'ttn-hs-hide-level-1)
+       (hs-hide-block-at-point t))
+     ;; Go to end of matched data to prevent from getting stuck
+     ;; with an endless loop.
+                 (when (looking-at hs-block-start-regexp)
+       (goto-char (match-end 0)))))
+           ;; found a comment, probably
+           (let ((c-reg (hs-inside-comment-p)))
+             (when (and c-reg (car c-reg))
+               (if (> (count-lines (car c-reg) (nth 1 c-reg)) 1)
+                   (hs-hide-block-at-point t c-reg)
+                 (goto-char (nth 1 c-reg))))))
+         (progress-reporter-update spew (point)))
+       (progress-reporter-done spew)))
+   (beginning-of-line)
+   (run-hooks 'hs-hide-hook)))
+
+(defun ttn-hs-hide-level-1 ()
+  (hs-hide-level 1)
+  (forward-sexp 1))
+
+;; if defined, this is called by regular hs-hide-all,
+;; https://github.com/emacs-mirror/emacs/blob/master/lisp/progmodes/hideshow.el#L99
+(setq hs-hide-all-non-comment-function nil)
+
+(define-key evil-normal-state-map (kbd "zl") 'cjm/hs-hide-all)
+
+;; (define-key evil-normal-state-map (kbd "zl") 'hs-hide-leafs)
+#+end_src
+
 ** Quickly visit Emacs configuration
 
 I futz around with my dotfiles a lot. This binds =C-c e= to quickly open my
@@ -609,14 +781,6 @@ Emacs configuration file.
     (find-file "~/.emacs.d/configuration.org"))
 
   (global-set-key (kbd "C-c e") 'hrs/visit-emacs-config)
-#+end_src
-
-** Always kill current buffer
-
-Assume that I always want to kill the current buffer when hitting =C-x k=.
-
-#+begin_src emacs-lisp
-  (global-set-key (kbd "C-x k") 'hrs/kill-current-buffer)
 #+end_src
 
 ** Set up =helpful=
@@ -669,24 +833,20 @@ really helpful for some modes (like =projectile=, for example).
 
 ** Configure =yasnippet=
 
-#+begin_src
-  (use-package yasnippet)
-#+end_src
-
 I keep my snippets in =~/.emacs/snippets/text-mode=, and I always want =yasnippet=
 enabled.
-
-#+begin_src
-  (setq yas-snippet-dirs '("~/.emacs.d/snippets/text-mode"))
-  (yas-global-mode 1)
-#+end_src
 
 I /don’t/ want =yas= to automatically indent the snippets it inserts. Sometimes
 this looks pretty bad (when indenting org-mode, for example, or trying to guess
 at the correct indentation for Python).
 
-#+begin_src
+#+begin_src emacs-lisp
+  (use-package yasnippet
+:config
+  (setq yas-snippet-dirs '("~/.emacs.d/snippets/text-mode" "~/.emacs.d/snippets/org-mode"))
   (setq yas-indent-line 'auto)
+  (yas-global-mode 1)
+)
 #+end_src
 
 ** Configure =ivy= and =counsel=
@@ -704,9 +864,6 @@ This configuration:
 
 #+begin_src emacs-lisp
   (use-package counsel
-    :bind
-    ("M-x" . 'counsel-M-x)
-    ("C-s" . 'swiper)
 
     :config
     (use-package flx)
@@ -772,13 +929,15 @@ results and =C-c C-c= to stop, just like in =dired=.
 #+end_src
 
 * Utility functions
+#+begin_src emacs-lisp
+(message "Utility functions")
+#+end_src
 
 #+begin_src emacs-lisp
- (defun cjm/kill-current-buffer ()
+(defun cjm/kill-current-buffer ()
   "Kill the current buffer without prompting."
   (interactive)
   (kill-buffer (current-buffer))) 
-  
   
 (defun cjm/kill-other-buffers ()
       "Kill all other buffers."
@@ -789,11 +948,51 @@ results and =C-c C-c= to stop, just like in =dired=.
     "Add a path both to the $PATH variable and to Emacs' exec-path."
     (setenv "PATH" (concat (getenv "PATH") ":" path))
     (add-to-list 'exec-path path))
-
+    
+    
+(defun cjm/copy-file-name-to-clipboard ()
+  "Copy the current buffer file name to the clipboard."
+  (interactive)
+  (let ((filename (if (equal major-mode 'dired-mode)
+                      default-directory
+                    (buffer-file-name))))
+    (when filename
+      (kill-new filename)
+      (message "Copied buffer file name '%s' to the clipboard." filename))))
       
+      
+(defun cjm/copy-current-line-position-to-clipboard ()
+    "Copy current line in file to clipboard as '</path/to/file>:<line-number>'."
+    (interactive)
+    (let ((path-with-line-number
+           (concat (dired-replace-in-string (getenv "HOME") "~" (buffer-file-name)) ":" (number-to-string (line-number-at-pos)))))
+      (kill-new path-with-line-number)
+      (message (concat path-with-line-number " copied to clipboard"))))
+
+
 #+end_src
 * Orgmode
+#+begin_src emacs-lisp
+(message "Orgmode")
+#+end_src
 
+Collapse src blocks by default, and toggle.
+#+begin_src emacs-lisp
+(defvar org-blocks-hidden nil)
+
+(defun org-toggle-blocks ()
+  (interactive)
+  (if org-blocks-hidden
+      (org-show-block-all)
+    (org-hide-block-all))
+  (setq-local org-blocks-hidden (not org-blocks-hidden)))
+
+(add-hook 'org-mode-hook 'org-toggle-blocks)
+
+(define-key org-mode-map (kbd "C-c t") 'org-toggle-blocks)
+#+end_src
+
+To file:
 #+begin_src emacs-lisp
 ;; use / in dired mode to
 (use-package dired-narrow
@@ -801,7 +1000,7 @@ results and =C-c C-c= to stop, just like in =dired=.
   :bind (:map dired-mode-map
               ("/" . dired-narrow)))
               
-              
+(setq org-return-follows-link t)           
 
 (add-hook 'org-mode-hook
           '(lambda ()
@@ -1005,7 +1204,6 @@ results and =C-c C-c= to stop, just like in =dired=.
               '("D" "Deadlines"
                 tags "DEADLINE>=\"<today>\""))
 
-(evil-define-key 'normal evil-org-mode-map "t" 'org-todo)
 
 
 (setq org-treat-insert-todo-heading-as-state-change t)
@@ -1056,8 +1254,33 @@ results and =C-c C-c= to stop, just like in =dired=.
 (set-face-attribute 'calendar-iso-week-face nil
                     :height 1.0 :foreground "salmon")
 #+end_src
+
 * Programming environments
 
+#+begin_src emacs-lisp
+(message "Programming environments")
+#+end_src
+
+** General
+
+this seems slow
+
+https://github.com/tarsius/hl-todo
+#+begin_src emacs-lisp
+(use-package hl-todo
+
+  :config
+
+  (setq hl-todo-keyword-faces
+        '(("TODO"   . "#FF0000")
+          ("FIXME"  . "#FF0000")
+          ("NOTE"   . "#A020F0")
+          ("NOTE"   . "#1E90FF")))
+          
+ (add-hook 'anaconda-mode-hook 'hl-todo-mode) 
+ 
+)
+#+end_src
 
 Evil treat an Emacs symbol as a word. This has the advantage that it
 changes depending on the language: foo-bar is one symbol in lisp-mode
@@ -1070,17 +1293,6 @@ but two symbols (separated by -) in c-mode.
     (setq-default evil-symbol-word-search t))
 #+end_src
 
-Flycheck will have you visit all warnings and whatnot, only visit errors.
-
-#+begin_src emacs-lisp
-(setq flycheck-navigation-minimum-level 'error)
-#+end_src
-
-Check syntax on save or idle.
-
-#+begin_src emacs-lisp
-(setq flycheck-check-syntax-automatically '(mode-enabled save idle-change))
-#+end_src
 
 I like shallow indentation, but tabs are displayed as 8 characters by default.
 This reduces that.
@@ -1108,6 +1320,7 @@ output.
 
 ** Python
 
+
 #+begin_src 
   (use-package python-mode)
 #+end_src
@@ -1128,53 +1341,99 @@ https://emacs.stackexchange.com/questions/45883/fold-all-methods-in-a-python-cla
 #+begin_src emacs-lisp
 
   (use-package anaconda-mode
+    :config
+    (setq python-shell-interpreter "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/scripts/ipython.exe")
+  
+    (add-hook 'python-mode-hook 'anaconda-mode)
+    (add-hook 'python-mode-hook 'hs-minor-mode)
+    (add-hook 'python-mode-hook 'flycheck-mode)
+  )
+
+  (reformatter-define python-isort
+    :program "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/Scripts/isort.exe"
+    :args (list "-" "-p quant,datastore")
 )
-(add-hook 'python-mode-hook 'anaconda-mode)
-(add-hook 'python-mode-hook 'hs-minor-mode)
+  
+  
+  (use-package python-black
+    :demand t
+    :after python
+    :config
+    (setq python-black-command "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/Scripts/black.exe")
+  )
+  
+  ;; this needs an epc backend setup
+  (use-package company-jedi
+  :ensure t
+  :init
+    '(add-to-list 'company-backends 'company-jedi)
+)
 
- ;;  (use-package company-anaconda
- ;;    :ensure t
- ;;    :init
- ;;    (eval-after-load "company"
- ;; '(add-to-list 'company-backends 'company-anaconda))
- ;; )
+  ;; this uses Jedi to get completions?
+  (use-package company-anaconda
+   :ensure t
+   :init
+   (eval-after-load "company"
+    '(add-to-list 'company-backends '(company-anaconda :with company-capf)))
+)
 
- (setq history-length 100)
-(put 'minibuffer-history 'history-length 50)
-(put 'evil-ex-history 'history-length 50)
-(put 'kill-ring 'history-length 25)
+   (setq history-length 100)
+  (put 'minibuffer-history 'history-length 50)
+  (put 'evil-ex-history 'history-length 50)
+  (put 'kill-ring 'history-length 25)
 
 #+end_src
 
-Enable =elpy=. This provides automatic indentation, auto-completion, syntax
-checking, etc.
+Snippets that probably should exist in yas snippet.
 
-(setq python-shell-interpreter "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/python.exe")
+#+begin_src emacs-lisp
+(defun cjm/python-insert-breakpoint ()
+  "Insert Python breakpoint above point."
+  (interactive)
+  (evil-open-above 1)
+  ;; it's annoying to have this broken by yap
+  ;; (insert "import pdb; pdb.set_trace()  # BREAKPOINT")
+  (insert "pdb.set_trace()  # BREAKPOINT")
+  (evil-normal-state)
+  (interactive)
+  (evil-open-above 1)
+  (insert "import pdb")
+  ;; (insert "import pdb; pdb.set_trace()  # BREAKPOINT")
+  (evil-normal-state)
+)
 
-this is very slow
-#+begin_src 
-(pyvenv-activate "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev")
+(defun cjm/python-insert-ifname ()
+  (interactive)
+  (evil-open-above 1)
+  (insert "if __name__ == '__main__':")
+  (evil-normal-state)
+)
 
-  (use-package elpy)
-  (elpy-enable)
-  (setq elpy-rpc-virtualenv-path "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev") 
-  (setq elpy-rpc-python-command "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/python.exe") 
-  
+(defun cjm/python-insert-numpy-pandas()
+  "Insert Python breakpoint above point."
+  (interactive)
+  (evil-open-above 1)
+  (insert "import numpy as np")
+  (evil-normal-state)
+  (interactive)
+  (evil-open-above 1)
+  (insert "import pandas as pd")
+  (evil-normal-state)
+  )
+#+end_src
+
+
+
+#+begin_src emacs-lisp
+;; add extra custom spacemacs config files to emacs-lisp-mode
+(setq auto-mode-alist (append '(
+                                (".spacemacs.*" . emacs-lisp-mode)
+                                ("Rprofile.site" . R-mode)
+                                )
+      auto-mode-alist))
 #+end_src
 
 Use =flycheck= for syntax checking:
-
-#+begin_src 
-  (add-hook 'elpy-mode-hook 'flycheck-mode)
-#+end_src
-
-Format code according to PEP8 on save:
-
-#+begin_src 
-  (use-package py-autopep8)
-  (require 'py-autopep8)
-  (add-hook 'elpy-mode-hook 'py-autopep8-enable-on-save)
-#+end_src
 
 Configure Jedi along with the associated =company= mode:
 
@@ -1186,66 +1445,16 @@ Configure Jedi along with the associated =company= mode:
   (setq jedi:complete-on-dot t)
 #+end_src
 
+** Javascript / JSON
+
+Have at least some code folding in for json/javascript.
+#+begin_src emacs-lisp
+    (add-hook 'js-mode-hook 'hs-minor-mode)
+#+end_src    
 ** TODO tidy this
 
-#+begin_src 
-(defun cjm/hs-hide-all ()
-  "Hide all top level blocks, displaying only first and last lines.
-Move point to the beginning of the line, and run the normal hook
-`hs-hide-hook'.  See documentation for `run-hooks'.
-If `hs-hide-comments-when-hiding-all' is non-nil, also hide the comments."
-  (interactive)
-  (hs-life-goes-on
-   (save-excursion
-     (unless hs-allow-nesting
-       (hs-discard-overlays (point-min) (point-max)))
-     (goto-char (point-min))
-     (syntax-propertize (point-max))
-     (let ((spew (make-progress-reporter "Hiding all blocks..."
-                                         (point-min) (point-max)))
-           (re (concat "\\("
-                       hs-block-start-regexp
-                       "\\)"
-                       (if hs-hide-comments-when-hiding-all
-                           (concat "\\|\\("
-                                   hs-c-start-regexp
-                                   "\\)")
-                         ""))))
-       (while (progn
-                (unless hs-hide-comments-when-hiding-all
-                  (forward-comment (point-max)))
-                (re-search-forward re (point-max) t))
-         (if (match-beginning 1)
-             ;; We have found a block beginning.
-             (progn
-               (goto-char (match-beginning 1))
-               (unless (if 'ttn-hs-hide-level-1
-                           (funcall 'ttn-hs-hide-level-1)
-       (hs-hide-block-at-point t))
-     ;; Go to end of matched data to prevent from getting stuck
-     ;; with an endless loop.
-                 (when (looking-at hs-block-start-regexp)
-       (goto-char (match-end 0)))))
-           ;; found a comment, probably
-           (let ((c-reg (hs-inside-comment-p)))
-             (when (and c-reg (car c-reg))
-               (if (> (count-lines (car c-reg) (nth 1 c-reg)) 1)
-                   (hs-hide-block-at-point t c-reg)
-                 (goto-char (nth 1 c-reg))))))
-         (progress-reporter-update spew (point)))
-       (progress-reporter-done spew)))
-   (beginning-of-line)
-   (run-hooks 'hs-hide-hook)))
 
-(defun ttn-hs-hide-level-1 ()
-  (hs-hide-level 1)
-  (forward-sexp 1))
 
-;; if defined, this is called by regular hs-hide-all,
-;; https://github.com/emacs-mirror/emacs/blob/master/lisp/progmodes/hideshow.el#L99
-(setq hs-hide-all-non-comment-function nil)
-
-(define-key evil-normal-state-map (kbd "zl") 'cjm/hs-hide-all)
-
-;; (define-key evil-normal-state-map (kbd "zl") 'hs-hide-leafs)
+#+begin_src emacs-lisp
+(message "End Config")
 #+end_src
