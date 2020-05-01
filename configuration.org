@@ -6,9 +6,14 @@ https://github.com/pcorey/.emacs.d/blob/master/init.el#L279
 https://github.com/hrs/dotfiles/blob/master/emacs/.emacs.d/configuration.org
 https://github.com/felixSchl/.emacs.d/blob/master/init.el
 https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
+https://github.com/magnars/.emacs.d/blob/master/settings/setup-org.el
 
 (byte-recompile-directory (expand-file-name "~/.emacs.d") 0)
 * Configure =use-package=
+
+#+begin_src emacs-lisp
+(message "Configure use-package")
+#+end_src 
 
 I use =use-package= to install and configure my packages. My =init.el= includes
 the initial setup for =package.el= and ensures that =use-package= is installed,
@@ -34,6 +39,10 @@ Always compile packages, and use the newest version available.
 #+end_src
 
 * =evil-mode=
+
+#+begin_src emacs-lisp
+(message "=evil-mode=")
+#+end_src 
 
 Use =evil=.
 
@@ -88,10 +97,21 @@ Use =evil= with Org agendas.
 #+end_src
 
 * UI preferences
+#+begin_src emacs-lisp
+(message "UI preferences")
+#+end_src 
 
 ** to file
 #+begin_src emacs-lisp
-    (add-hook 'after-init-hook '(lambda () (w32-send-sys-command #xf030)))
+
+
+(defun cjm/load-init()
+(interactive)
+(load user-init-file)
+
+)
+
+;; (add-hook 'after-init-hook '(lambda () (w32-send-sys-command #xf030)))
 
 
   (defalias 'yes-or-no-p 'y-or-n-p)
@@ -220,13 +240,17 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
        ;; emacs
        "e" '(:ignore t :which-key "Emacs")
        "er"  'restart-emacs  
+       "ei"  'cjm/load-init
+       
        ;; projectile
        "p" '(:ignore t :which-key "Projectile")
        "pi" 'projectile-invalidate-cache
        "pp" 'projectile-switch-project
+       "pr" 'projectile-recentf
        "pf" 'counsel-projectile-find-file
        "pb" 'persp-counsel-switch-buffer
        "pa" 'projectile-find-file-in-known-projects
+       "pn" 'persp-next
    
        ;; files
        "f" '(:ignore t :which-key "Files")
@@ -271,7 +295,7 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
        "sc" 'evil-ex-nohighlight
        "sl" 'ivy-resume
   )
-  )
+ )
 
 
   ;; (global-set-key (kbd "C-x k") 'cjm/kill-current-buffer)
@@ -341,28 +365,10 @@ Why not?
 ** Theme
 
 #+begin_src emacs-lisp
-;;   (use-package solarized-theme
-;;     :config
-;;     (setq solarized-use-variable-pitch nil
-;;           solarized-height-plus-1 1.0
-;;           solarized-height-plus-2 1.0
-;;           solarized-height-plus-3 1.0
-;;           solarized-height-plus-4 1.0)
-
-;;     (let ((line (face-attribute 'mode-line :underline)))
-;;       (set-face-attribute 'mode-line          nil :overline   line)
-;;       (set-face-attribute 'mode-line-inactive nil :overline   line)
-;;       (set-face-attribute 'mode-line-inactive nil :underline  line)
-;;       (set-face-attribute 'mode-line          nil :box        nil)
-;;       (set-face-attribute 'mode-line-inactive nil :box        nil)
-;;       (set-face-attribute 'mode-line-inactive nil :background "#f9f2d9"))
-      
-;;       (load-theme 'solarized-dark t)
-;; )
-
 (use-package spacemacs-theme
   :defer t
-  :init (load-theme 'spacemacs-light t)
+  ;; :init (load-theme 'spacemacs-light t)
+  :init (load-theme 'spacemacs-dark t)
   :config 
   
   (let ((line (face-attribute 'mode-line :underline)))
@@ -373,11 +379,9 @@ Why not?
     (set-face-attribute 'mode-line-inactive nil :box        nil)
     (set-face-attribute 'mode-line-inactive nil :background "#f9f2d9"))
 )
-
-
 #+end_src
-#
 
+#+begin_src
 (use-package spacemacs-theme
   :config (load-theme 'spacemacs-dark t)
   (let ((line (face-attribute 'mode-line :underline)))
@@ -393,7 +397,9 @@ Why not?
    "Apply the `solarized-light' theme and make frames just slightly transparent."
    (interactive)
    (load-theme 'solarized-light t)
+   (load-theme 'solarized-darkt)
 )
+#+end_src
 
 If this code is being evaluated by =emacs --daemon=, ensure that each subsequent
 frame is themed appropriately.
@@ -667,25 +673,26 @@ I like tree-based undo management. I only rarely need it, but when I do, oh boy.
 
 
 #+begin_src emacs-lisp
-
-
 ;; restart emacs in emacs
 (use-package restart-emcas)
 
-  (setq make-backup-files nil) ; stop creating backup~ files
-  (setq auto-save-default nil) ; stop creating #autosave# files
-  (setq delete-old-versions -1 )
-  ;;(setq inhibit-startup-screen t )
-  (setq ring-bell-function 'ignore )
-  (setq sentence-end-double-space nil)
-  (setq default-fill-column 80)
-  (setq initial-scratch-message "")
-  (setq word-wrap t)
+;; general 
+(setq create-lockfiles nil)
+(setq make-backup-files nil) ; stop creating backup~ files
+(setq auto-save-default nil) ; stop creating #autosave# files
+(setq delete-old-versions -1 )
+;;(setq inhibit-startup-screen t )
+(setq ring-bell-function 'ignore )
+(setq sentence-end-double-space nil)
+(setq default-fill-column 80)
+(setq initial-scratch-message "")
+(setq word-wrap t)
   
-  (use-package eshell-bookmark
-  :after eshell
-  :config
-  (add-hook 'eshell-mode-hook #'eshell-bookmark-setup))
+(use-package eshell-bookmark
+:after eshell
+:config
+(add-hook 'eshell-mode-hook #'eshell-bookmark-setup)
+)
 #+end_src emacs-lisp
   
 UTF-8 everywhere.
@@ -1263,10 +1270,10 @@ To file:
 
 ** General
 
-this seems slow
+Highlight keywords like TODO etc in code.
 
-https://github.com/tarsius/hl-todo
 #+begin_src emacs-lisp
+;; https://github.com/tarsius/hl-todo
 (use-package hl-todo
 
   :config
@@ -1293,12 +1300,11 @@ but two symbols (separated by -) in c-mode.
     (setq-default evil-symbol-word-search t))
 #+end_src
 
-
 I like shallow indentation, but tabs are displayed as 8 characters by default.
 This reduces that.
 
 #+begin_src emacs-lisp
-  (setq-default tab-width 4)
+  (setq-default tab-width 2)
 #+end_src
 
 Treating terms in CamelCase symbols as separate words makes editing a little
@@ -1318,8 +1324,21 @@ output.
   (setq compilation-scroll-output t)
 #+end_src
 
+Add some custom file definitions for syntax checking.
+#+begin_src emacs-lisp
+;; add extra custom spacemacs config files to emacs-lisp-mode
+(setq auto-mode-alist (append '(
+                                (".spacemacs.*" . emacs-lisp-mode)
+                                ("Rprofile.site" . R-mode)
+                                )
+      auto-mode-alist))
+#+end_src
+
 ** Python
 
+#+begin_src emacs-lisp
+(message "Programming environments: Python")
+#+end_src
 
 #+begin_src 
   (use-package python-mode)
@@ -1340,47 +1359,47 @@ code folding
 https://emacs.stackexchange.com/questions/45883/fold-all-methods-in-a-python-class-with-evil
 #+begin_src emacs-lisp
 
-  (use-package anaconda-mode
-    :config
-    (setq python-shell-interpreter "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/scripts/ipython.exe")
+    (use-package anaconda-mode
+      :config
+      (setq python-shell-interpreter "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/scripts/ipython.exe")
   
-    (add-hook 'python-mode-hook 'anaconda-mode)
-    (add-hook 'python-mode-hook 'hs-minor-mode)
-    (add-hook 'python-mode-hook 'flycheck-mode)
-  )
+      (add-hook 'python-mode-hook 'anaconda-mode)
+      (add-hook 'python-mode-hook 'hs-minor-mode)
+      (add-hook 'python-mode-hook 'flycheck-mode)
+      (setq-default tab-width 4)
+    )
 
-  (reformatter-define python-isort
-    :program "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/Scripts/isort.exe"
-    :args (list "-" "-p quant,datastore")
-)
-  
-  
-  (use-package python-black
-    :demand t
-    :after python
-    :config
-    (setq python-black-command "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/Scripts/black.exe")
+    (reformatter-define python-isort
+      :program "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/Scripts/isort.exe"
+      :args (list "-" "-p quant,datastore")
   )
   
-  ;; this needs an epc backend setup
-  (use-package company-jedi
-  :ensure t
-  :init
-    '(add-to-list 'company-backends 'company-jedi)
-)
+    (use-package python-black
+      :demand t
+      :after python
+      :config
+      (setq python-black-command "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/Scripts/black.exe")
+    )
+  
+    ;; this needs an epc backend setup
+    ;; (use-package company-jedi
+    ;; :ensure t
+    ;; :init
+    ;;   '(add-to-list 'company-backends 'company-jedi)
+  ;; )
 
-  ;; this uses Jedi to get completions?
-  (use-package company-anaconda
-   :ensure t
-   :init
-   (eval-after-load "company"
-    '(add-to-list 'company-backends '(company-anaconda :with company-capf)))
-)
+    ;; this uses Jedi to get completions?
+  ;;   (use-package company-anaconda
+  ;;    :ensure t
+  ;;    :init
+  ;;    (eval-after-load "company"
+  ;;     '(add-to-list 'company-backends '(company-anaconda :with company-capf)))
+  ;; )
 
-   (setq history-length 100)
-  (put 'minibuffer-history 'history-length 50)
-  (put 'evil-ex-history 'history-length 50)
-  (put 'kill-ring 'history-length 25)
+     (setq history-length 100)
+    (put 'minibuffer-history 'history-length 50)
+    (put 'evil-ex-history 'history-length 50)
+    (put 'kill-ring 'history-length 25)
 
 #+end_src
 
@@ -1423,16 +1442,6 @@ Snippets that probably should exist in yas snippet.
 #+end_src
 
 
-
-#+begin_src emacs-lisp
-;; add extra custom spacemacs config files to emacs-lisp-mode
-(setq auto-mode-alist (append '(
-                                (".spacemacs.*" . emacs-lisp-mode)
-                                ("Rprofile.site" . R-mode)
-                                )
-      auto-mode-alist))
-#+end_src
-
 Use =flycheck= for syntax checking:
 
 Configure Jedi along with the associated =company= mode:
@@ -1451,10 +1460,8 @@ Have at least some code folding in for json/javascript.
 #+begin_src emacs-lisp
     (add-hook 'js-mode-hook 'hs-minor-mode)
 #+end_src    
-** TODO tidy this
 
-
-
+Finish.
 #+begin_src emacs-lisp
 (message "End Config")
 #+end_src
