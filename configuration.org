@@ -674,7 +674,7 @@ I like tree-based undo management. I only rarely need it, but when I do, oh boy.
 
 #+begin_src emacs-lisp
 ;; restart emacs in emacs
-(use-package restart-emcas)
+(use-package restart-emacs)
 
 ;; general 
 (setq create-lockfiles nil)
@@ -1369,10 +1369,14 @@ https://emacs.stackexchange.com/questions/45883/fold-all-methods-in-a-python-cla
       (setq-default tab-width 4)
     )
 
+    (use-package reformatter
+   :config 
+    
     (reformatter-define python-isort
       :program "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/Scripts/isort.exe"
       :args (list "-" "-p quant,datastore")
   )
+)
   
     (use-package python-black
       :demand t
