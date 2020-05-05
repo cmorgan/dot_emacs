@@ -185,6 +185,9 @@ https://github.com/noctuid/general.el#evil-examples
 https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
 
 #+begin_src emacs-lisp
+
+;; this prevents emacs from being slow on windoes?
+(setq inhibit-compacting-font-caches t)
   ;; (define-key dired-mode-map (kbd ",") nil)
 
     (use-package general
@@ -197,6 +200,11 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
        :states '(normal)
        :keymaps 'org-mode-map
        :prefix ","
+       
+       "t" '(:ignore t :wich-key "Table")
+       "ti" 'org-table-create
+       "ta" 'org-table-align
+       
        "s" '(:ignore t :wich-key "Section")
        "sh" 'org-insert-heading
        "dt" 'org-time-stamp-inactive
@@ -204,7 +212,8 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
        
        "w" 'widen
        
-       "t" 'org-toggle-blocks
+       "b" '(:ignore t :wich-key "Blocks")
+       "bt" 'org-toggle-blocks
        
        )
       
@@ -227,12 +236,14 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
        :non-normal-prefix "C-SPC"
        "/"   'counsel-rg
        "SPC" 'counsel-M-x
-       "."   'edit-emacs-configuration
+       "."   'cjm/open-config
        "\""  'split-window-below
        "%"  'split-window-right
        "TAB" 'toggle-buffers   
        "k" 'cjm/kill-current-buffer
-   
+       "l" 'cjm/open-log
+       
+       
        ;; buffers
        "b" '(:ignore t :which-key "Buffers")
        "bb"  'ivy-switch-buffer
@@ -251,6 +262,7 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
        "pb" 'persp-counsel-switch-buffer
        "pa" 'projectile-find-file-in-known-projects
        "pn" 'persp-next
+       "px" 'persp-kill
    
        ;; files
        "f" '(:ignore t :which-key "Files")
@@ -382,6 +394,10 @@ Why not?
 #+end_src
 
 #+begin_src
+
+;; old school yellow text
+(use-package gruvbox-theme)
+
 (use-package spacemacs-theme
   :config (load-theme 'spacemacs-dark t)
   (let ((line (face-attribute 'mode-line :underline)))
@@ -673,6 +689,13 @@ I like tree-based undo management. I only rarely need it, but when I do, oh boy.
 
 
 #+begin_src emacs-lisp
+(use-package yaml-mode
+
+:config
+
+    (add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode))
+    (add-to-list 'auto-mode-alist '("\\.yaml" . yaml-mode))
+)
 ;; restart emacs in emacs
 (use-package restart-emacs)
 
@@ -693,7 +716,7 @@ I like tree-based undo management. I only rarely need it, but when I do, oh boy.
 :config
 (add-hook 'eshell-mode-hook #'eshell-bookmark-setup)
 )
-#+end_src emacs-lisp
+#+end_src
   
 UTF-8 everywhere.
 
@@ -709,7 +732,7 @@ UTF-8 everywhere.
         'utf-16-le  ;; https://rufflewind.com/2014-07-20/pasting-unicode-in-emacs-on-windows
       'utf-8))
   (prefer-coding-system 'utf-8)
-#+end_src emacs-lisp
+#+end_src
 
 ** Hide-show
 
@@ -941,6 +964,10 @@ results and =C-c C-c= to stop, just like in =dired=.
 #+end_src
 
 #+begin_src emacs-lisp
+
+(defun cjm/open-log ()(interactive)(find-file "c:/Users/Public/dev/docs/org/log.org"))
+(defun cjm/open-config ()(interactive)(find-file (concat (expand-file-name "~/.emacs.d") "/configuration.org")))
+
 (defun cjm/kill-current-buffer ()
   "Kill the current buffer without prompting."
   (interactive)
