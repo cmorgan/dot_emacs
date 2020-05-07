@@ -266,13 +266,14 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    
        ;; files
        "f" '(:ignore t :which-key "Files")
+       "fa" 'bookmark-set
+       "fb" 'counsel-bookmark
+       "fc" 'cjm/copy-file-name-to-clipboard
+       "fd" 'dired-at-point
        "ff" 'find-file
        "fr" 'counsel-recentf
-       "fb" 'counsel-bookmark
-       "fa" 'bookmark-set
        "fs" 'save-buffer
        "fp" 'cjm/copy-current-line-position-to-clipboard
-       "fc" 'cjm/copy-file-name-to-clipboard
      
        ;; code
        "c" '(:ignore t :which-key "Code")
@@ -689,10 +690,17 @@ I like tree-based undo management. I only rarely need it, but when I do, oh boy.
 
 
 #+begin_src emacs-lisp
-(use-package yaml-mode
+(use-package smartparens
 
 :config
 
+(require 'smartparens-config)
+
+)
+
+(use-package yaml-mode
+
+:config
     (add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode))
     (add-to-list 'auto-mode-alist '("\\.yaml" . yaml-mode))
 )
@@ -1022,8 +1030,8 @@ Collapse src blocks by default, and toggle.
   (setq-local org-blocks-hidden (not org-blocks-hidden)))
 
 (add-hook 'org-mode-hook 'org-toggle-blocks)
+(add-hook 'org-mode-hook 'auto-fill-mode)
 
-(define-key org-mode-map (kbd "C-c t") 'org-toggle-blocks)
 #+end_src
 
 To file:
