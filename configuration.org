@@ -234,7 +234,9 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
        :prefix "SPC"
        :keymaps 'override
        :non-normal-prefix "C-SPC"
-       "/"   'counsel-rg
+       ;; "/"   'counsel-rg
+       "/"   'counsel-grep
+       ;; "/"   'counsel-ag
        "SPC" 'counsel-M-x
        "."   'cjm/open-config
        "\""  'split-window-below
@@ -336,10 +338,12 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
 
   (global-set-key (kbd "M-o") 'next-multiframe-window)
 
-
   (use-package perspective
   :config
-  (persp-mode))
+  (persp-mode)
+  (setq persp-state-default-file (expand-file-name "work" (expand-file-name "persp-confs/" user-emacs-directory))
+)
+  
   (use-package persp-projectile)
 
 #+end_src
@@ -682,6 +686,15 @@ I like tree-based undo management. I only rarely need it, but when I do, oh boy.
 #+end_src
 ** General 
 
+Install structured text support.
+#+BEGIN_SRC emacs-lisp
+
+(use-package markdown-mode)
+
+#+END_SRC
+
+
+
 #+BEGIN_SRC 
 (use-package magit)
 (use-package evil-magit)
@@ -690,11 +703,16 @@ I like tree-based undo management. I only rarely need it, but when I do, oh boy.
 
 
 #+begin_src emacs-lisp
+
+;; don't ask to update buffer when file changed
+(global-auto-revert-mode t) 
+
 (use-package smartparens
 
 :config
 
 (require 'smartparens-config)
+(smartparens-global-mode t)
 
 )
 
@@ -881,7 +899,7 @@ at the correct indentation for Python).
 #+begin_src emacs-lisp
   (use-package yasnippet
 :config
-  (setq yas-snippet-dirs '("~/.emacs.d/snippets/text-mode" "~/.emacs.d/snippets/org-mode"))
+  (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
   (setq yas-indent-line 'auto)
   (yas-global-mode 1)
 )
@@ -973,6 +991,25 @@ results and =C-c C-c= to stop, just like in =dired=.
 
 #+begin_src emacs-lisp
 
+(defun cjm/kill-other-buffers ()
+    "Kill all other buffers."
+    (interactive)
+    (mapc 'kill-buffer 
+          (delq (current-buffer) 
+                (cl-remove-if-not 'buffer-file-name (buffer-list)))))
+
+(defun cjm/delete-file-and-buffer ()
+  "Kill the current buffer and deletes the file it is visiting."
+  (interactive)
+  (let ((filename (buffer-file-name)))
+    (when filename
+      (if (vc-backend filename)
+          (vc-delete-file filename)
+        (progn
+          (delete-file filename)
+          (message "Deleted file %s" filename)
+          (kill-buffer))))))
+
 (defun cjm/open-log ()(interactive)(find-file "c:/Users/Public/dev/docs/org/log.org"))
 (defun cjm/open-config ()(interactive)(find-file (concat (expand-file-name "~/.emacs.d") "/configuration.org")))
 
@@ -1007,7 +1044,7 @@ results and =C-c C-c= to stop, just like in =dired=.
     "Copy current line in file to clipboard as '</path/to/file>:<line-number>'."
     (interactive)
     (let ((path-with-line-number
-           (concat (dired-replace-in-string (getenv "HOME") "~" (buffer-file-name)) ":" (number-to-string (line-number-at-pos)))))
+           (concat (dired-replace-in-string (getenv "HOME") "~" (buffer-file-name)) "::" (number-to-string (line-number-at-pos)))))
       (kill-new path-with-line-number)
       (message (concat path-with-line-number " copied to clipboard"))))
 
@@ -1080,7 +1117,9 @@ To file:
 ;; default: (setq org-link-frame-setup '((file . find-file-other-window)))
 ;; this has a nice snippet for maybe opening links depedning on extension https://stackoverflow.com/questions/17590784/how-to-let-org-mode-open-a-link-like-file-file-org-in-current-window-inste
 ;; open links in same window
-(setq org-link-frame-setup '((file . find-file)))
+;; (setq org-link-frame-setup '((file . find-file)))
+;; open in other window
+(setq org-link-frame-setup '((file . find-file-other-window)))
 
 (defun copy-current-line-position-to-clipboard ()
   "Copy current line in file to clipboard as 'file:</path/to/file>::<line-number>'."
