@@ -224,9 +224,11 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
        :prefix ","
        
        "b" 'cjm/python-insert-breakpoint
+       
        "r" '(:ignore t :wich-key "Refactor")
        "rb" 'python-black-buffer
        "rs" 'python-isort-buffer
+       "rr" '((lambda () (interactive) (python-isort-buffer)(python-black-buffer)(flycheck-buffer)) :which-key "all")
        )
      
       ;; Main menu
