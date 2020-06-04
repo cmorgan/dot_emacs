@@ -242,6 +242,8 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
        "er"  'restart-emacs  
        "ei"  'cjm/load-init
        "eb"  'eval-buffer
+       "ev"  'counsel-describe-variable
+       "ef"  'counsel-describe-function
        
        ; projectile
        "p" '(:ignore t :which-key "Projectile")
@@ -1153,80 +1155,82 @@ Collapse src blocks by default, and toggle.
 #+begin_src emacs-lisp
 	
 
-;; TODO https://emacs.stackexchange.com/a/30523/16359
-;; (use-package orglink
-;;   :config
-;; )
-  ;; 	(use-package flycheck-aspell)
-  ;; (add-to-list 'flycheck-checkers 'tex-aspell-dynamic)
-          ;; (setq-default ispell-program-name "C:/dev/bin/hunspell-1.3.2-3-w32-bin/bin/hunspell.exe")
-          (setq-default ispell-program-name "c:/Users/Public/dev/bin/hunspell/bin/hunspell.exe")
+  ;; TODO https://emacs.stackexchange.com/a/30523/16359
+  ;; (use-package orglink
+  ;;   :config
+  ;; )
+    ;; 	(use-package flycheck-aspell)
+    ;; (add-to-list 'flycheck-checkers 'tex-aspell-dynamic)
+            ;; (setq-default ispell-program-name "C:/dev/bin/hunspell-1.3.2-3-w32-bin/bin/hunspell.exe")
+            (setq-default ispell-program-name "c:/Users/Public/dev/bin/hunspell/bin/hunspell.exe")
 	
-           (add-to-list 'exec-path "c:/Users/Public/dev/bin/hunspell/bin/")
+             (add-to-list 'exec-path "c:/Users/Public/dev/bin/hunspell/bin/")
 
-         (setq ispell-program-name (locate-file "hunspell"
-                  exec-path exec-suffixes 'file-executable-p))
+           (setq ispell-program-name (locate-file "hunspell"
+                    exec-path exec-suffixes 'file-executable-p))
 	
 	
-   ;; (setq ispell-dictionary "en_US,en_GB")
-      ;; ispell-set-spellchecker-params has to be called
-      ;; before ispell-hunspell-add-multi-dic will work
-      ;; (ispell-set-spellchecker-params)
-      ;; (ispell-hunspell-add-multi-dic "en_US,en_GB")
+     ;; (setq ispell-dictionary "en_US,en_GB")
+        ;; ispell-set-spellchecker-params has to be called
+        ;; before ispell-hunspell-add-multi-dic will work
+        ;; (ispell-set-spellchecker-params)
+        ;; (ispell-hunspell-add-multi-dic "en_US,en_GB")
 	
-           ;; (setenv "LANG" "en_US ru_RU")
+             ;; (setenv "LANG" "en_US ru_RU")
 	
-          (setenv "LANG" "en_US"	)
-          (setenv "DICTPATH" "c:/Users/Public/dev/bin/hunspell/share/hunspell/")
-    ;; (setq-default  ispell-program-name "c:/msys64/mingw64/bin/hunspell.exe")
-    (with-eval-after-load "ispell"
-      (setq ispell-really-hunspell t)
-      ;; (setq ispell-program-name "hunspell")
+            (setenv "LANG" "en_US"	)
+            (setenv "DICTPATH" "c:/Users/Public/dev/bin/hunspell/share/hunspell/")
+      ;; (setq-default  ispell-program-name "c:/msys64/mingw64/bin/hunspell.exe")
+     ;;  (with-eval-after-load "ispell"
+     ;;    (setq ispell-really-hunspell t)
+     ;;    ;; (setq ispell-program-name "hunspell")
 	
-         (setq ispell-program-name (locate-file "hunspell"
-                  exec-path exec-suffixes 'file-executable-p))
+     ;;       (setq ispell-program-name (locate-file "hunspell"
+     ;;                exec-path exec-suffixes 'file-executable-p))
 	
-   (setq ispell-dictionary "en_US")
-      ;; ispell-set-spellchecker-params has to be called
-      ;; before ispell-hunspell-add-multi-dic will work
-      ;; (ispell-set-spellchecker-params)
-      (ispell-hunspell-add-multi-dic "en_US"))
+     ;; (setq ispell-dictionary "en_US")
+     ;;    ;; ispell-set-spellchecker-params has to be called
+     ;;    ;; before ispell-hunspell-add-multi-dic will work
+     ;;    ;; (ispell-set-spellchecker-params)
+     ;;    (ispell-hunspell-add-multi-dic "en_US"))
 	
-(setq ispell-local-dictionary "en_US")
-(setq ispell-local-dictionary-alist
-'(("en_US" "[[:alpha:]]" "[^[:alpha:]]" "[']" nil nil nil utf-8)))
+  (setq ispell-local-dictionary "en_US")
+  (setq ispell-local-dictionary-alist
+  '(("en_US" "[[:alpha:]]" "[^[:alpha:]]" "[']" nil nil nil utf-8)))
 	
-(setq ispell-dictionary "british")
+  (setq ispell-dictionary "british")
 	
-  ;; get tabs working nicely in babel	
-  (setq org-src-tab-acts-natively t)
+    ;; get tabs working nicely in babel	
+    (setq org-src-tab-acts-natively t)
 
-  (setq org-edit-src-content-indentation 0)
+    (setq org-edit-src-content-indentation 0)
 
-  (defun my-tab-related-stuff ()
-     ;; (setq indent-tabs-mode t)
-     (setq tab-stop-list (number-sequence 4 200 4))
-     (setq tab-width 2)
-     (setq indent-line-function 'insert-tab))
+    (defun my-tab-related-stuff ()
+       ;; (setq indent-tabs-mode t)
+       (setq tab-stop-list (number-sequence 4 200 4))
+       (setq tab-width 2)
+       (setq evil-auto-indent nil)  
+       (setq indent-line-function 'insert-tab))
 
-  (add-hook 'org-mode-hook 'my-tab-related-stuff)
+    (add-hook 'org-mode-hook 'my-tab-related-stuff)
+  
 	
-          (org-babel-do-load-languages
-   'org-babel-load-languages
-   '((python . t)))
+            (org-babel-do-load-languages
+     'org-babel-load-languages
+     '((python . t)))
 	
-  (defvar org-blocks-hidden nil)
+    (defvar org-blocks-hidden nil)
 
-  (defun org-toggle-blocks ()
-    (interactive)
-    (if org-blocks-hidden
-        (org-show-block-all)
-      (org-hide-block-all))
-    (setq-local org-blocks-hidden (not org-blocks-hidden)))
+    (defun org-toggle-blocks ()
+      (interactive)
+      (if org-blocks-hidden
+          (org-show-block-all)
+        (org-hide-block-all))
+      (setq-local org-blocks-hidden (not org-blocks-hidden)))
 	
 
-  (add-hook 'org-mode-hook 'org-toggle-blocks)
-  (add-hook 'org-mode-hook 'auto-fill-mode)
+    (add-hook 'org-mode-hook 'org-toggle-blocks)
+    (add-hook 'org-mode-hook 'auto-fill-mode)
 
 #+end_src
   
