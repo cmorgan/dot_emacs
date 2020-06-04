@@ -115,52 +115,33 @@ Use =evil= with Org agendas.
 ;; (add-hook 'after-init-hook '(lambda () (w32-send-sys-command #xf030)))
 
 
-  (defalias 'yes-or-no-p 'y-or-n-p)
-  (blink-cursor-mode -1)
-  (show-paren-mode t)
+(defalias 'yes-or-no-p 'y-or-n-p)
+(blink-cursor-mode -1)
+(show-paren-mode t)
 
-  (setq-default mode-line-format nil)
+(setq-default mode-line-format nil)
 
-  (use-package exec-path-from-shell
-    :ensure t
-    :config
-    (when (memq window-system '(mac ns x))
-      (exec-path-from-shell-initialize)))
-    
-  (use-package writeroom-mode
-    :ensure t
-  )
+(use-package exec-path-from-shell
+:ensure t
+:config
+(when (memq window-system '(mac ns x))
+    (exec-path-from-shell-initialize)))
 
-    (use-package which-key
-    :ensure t
-    :init
-    (setq which-key-separator " ")
-    (setq which-key-prefix-prefix "+")
-    :config
-    (which-key-mode))
-  
-    (use-package ivy 
-    :ensure t
-    :config
-    (setq ivy-use-virtual-buffers t)
+(use-package writeroom-mode
+:ensure t
 )
 
-;; fuzzy
-;; https://oremacs.com/2016/01/06/ivy-flx/
-;; (setq ivy-re-builders-alist
-;;       '((t . ivy--regex-fuzzy)))
-(setq ivy-initial-inputs-alist nil)
-(setq ivy-re-builders-alist
-      '((ivy-switch-buffer . ivy--regex-plus)
-        (t . ivy--regex-fuzzy)))
+(use-package which-key
+:ensure t
+:init
+(setq which-key-separator " ")
+(setq which-key-prefix-prefix "+")
+:config
+(which-key-mode))
 
-(use-package flx :ensure t)
-    
-  (use-package counsel :ensure t)
-    
-    (use-package evil-nerd-commenter :ensure t)
+(use-package evil-nerd-commenter :ensure t)
 
-    (use-package key-chord
+(use-package key-chord
     :ensure t
     :config
     (key-chord-mode 1)
@@ -169,12 +150,11 @@ Use =evil= with Org agendas.
     (key-chord-define evil-insert-state-map "KJ" 'evil-normal-state)
     (key-chord-define evil-insert-state-map "kJ" 'evil-normal-state))
   
-    (defun toggle-buffers ()
-    (interactive)
-    (switch-to-buffer nil))
+(defun toggle-buffers ()
+(interactive)
+(switch-to-buffer nil))
   
-    (use-package ranger
-  :ensure t)
+(use-package ranger :ensure t)
 
 #+end_src
 
@@ -194,13 +174,13 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
     (use-package general
       :ensure t
       :config 
-      (general-define-key "M-x" 'counsel-M-x)
       
       ;; mode specific
       (general-define-key
        :states '(normal)
        :keymaps 'org-mode-map
        :prefix ","
+       "l" 'org-cliplink
        
        "t" '(:ignore t :wich-key "Table")
        "ti" 'org-table-create
@@ -215,7 +195,6 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
        
        "b" '(:ignore t :wich-key "Blocks")
        "bt" 'org-toggle-blocks
-       
        )
       
       (general-define-key
@@ -224,11 +203,14 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
        :prefix ","
        
        "b" 'cjm/python-insert-breakpoint
+       "n" 'cjm/python-insert-ifname
        
        "r" '(:ignore t :wich-key "Refactor")
        "rb" 'python-black-buffer
        "rs" 'python-isort-buffer
        "rr" '((lambda () (interactive) (python-isort-buffer)(python-black-buffer)(flycheck-buffer)) :which-key "all")
+       "rz" 'zimports
+  
        )
      
       ;; Main menu
@@ -237,8 +219,8 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
        :prefix "SPC"
        :keymaps 'override
        :non-normal-prefix "C-SPC"
-       ;; "/"   'counsel-rg
-       "/"   'counsel-grep
+       "/"   'counsel-rg
+       ;; "/"   'counsel-grep
        ;; "/"   'counsel-ag
        "SPC" 'counsel-M-x
        "."   'cjm/open-config
@@ -259,8 +241,9 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
        "e" '(:ignore t :which-key "Emacs")
        "er"  'restart-emacs  
        "ei"  'cjm/load-init
+       "eb"  'eval-buffer
        
-       ;; projectile
+       ; projectile
        "p" '(:ignore t :which-key "Projectile")
        "pi" 'projectile-invalidate-cache
        "pp" 'projectile-switch-project
@@ -277,7 +260,7 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
        "fb" 'counsel-bookmark
        "fc" 'cjm/copy-file-name-to-clipboard
        "fd" 'dired-at-point
-       "ff" 'find-file
+       "ff" 'counsel-find-file
        "fr" 'counsel-recentf
        "fs" 'save-buffer
        "fp" 'cjm/copy-current-line-position-to-clipboard
@@ -287,6 +270,7 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
        "cl" 'evilnc-comment-or-uncomment-lines
        "cn" 'flycheck-next-error
        "cp" 'flycheck-previous-error
+       "cf" 'cjm/toggle-fold
        
        ;; hide
        "h" '(:ignore t :which-key "Hide")
@@ -662,6 +646,7 @@ project root (if I'm not in a "real" project).
     (setq projectile-completion-system 'ivy)
     (setq projectile-indexing-method 'alien)
     (setq projectile-sort-order 'recently-active)
+    (projectile-global-mode)
 
 )
 
@@ -698,6 +683,15 @@ Install structured text support.
 #+BEGIN_SRC emacs-lisp
 
 (use-package markdown-mode)
+	
+;; render links as clickable	
+;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Basic-Major-Modes.html
+(add-hook 'text-mode-hook (lambda ()
+						(goto-address-mode)))
+
+(add-hook 'prog-mode-hook (lambda ()
+						(goto-address-mode)))
+
 
 #+END_SRC
 
@@ -934,7 +928,43 @@ This configuration:
   unhelpful), and
 - Includes recent files in the switch buffer.
 
+counsel-rg?	
 #+begin_src emacs-lisp
+  
+(use-package ivy 
+:ensure t
+:config
+(setq ivy-use-virtual-buffers t)
+)
+
+;; fuzzy
+;; https://oremacs.com/2016/01/06/ivy-flx/
+;; (setq ivy-re-builders-alist
+;;       '((t . ivy--regex-fuzzy)))
+;; (setq ivy-initial-inputs-alist nil)
+;; (setq ivy-re-builders-alist
+;;       '((ivy-switch-buffer . ivy--regex-plus)
+;;         (t . ivy--regex-fuzzy)))
+  
+(setq ivy-re-builders-alist
+  '(
+    ;; (swiper . ivy--regex-plus)
+    (counsel-recentf . ivy--regex-fuzzy)
+    (counsel-M-x . ivy--regex-fuzzy)
+    (projectile-recentf . ivy--regex-fuzzy)
+    (projectile-find-file-in-known-projects . ivy--regex-fuzzy)
+    (find-file . ivy--regex-fuzzy)
+    (t . ivy--regex-plus)
+  )
+)
+  
+  (setq )
+  'counsel-find-file
+
+(use-package flx :ensure t)
+;; (use-package counsel :ensure t)
+    
+  
   (use-package counsel
 
     :config
@@ -942,58 +972,13 @@ This configuration:
     (use-package smex)
 
     (ivy-mode 1)
-    (setq ivy-use-virtual-buffers t)
-    (setq ivy-count-format "(%d/%d) ")
-    (setq ivy-initial-inputs-alist nil)
-    (setq ivy-re-builders-alist
-          '((swiper . ivy--regex-plus)
-            (t . ivy--regex-fuzzy))))
-#+end_src
-
-** Switch and rebalance windows when splitting
-
-When splitting a window, I invariably want to switch to the new window. This
-makes that automatic.
-
-#+begin_src emacs-lisp
-  (defun hrs/split-window-below-and-switch ()
-    "Split the window horizontally, then switch to the new pane."
-    (interactive)
-    (split-window-below)
-    (balance-windows)
-    (other-window 1))
-
-  (defun hrs/split-window-right-and-switch ()
-    "Split the window vertically, then switch to the new pane."
-    (interactive)
-    (split-window-right)
-    (balance-windows)
-    (other-window 1))
-
-  (global-set-key (kbd "C-x 2") 'hrs/split-window-below-and-switch)
-  (global-set-key (kbd "C-x 3") 'hrs/split-window-right-and-switch)
-#+end_src
-
-** Mass editing of =grep= results
-
-I like the idea of mass editing =grep= results the same way I can edit filenames
-in =dired=. These keybindings allow me to use =C-x C-q= to start editing =grep=
-results and =C-c C-c= to stop, just like in =dired=.
-
-#+begin_src emacs-lisp
-  (use-package wgrep)
-
-  (eval-after-load 'grep
-    '(define-key grep-mode-map
-      (kbd "C-x C-q") 'wgrep-change-to-wgrep-mode))
-
-  (eval-after-load 'wgrep
-    '(define-key grep-mode-map
-      (kbd "C-c C-c") 'wgrep-finish-edit))
-
-  (setq wgrep-auto-save-buffer t)
-#+end_src
-
+    ;; (setq ivy-use-virtual-buffers t)
+    ;; (setq ivy-count-format "(%d/%d) ")
+    ;; (setq ivy-initial-inputs-alist nil)
+    ;; (setq ivy-re-builders-alist
+    ;;       '((swiper . ivy--regex-plus)
+    ;;         (t . ivy--regex-fuzzy)))
+)
 ** Use projectile everywhere
 
 #+begin_src emacs-lisp
@@ -1004,8 +989,99 @@ results and =C-c C-c= to stop, just like in =dired=.
 #+begin_src emacs-lisp
 (message "Utility functions")
 #+end_src
-
 #+begin_src emacs-lisp
+  
+ (defun cjm/toggle-fold()
+  "Toggle fold all lines larger than indentation on current line
+  https://stackoverflow.com/questions/1587972/how-to-display-indentation-guides-in-emacs/4459159#4459159
+"
+  (interactive)
+  (let ((col 1))
+    (save-excursion
+      (back-to-indentation)
+      (setq col (+ 1 (current-column)))
+      (set-selective-display
+       (if selective-display nil (or col 1))))))
+  
+(setq cjm/devroot-dir "C:/Users/Public/dev/")
+;; C:\Users\Public\dev\bin\dbConda-2019_07-py37\condabin\conda.bat
+(setq cjm/conda-envs (concat cjm/devroot-dir "bin/dbConda-2019_07-py37/envs/"))
+(setq cjm/main-conda (concat cjm/conda-envs "dev/"))
+(setq cjm/default-env (concat cjm/conda-envs "dev/"))
+(setq cjm/black-path (concat cjm/default-env "Scripts/black.exe"))
+(setq cjm/zimports-path (concat cjm/default-env "Scripts/zimports.exe"))
+(setq cjm/zimports-modules (concat cjm/default-env "datastore,dig,db,qis,refinitiv"))
+(setq cjm/latex-path "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/tools/Scripts")
+(setq cjm/python-interpreter (concat cjm/main-conda "Scripts/" "ipython.exe"))
+(setq cjm/src-code-directory (concat cjm/devroot-dir "src/"))
+(setq cjm/python-path (concat cjm/default-env "python.exe"))
+  
+(defun cjm/zimports()
+  (start-process
+   "a"
+   "b"
+   cjm/zimports-path
+   "-m"
+   cjm/zimports-modules
+   (buffer-file-name (window-buffer (minibuffer-selected-window)))))
+
+(defun zimports()
+  (interactive)
+  (cjm/zimports)
+  )
+
+  
+
+(defun package-upgrade-all ()
+ "Upgrade all packages automatically without showing *Packages* buffer.
+https://emacs.stackexchange.com/questions/16398/noninteractively-upgrade-all-packages"
+  (interactive)
+  (package-refresh-contents)
+  (let (upgrades)
+    (cl-flet ((get-version (name where)
+                (let ((pkg (cadr (assq name where))))
+                  (when pkg
+                    (package-desc-version pkg)))))
+      (dolist (package (mapcar #'car package-alist))
+        (let ((in-archive (get-version package package-archive-contents)))
+          (when (and in-archive
+                     (version-list-< (get-version package package-alist)
+                                     in-archive))
+            (push (cadr (assq package package-archive-contents))
+                  upgrades)))))
+    (if upgrades
+        (when (yes-or-no-p
+               (message "Upgrade %d package%s (%s)? "
+                        (length upgrades)
+                        (if (= (length upgrades) 1) "" "s")
+                        (mapconcat #'package-desc-full-name upgrades ", ")))
+          (save-window-excursion
+            (dolist (package-desc upgrades)
+              (let ((old-package (cadr (assq (package-desc-name package-desc)
+                                             package-alist))))
+                (package-install package-desc)
+                (package-delete  old-package)))))
+      (message "All packages are up to date"))))
+
+
+(defun cjm/kill-other-buffers ()
+    "Kill all other buffers."
+    (interactive)
+    (mapc 'kill-buffer 
+          (delq (current-buffer) 
+                (cl-remove-if-not 'buffer-file-name (buffer-list)))))
+
+(defun cjm/delete-file-and-buffer ()
+  "Kill the current buffer and deletes the file it is visiting."
+  (interactive)
+  (let ((filename (buffer-file-name)))
+    (when filename
+      (if (vc-backend filename)
+          (vc-delete-file filename)
+        (progn
+          (delete-file filename)
+          (message "Deleted file %s" filename)
+          (kill-buffer))))))
 
 (defun cjm/kill-other-buffers ()
     "Kill all other buffers."
@@ -1027,7 +1103,8 @@ results and =C-c C-c= to stop, just like in =dired=.
           (kill-buffer))))))
 
 (defun cjm/open-log ()(interactive)(find-file "c:/Users/Public/dev/docs/org/log.org"))
-(defun cjm/open-project ()(interactive)(find-file "c:/Users/Public/dev/docs/org/projects/rf2.org"))
+;; (defun cjm/open-project ()(interactive)(find-file "c:/Users/Public/dev/docs/org/projects/rf2.org"))
+(defun cjm/open-project ()(interactive)(find-file "c:/Users/Public/dev/docs/org/projects/refinitiv.org"))
 (defun cjm/open-config ()(interactive)(find-file (concat (expand-file-name "~/.emacs.d") "/configuration.org")))
 
 (defun cjm/kill-current-buffer ()
@@ -1074,20 +1151,96 @@ results and =C-c C-c= to stop, just like in =dired=.
 
 Collapse src blocks by default, and toggle.
 #+begin_src emacs-lisp
-(defvar org-blocks-hidden nil)
+	
 
-(defun org-toggle-blocks ()
-  (interactive)
-  (if org-blocks-hidden
-      (org-show-block-all)
-    (org-hide-block-all))
-  (setq-local org-blocks-hidden (not org-blocks-hidden)))
+;; TODO https://emacs.stackexchange.com/a/30523/16359
+;; (use-package orglink
+;;   :config
+;; )
+  ;; 	(use-package flycheck-aspell)
+  ;; (add-to-list 'flycheck-checkers 'tex-aspell-dynamic)
+          ;; (setq-default ispell-program-name "C:/dev/bin/hunspell-1.3.2-3-w32-bin/bin/hunspell.exe")
+          (setq-default ispell-program-name "c:/Users/Public/dev/bin/hunspell/bin/hunspell.exe")
+	
+           (add-to-list 'exec-path "c:/Users/Public/dev/bin/hunspell/bin/")
 
-(add-hook 'org-mode-hook 'org-toggle-blocks)
-(add-hook 'org-mode-hook 'auto-fill-mode)
+         (setq ispell-program-name (locate-file "hunspell"
+                  exec-path exec-suffixes 'file-executable-p))
+	
+	
+   ;; (setq ispell-dictionary "en_US,en_GB")
+      ;; ispell-set-spellchecker-params has to be called
+      ;; before ispell-hunspell-add-multi-dic will work
+      ;; (ispell-set-spellchecker-params)
+      ;; (ispell-hunspell-add-multi-dic "en_US,en_GB")
+	
+           ;; (setenv "LANG" "en_US ru_RU")
+	
+          (setenv "LANG" "en_US"	)
+          (setenv "DICTPATH" "c:/Users/Public/dev/bin/hunspell/share/hunspell/")
+    ;; (setq-default  ispell-program-name "c:/msys64/mingw64/bin/hunspell.exe")
+    (with-eval-after-load "ispell"
+      (setq ispell-really-hunspell t)
+      ;; (setq ispell-program-name "hunspell")
+	
+         (setq ispell-program-name (locate-file "hunspell"
+                  exec-path exec-suffixes 'file-executable-p))
+	
+   (setq ispell-dictionary "en_US")
+      ;; ispell-set-spellchecker-params has to be called
+      ;; before ispell-hunspell-add-multi-dic will work
+      ;; (ispell-set-spellchecker-params)
+      (ispell-hunspell-add-multi-dic "en_US"))
+	
+(setq ispell-local-dictionary "en_US")
+(setq ispell-local-dictionary-alist
+'(("en_US" "[[:alpha:]]" "[^[:alpha:]]" "[']" nil nil nil utf-8)))
+	
+(setq ispell-dictionary "british")
+	
+  ;; get tabs working nicely in babel	
+  (setq org-src-tab-acts-natively t)
+
+  (setq org-edit-src-content-indentation 0)
+
+  (defun my-tab-related-stuff ()
+     ;; (setq indent-tabs-mode t)
+     (setq tab-stop-list (number-sequence 4 200 4))
+     (setq tab-width 2)
+     (setq indent-line-function 'insert-tab))
+
+  (add-hook 'org-mode-hook 'my-tab-related-stuff)
+	
+          (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((python . t)))
+	
+  (defvar org-blocks-hidden nil)
+
+  (defun org-toggle-blocks ()
+    (interactive)
+    (if org-blocks-hidden
+        (org-show-block-all)
+      (org-hide-block-all))
+    (setq-local org-blocks-hidden (not org-blocks-hidden)))
+	
+
+  (add-hook 'org-mode-hook 'org-toggle-blocks)
+  (add-hook 'org-mode-hook 'auto-fill-mode)
 
 #+end_src
-
+  
+Note taking in org mode following [[https://blog.jethro.dev/posts/zettelkasten_with_org/][Org-mode Workflow Part 3: Zettelkasten with Org-mode · Jethro Kuan]] 
+[[https://blog.jethro.dev/posts/how_to_take_smart_notes_org/][How To Take Smart Notes With Org-mode · Jethro Kuan]] 
+  
+https://github.com/org-roam/org-roam/
+  
+copy link to clipboard then org-cliplink inserts with metadata  
+#+BEGIN_SRC emacs-lisp
+(use-package org-cliplink) 
+    
+#+END_SRC
+  
 To file:
 #+begin_src emacs-lisp
 ;; use / in dired mode to
@@ -1156,9 +1309,6 @@ To file:
                   org-level-4
                   org-level-5))
     (set-face-attribute face nil :weight 'semi-bold :height 1.0))
-
-  ;; (org-document-title ((t (:weight 'semi-bold :height 1.1))))
-
   )
 
 (add-hook 'org-mode-hook 'my/org-mode-hook)
@@ -1370,10 +1520,16 @@ Highlight keywords like TODO etc in code.
   :config
 
   (setq hl-todo-keyword-faces
-        '(("TODO"   . "#FF0000")
-          ("FIXME"  . "#FF0000")
-          ("NOTE"   . "#A020F0")
-          ("NOTE"   . "#1E90FF")))
+        '(
+  ;; ("TODO"   . "#c7edd1")
+  ("TODO"   . "#9bc7a7")
+  ("FIXME"  . "#FF0000")
+  ;; ("NOTE"   . "#A020F0")
+  ;; ("NOTE"   . "#1E90FF")
+  ("NOTE"   . "#eda574")
+  ("UPTO"   . "#ff82c3")
+           
+))
           
  (add-hook 'anaconda-mode-hook 'hl-todo-mode) 
  
@@ -1431,14 +1587,17 @@ Add some custom file definitions for syntax checking.
 (message "Programming environments: Python")
 #+end_src
 
-#+begin_src 
-  (use-package python-mode)
+#+begin_src emacs-lisp
+  ;; (use-package python-mode)
+  
+  (use-package jinja2-mode :config (add-to-list 'auto-mode-alist '("\\.tmpl" . jinja2-mode)))
 #+end_src
 
 Add =~/.local/bin= to load path. That's where =virtualenv= is installed, and
 we'll need that for =jedi=.
 #+begin_src emacs-lisp
   (hrs/append-to-path "~/.local/bin")
+  
 #+end_src
 
 
@@ -1559,3 +1718,10 @@ Finish.
 #+begin_src emacs-lisp
 (message "End Config")
 #+end_src
+** Other	
+#+BEGIN_SRC emacs-lisp
+(use-package csharp-mode)	
+	
+  	
+#+END_SRC
+	
