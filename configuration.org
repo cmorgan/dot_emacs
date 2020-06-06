@@ -229,9 +229,6 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
        "TAB" 'toggle-buffers   
        "k" 'cjm/kill-current-buffer
        
-       "l" '(:ignore t :wich-key "Log")
-       "ll" 'cjm/open-log
-       "lp" 'cjm/open-project
        
        ;; buffers
        "b" '(:ignore t :which-key "Buffers")
@@ -300,6 +297,31 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
        "s" '(:ignore t :which-key "Search")
        "sc" 'evil-ex-nohighlight
        "sl" 'ivy-resume
+
+       ;; deft
+       "d"  '(nil :wk "deft")
+       "dd" '(deft :wk "deft")
+       "dD" '(zetteldeft-deft-new-search :wk "new search")
+        "dR" '(deft-refresh :wk "refresh")
+        "ds" '(zetteldeft-search-at-point :wk "search at point")
+        "dc" '(zetteldeft-search-current-id :wk "search current id")
+        "df" '(zetteldeft-follow-link :wk "follow link")
+        "dF" '(zetteldeft-avy-file-search-ace-window :wk "avy file other window")
+        "dl" '(zetteldeft-avy-link-search :wk "avy link search")
+        "dt" '(zetteldeft-avy-tag-search :wk "avy tag search")
+        "dT" '(zetteldeft-tag-buffer :wk "tag list")
+        "di" '(zetteldeft-find-file-id-insert :wk "insert id")
+        "dI" '(zetteldeft-find-file-full-title-insert :wk "insert full title")
+        "do" '(zetteldeft-find-file :wk "find file")
+        "dn" '(zetteldeft-new-file :wk "new file")
+        "dN" '(zetteldeft-new-file-and-link :wk "new file & link")
+        "dr" '(zetteldeft-file-rename :wk "rename")
+        "dx" '(zetteldeft-count-words :wk "count words")
+
+       ;;log
+       "l" '(nil :wk "Log")
+       "ll" 'cjm/open-log
+       "lp" 'cjm/open-project
   )
  )
 
@@ -992,6 +1014,17 @@ counsel-rg?
 (message "Utility functions")
 #+end_src
 #+begin_src emacs-lisp
+
+(defun cjm/derived-modes (mode)
+  "Return a list of the ancestor modes that MODE is derived from.
+https://emacs.stackexchange.com/questions/58073/how-to-find-inheritance-of-modes"
+  (let ((modes   ())
+        (parent  nil))
+    (while (setq parent (get mode 'derived-mode-parent))
+      (push parent modes)
+      (setq mode parent))
+    (setq modes  (nreverse modes))))
+;; (derived-modes 'org-mode)
   
  (defun cjm/toggle-fold()
   "Toggle fold all lines larger than indentation on current line
@@ -1146,13 +1179,34 @@ https://emacs.stackexchange.com/questions/16398/noninteractively-upgrade-all-pac
 
 
 #+end_src
+
 * Orgmode
+TODO https://github.com/vspinu/company-math
 #+begin_src emacs-lisp
 (message "Orgmode")
 #+end_src
 
 Collapse src blocks by default, and toggle.
 #+begin_src emacs-lisp
+
+;; following https://www.eliasstorms.net/zetteldeft/
+(use-package deft
+  :ensure t
+  :custom
+    (deft-extensions '("org" "md" "txt"))
+    (deft-directory "c:/Users/Public/dev/docs/org/roam")
+    (deft-use-filename-as-title t))
+
+(use-package zetteldeft
+  :ensure t
+  :after deft
+  :config (zetteldeft-set-classic-keybindings))
+
+(use-package avy)
+(use-package ace-window)
+
+
+(use-package elisp-format)
 	
 
   ;; TODO https://emacs.stackexchange.com/a/30523/16359
@@ -1247,6 +1301,16 @@ copy link to clipboard then org-cliplink inserts with metadata
   
 To file:
 #+begin_src emacs-lisp
+(setq org-agenda-files '("c:/Users/Public/dev/docs/org/roam"))
+
+(use-package org-roam
+    ;; :hook
+    ;; (after-init . org-roam-mode)
+    ;; :config
+  
+    ;; (org-roam-directory "c:/Users/Public/dev/docs/org/roam")
+)
+  
 ;; use / in dired mode to
 (use-package dired-narrow
   :ensure t
@@ -1536,8 +1600,10 @@ Highlight keywords like TODO etc in code.
 ))
           
  (add-hook 'anaconda-mode-hook 'hl-todo-mode) 
+ (add-hook 'anaconda-mode-hook 'hl-todo-mode) 
  
 )
+
 #+end_src
 
 Evil treat an Emacs symbol as a word. This has the advantage that it
@@ -1594,6 +1660,12 @@ Add some custom file definitions for syntax checking.
 #+begin_src emacs-lisp
   ;; (use-package python-mode)
   
+  (use-package cython-mode
+  :ensure t
+  :mode (("\\.pyx\\'"  . cython-mode)
+         ("\\.spyx\\'" . cython-mode)
+         ("\\.pxd\\'"  . cython-mode)
+         ("\\.pxi\\'"  . cython-mode)))
   (use-package jinja2-mode :config (add-to-list 'auto-mode-alist '("\\.tmpl" . jinja2-mode)))
 #+end_src
 
