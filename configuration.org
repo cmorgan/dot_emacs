@@ -14,7 +14,7 @@ https://github.com/bling/dotemacs/tree/master/config
 
 #+begin_src emacs-lisp
 (message "Configure use-package")
-#+end_src 
+#+end_src
 
 I use =use-package= to install and configure my packages. My =init.el= includes
 the initial setup for =package.el= and ensures that =use-package= is installed,
@@ -43,7 +43,7 @@ Always compile packages, and use the newest version available.
 
 #+begin_src emacs-lisp
 (message "=evil-mode=")
-#+end_src 
+#+end_src
 
 Use =evil=.
 
@@ -87,20 +87,20 @@ Use =evil= with Org agendas.
     (add-hook 'evil-org-mode-hook
               (lambda () (evil-org-set-key-theme)))
     (require 'evil-org-agenda)
-    
+
     (with-eval-after-load 'evil-maps
   (define-key evil-motion-state-map (kbd "SPC") nil)
   (define-key evil-motion-state-map (kbd "RET") nil)
   (define-key evil-motion-state-map (kbd "TAB") nil))
-    
+
     (evil-org-agenda-set-keys))
-    
+
 #+end_src
 
 * UI preferences
 #+begin_src emacs-lisp
 (message "UI preferences")
-#+end_src 
+#+end_src
 
 ** to file
 #+begin_src emacs-lisp
@@ -149,11 +149,11 @@ Use =evil= with Org agendas.
     (key-chord-define evil-insert-state-map "Kj" 'evil-normal-state)
     (key-chord-define evil-insert-state-map "KJ" 'evil-normal-state)
     (key-chord-define evil-insert-state-map "kJ" 'evil-normal-state))
-  
+
 (defun toggle-buffers ()
 (interactive)
 (switch-to-buffer nil))
-  
+
 (use-package ranger :ensure t)
 
 #+end_src
@@ -173,46 +173,56 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
 
     (use-package general
       :ensure t
-      :config 
-      
+      :config
+
       ;; mode specific
+      ;; orgmode
       (general-define-key
        :states '(normal)
        :keymaps 'org-mode-map
        :prefix ","
-       "l" 'org-cliplink
-       
-       "t" '(:ignore t :wich-key "Table")
+       "l" '(nil :wk "link")
+       "lc" '(org-cliplink :wk "clip")
+       "li" '(org-insert-link :wk "insert")
+       "lg" '(counsel-org-link :wk "go")
+
+
+       "t" '(nil :wk "table")
        "ti" 'org-table-create
        "ta" 'org-table-align
-       
+
        "s" '(:ignore t :wich-key "Section")
        "sh" 'org-insert-heading
        "dt" 'org-time-stamp-inactive
+
        "ns" 'org-narrow-to-subtree
-       
-       "w" 'widen
-       
+       "nw" 'widen
+
        "b" '(:ignore t :wich-key "Blocks")
        "bt" 'org-toggle-blocks
+
+       "wo" 'cjm/org-writeroom-on
+       "wx" 'cjm/org-writeroom-off
+
        )
-      
+
+      ;; python
       (general-define-key
        :states '(normal)
        :keymaps 'anaconda-mode-map
        :prefix ","
-       
+
        "b" 'cjm/python-insert-breakpoint
        "n" 'cjm/python-insert-ifname
-       
+
        "r" '(:ignore t :wich-key "Refactor")
        "rb" 'python-black-buffer
        "rs" 'python-isort-buffer
        "rr" '((lambda () (interactive) (python-isort-buffer)(python-black-buffer)(flycheck-buffer)) :which-key "all")
        "rz" 'zimports
-  
+
        )
-     
+
       ;; Main menu
       (general-define-key
        :states '(normal visual insert emacs)
@@ -226,22 +236,22 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
        "."   'cjm/open-config
        "\""  'split-window-below
        "%"  'split-window-right
-       "TAB" 'toggle-buffers   
+       "TAB" 'toggle-buffers
        "k" 'cjm/kill-current-buffer
-       
-       
+
+
        ;; buffers
        "b" '(:ignore t :which-key "Buffers")
        "bb"  'ivy-switch-buffer
-       
+
        ;; emacs
        "e" '(:ignore t :which-key "Emacs")
-       "er"  'restart-emacs  
+       "er"  'restart-emacs
        "ei"  'cjm/load-init
        "eb"  'eval-buffer
        "ev"  'counsel-describe-variable
        "ef"  'counsel-describe-function
-       
+
        ; projectile
        "p" '(:ignore t :which-key "Projectile")
        "pi" 'projectile-invalidate-cache
@@ -252,7 +262,7 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
        "pa" 'projectile-find-file-in-known-projects
        "pn" 'persp-next
        "px" 'persp-kill
-   
+
        ;; files
        "f" '(:ignore t :which-key "Files")
        "fa" 'bookmark-set
@@ -263,19 +273,19 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
        "fr" 'counsel-recentf
        "fs" 'save-buffer
        "fp" 'cjm/copy-current-line-position-to-clipboard
-     
+
        ;; code
        "c" '(:ignore t :which-key "Code")
        "cl" 'evilnc-comment-or-uncomment-lines
        "cn" 'flycheck-next-error
        "cp" 'flycheck-previous-error
        "cf" 'cjm/toggle-fold
-       
+
        ;; hide
        "h" '(:ignore t :which-key "Hide")
        "hh" 'hs-toggle-hiding
        "hs" 'hs-show-all
-       
+
        ;; apps
        "a" '(:ignore t :which-key "Applications")
        "ar" 'ranger
@@ -357,7 +367,7 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
   (setq persp-state-default-file (expand-file-name "work" (expand-file-name "persp-confs/" user-emacs-directory))
 )
 )
-  
+
 (use-package persp-projectile)
 
 #+end_src
@@ -400,8 +410,8 @@ Why not?
   :defer t
   ;; :init (load-theme 'spacemacs-light t)
   :init (load-theme 'spacemacs-dark t)
-  :config 
-  
+  :config
+
   (let ((line (face-attribute 'mode-line :underline)))
     (set-face-attribute 'mode-line          nil :overline   line)
     (set-face-attribute 'mode-line-inactive nil :overline   line)
@@ -439,7 +449,7 @@ Why not?
 If this code is being evaluated by =emacs --daemon=, ensure that each subsequent
 frame is themed appropriately.
 
-#+begin_src 
+#+begin_src
   (if (daemonp)
       (add-hook 'after-make-frame-functions
                 (lambda (frame)
@@ -565,7 +575,7 @@ pairing or presenting code.
 Use the =diff-hl= package to highlight changed-and-uncommitted lines when
 programming.
 
-#+begin_src 
+#+begin_src
   (use-package diff-hl
     :config
     (add-hook 'prog-mode-hook 'turn-on-diff-hl-mode)
@@ -643,7 +653,7 @@ Flycheck will have you visit all warnings and whatnot, only visit errors.
       (add-hook 'elisp-mode-hook 'flycheck-mode)
 )
  #+end_src
- 
+
 
 ** =projectile=
 
@@ -676,7 +686,7 @@ project root (if I'm not in a "real" project).
 
 (use-package counsel-projectile)
 
-    
+
 #+end_src
 
 ** =restclient=
@@ -701,14 +711,14 @@ I like tree-based undo management. I only rarely need it, but when I do, oh boy.
 #+begin_src emacs-lisp
 (message "Editing settings")
 #+end_src
-** General 
+** General
 
 Install structured text support.
 #+BEGIN_SRC emacs-lisp
 
 (use-package markdown-mode)
-	
-;; render links as clickable	
+
+;; render links as clickable
 ;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Basic-Major-Modes.html
 (add-hook 'text-mode-hook (lambda ()
 						(goto-address-mode)))
@@ -721,7 +731,7 @@ Install structured text support.
 
 
 
-#+BEGIN_SRC 
+#+BEGIN_SRC
 (use-package magit)
 (use-package evil-magit)
 
@@ -731,13 +741,13 @@ Install structured text support.
 #+begin_src emacs-lisp
 
 ;; don't ask to update buffer when file changed
-(global-auto-revert-mode t) 
+(global-auto-revert-mode t)
 
 
 ;; search whatever is highlighted
 (use-package evil-visualstar
 :config
-(global-evil-visualstar-mode) 
+(global-evil-visualstar-mode)
 )
 
 
@@ -759,7 +769,7 @@ Install structured text support.
 ;; restart emacs in emacs
 (use-package restart-emacs)
 
-;; general 
+;; general
 (setq create-lockfiles nil)
 (setq make-backup-files nil) ; stop creating backup~ files
 (setq auto-save-default nil) ; stop creating #autosave# files
@@ -770,14 +780,14 @@ Install structured text support.
 (setq default-fill-column 80)
 (setq initial-scratch-message "")
 (setq word-wrap t)
-  
+
 (use-package eshell-bookmark
 :after eshell
 :config
 (add-hook 'eshell-mode-hook #'eshell-bookmark-setup)
 )
 #+end_src
-  
+
 UTF-8 everywhere.
 
 #+begin_src emacs-lisp
@@ -952,10 +962,10 @@ This configuration:
   unhelpful), and
 - Includes recent files in the switch buffer.
 
-counsel-rg?	
+counsel-rg?
 #+begin_src emacs-lisp
-  
-(use-package ivy 
+
+(use-package ivy
 :ensure t
 :config
 (setq ivy-use-virtual-buffers t)
@@ -969,7 +979,7 @@ counsel-rg?
 ;; (setq ivy-re-builders-alist
 ;;       '((ivy-switch-buffer . ivy--regex-plus)
 ;;         (t . ivy--regex-fuzzy)))
-  
+
 (setq ivy-re-builders-alist
   '(
     ;; (swiper . ivy--regex-plus)
@@ -981,14 +991,14 @@ counsel-rg?
     (t . ivy--regex-plus)
   )
 )
-  
+
   (setq )
   'counsel-find-file
 
 (use-package flx :ensure t)
 ;; (use-package counsel :ensure t)
-    
-  
+
+
   (use-package counsel
 
     :config
@@ -1015,6 +1025,17 @@ counsel-rg?
 #+end_src
 #+begin_src emacs-lisp
 
+(defun cjm/org-writeroom-on ()
+
+  (add-hook 'org-mode-hook 'writeroom-mode)
+(interactive)
+(writeroom-mode))
+
+(defun cjm/org-writeroom-off()
+(remove-hook 'org-mode-hook 'writeroom-mode)
+(interactive)
+(writeroom-mode))
+
 (defun cjm/derived-modes (mode)
   "Return a list of the ancestor modes that MODE is derived from.
 https://emacs.stackexchange.com/questions/58073/how-to-find-inheritance-of-modes"
@@ -1025,7 +1046,7 @@ https://emacs.stackexchange.com/questions/58073/how-to-find-inheritance-of-modes
       (setq mode parent))
     (setq modes  (nreverse modes))))
 ;; (derived-modes 'org-mode)
-  
+
  (defun cjm/toggle-fold()
   "Toggle fold all lines larger than indentation on current line
   https://stackoverflow.com/questions/1587972/how-to-display-indentation-guides-in-emacs/4459159#4459159
@@ -1037,7 +1058,7 @@ https://emacs.stackexchange.com/questions/58073/how-to-find-inheritance-of-modes
       (setq col (+ 1 (current-column)))
       (set-selective-display
        (if selective-display nil (or col 1))))))
-  
+
 (setq cjm/devroot-dir "C:/Users/Public/dev/")
 ;; C:\Users\Public\dev\bin\dbConda-2019_07-py37\condabin\conda.bat
 (setq cjm/conda-envs (concat cjm/devroot-dir "bin/dbConda-2019_07-py37/envs/"))
@@ -1050,7 +1071,7 @@ https://emacs.stackexchange.com/questions/58073/how-to-find-inheritance-of-modes
 (setq cjm/python-interpreter (concat cjm/main-conda "Scripts/" "ipython.exe"))
 (setq cjm/src-code-directory (concat cjm/devroot-dir "src/"))
 (setq cjm/python-path (concat cjm/default-env "python.exe"))
-  
+
 (defun cjm/zimports()
   (start-process
    "a"
@@ -1065,45 +1086,14 @@ https://emacs.stackexchange.com/questions/58073/how-to-find-inheritance-of-modes
   (cjm/zimports)
   )
 
-  
 
-(defun package-upgrade-all ()
- "Upgrade all packages automatically without showing *Packages* buffer.
-https://emacs.stackexchange.com/questions/16398/noninteractively-upgrade-all-packages"
-  (interactive)
-  (package-refresh-contents)
-  (let (upgrades)
-    (cl-flet ((get-version (name where)
-                (let ((pkg (cadr (assq name where))))
-                  (when pkg
-                    (package-desc-version pkg)))))
-      (dolist (package (mapcar #'car package-alist))
-        (let ((in-archive (get-version package package-archive-contents)))
-          (when (and in-archive
-                     (version-list-< (get-version package package-alist)
-                                     in-archive))
-            (push (cadr (assq package package-archive-contents))
-                  upgrades)))))
-    (if upgrades
-        (when (yes-or-no-p
-               (message "Upgrade %d package%s (%s)? "
-                        (length upgrades)
-                        (if (= (length upgrades) 1) "" "s")
-                        (mapconcat #'package-desc-full-name upgrades ", ")))
-          (save-window-excursion
-            (dolist (package-desc upgrades)
-              (let ((old-package (cadr (assq (package-desc-name package-desc)
-                                             package-alist))))
-                (package-install package-desc)
-                (package-delete  old-package)))))
-      (message "All packages are up to date"))))
 
 
 (defun cjm/kill-other-buffers ()
     "Kill all other buffers."
     (interactive)
-    (mapc 'kill-buffer 
-          (delq (current-buffer) 
+    (mapc 'kill-buffer
+          (delq (current-buffer)
                 (cl-remove-if-not 'buffer-file-name (buffer-list)))))
 
 (defun cjm/delete-file-and-buffer ()
@@ -1121,8 +1111,8 @@ https://emacs.stackexchange.com/questions/16398/noninteractively-upgrade-all-pac
 (defun cjm/kill-other-buffers ()
     "Kill all other buffers."
     (interactive)
-    (mapc 'kill-buffer 
-          (delq (current-buffer) 
+    (mapc 'kill-buffer
+          (delq (current-buffer)
                 (cl-remove-if-not 'buffer-file-name (buffer-list)))))
 
 (defun cjm/delete-file-and-buffer ()
@@ -1145,19 +1135,19 @@ https://emacs.stackexchange.com/questions/16398/noninteractively-upgrade-all-pac
 (defun cjm/kill-current-buffer ()
   "Kill the current buffer without prompting."
   (interactive)
-  (kill-buffer (current-buffer))) 
-  
+  (kill-buffer (current-buffer)))
+
 (defun cjm/kill-other-buffers ()
       "Kill all other buffers."
       (interactive)
       (mapc 'kill-buffer (delq (current-buffer) (buffer-list))))
-      
+
     (defun hrs/append-to-path (path)
     "Add a path both to the $PATH variable and to Emacs' exec-path."
     (setenv "PATH" (concat (getenv "PATH") ":" path))
     (add-to-list 'exec-path path))
-    
-    
+
+
 (defun cjm/copy-file-name-to-clipboard ()
   "Copy the current buffer file name to the clipboard."
   (interactive)
@@ -1167,8 +1157,8 @@ https://emacs.stackexchange.com/questions/16398/noninteractively-upgrade-all-pac
     (when filename
       (kill-new filename)
       (message "Copied buffer file name '%s' to the clipboard." filename))))
-      
-      
+
+
 (defun cjm/copy-current-line-position-to-clipboard ()
     "Copy current line in file to clipboard as '</path/to/file>:<line-number>'."
     (interactive)
@@ -1190,24 +1180,47 @@ Collapse src blocks by default, and toggle.
 #+begin_src emacs-lisp
 
 ;; following https://www.eliasstorms.net/zetteldeft/
+
+;; render fragments of latex when cursor leaves them
+(use-package org-fragtog
+:config
+(add-hook 'org-mode-hook 'org-fragtog-mode)
+)
+
+
 (use-package deft
   :ensure t
   :custom
     (deft-extensions '("org" "md" "txt"))
-    (deft-directory "c:/Users/Public/dev/docs/org/roam")
+    (deft-directory "~/Dropbox/org/notes")
     (deft-use-filename-as-title t))
+
+(defun cjm/inhibit-buffer-messages ()
+  "Set `inhibit-message' buffer-locally."
+  (setq-local inhibit-message t))
 
 (use-package zetteldeft
   :ensure t
   :after deft
-  :config (zetteldeft-set-classic-keybindings))
+  :config (zetteldeft-set-classic-keybindings)
 
+(add-hook 'org-mode-hook 'cjm/inhibit-buffer-messages)
+
+)
+
+;; gives link highlighting on page, used by zetteldeft
 (use-package avy)
+;; ?
 (use-package ace-window)
+
+;; TODO move to orgmode hook
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((dot . t))) ; this line activates dot
 
 
 (use-package elisp-format)
-	
+
 
   ;; TODO https://emacs.stackexchange.com/a/30523/16359
   ;; (use-package orglink
@@ -1217,44 +1230,44 @@ Collapse src blocks by default, and toggle.
     ;; (add-to-list 'flycheck-checkers 'tex-aspell-dynamic)
             ;; (setq-default ispell-program-name "C:/dev/bin/hunspell-1.3.2-3-w32-bin/bin/hunspell.exe")
             (setq-default ispell-program-name "c:/Users/Public/dev/bin/hunspell/bin/hunspell.exe")
-	
+
              (add-to-list 'exec-path "c:/Users/Public/dev/bin/hunspell/bin/")
 
            (setq ispell-program-name (locate-file "hunspell"
                     exec-path exec-suffixes 'file-executable-p))
-	
-	
+
+
      ;; (setq ispell-dictionary "en_US,en_GB")
         ;; ispell-set-spellchecker-params has to be called
         ;; before ispell-hunspell-add-multi-dic will work
         ;; (ispell-set-spellchecker-params)
         ;; (ispell-hunspell-add-multi-dic "en_US,en_GB")
-	
+
              ;; (setenv "LANG" "en_US ru_RU")
-	
+
             (setenv "LANG" "en_US"	)
             (setenv "DICTPATH" "c:/Users/Public/dev/bin/hunspell/share/hunspell/")
       ;; (setq-default  ispell-program-name "c:/msys64/mingw64/bin/hunspell.exe")
      ;;  (with-eval-after-load "ispell"
      ;;    (setq ispell-really-hunspell t)
      ;;    ;; (setq ispell-program-name "hunspell")
-	
+
      ;;       (setq ispell-program-name (locate-file "hunspell"
      ;;                exec-path exec-suffixes 'file-executable-p))
-	
+
      ;; (setq ispell-dictionary "en_US")
      ;;    ;; ispell-set-spellchecker-params has to be called
      ;;    ;; before ispell-hunspell-add-multi-dic will work
      ;;    ;; (ispell-set-spellchecker-params)
      ;;    (ispell-hunspell-add-multi-dic "en_US"))
-	
+
   (setq ispell-local-dictionary "en_US")
   (setq ispell-local-dictionary-alist
   '(("en_US" "[[:alpha:]]" "[^[:alpha:]]" "[']" nil nil nil utf-8)))
-	
+
   (setq ispell-dictionary "british")
-	
-    ;; get tabs working nicely in babel	
+
+    ;; get tabs working nicely in babel
     (setq org-src-tab-acts-natively t)
 
     (setq org-edit-src-content-indentation 0)
@@ -1263,16 +1276,16 @@ Collapse src blocks by default, and toggle.
        ;; (setq indent-tabs-mode t)
        (setq tab-stop-list (number-sequence 4 200 4))
        (setq tab-width 2)
-       (setq evil-auto-indent nil)  
+       (setq evil-auto-indent nil)
        (setq indent-line-function 'insert-tab))
 
     (add-hook 'org-mode-hook 'my-tab-related-stuff)
-  
-	
+
+
             (org-babel-do-load-languages
      'org-babel-load-languages
      '((python . t)))
-	
+
     (defvar org-blocks-hidden nil)
 
     (defun org-toggle-blocks ()
@@ -1281,24 +1294,24 @@ Collapse src blocks by default, and toggle.
           (org-show-block-all)
         (org-hide-block-all))
       (setq-local org-blocks-hidden (not org-blocks-hidden)))
-	
+
 
     (add-hook 'org-mode-hook 'org-toggle-blocks)
     (add-hook 'org-mode-hook 'auto-fill-mode)
 
 #+end_src
-  
-Note taking in org mode following [[https://blog.jethro.dev/posts/zettelkasten_with_org/][Org-mode Workflow Part 3: Zettelkasten with Org-mode · Jethro Kuan]] 
-[[https://blog.jethro.dev/posts/how_to_take_smart_notes_org/][How To Take Smart Notes With Org-mode · Jethro Kuan]] 
-  
+
+Note taking in org mode following [[https://blog.jethro.dev/posts/zettelkasten_with_org/][Org-mode Workflow Part 3: Zettelkasten with Org-mode · Jethro Kuan]]
+[[https://blog.jethro.dev/posts/how_to_take_smart_notes_org/][How To Take Smart Notes With Org-mode · Jethro Kuan]]
+
 https://github.com/org-roam/org-roam/
-  
-copy link to clipboard then org-cliplink inserts with metadata  
+
+copy link to clipboard then org-cliplink inserts with metadata
 #+BEGIN_SRC emacs-lisp
-(use-package org-cliplink) 
-    
+(use-package org-cliplink)
+
 #+END_SRC
-  
+
 To file:
 #+begin_src emacs-lisp
 (setq org-agenda-files '("c:/Users/Public/dev/docs/org/roam"))
@@ -1307,17 +1320,17 @@ To file:
     ;; :hook
     ;; (after-init . org-roam-mode)
     ;; :config
-  
+
     ;; (org-roam-directory "c:/Users/Public/dev/docs/org/roam")
 )
-  
+
 ;; use / in dired mode to
 (use-package dired-narrow
   :ensure t
   :bind (:map dired-mode-map
               ("/" . dired-narrow)))
-              
-(setq org-return-follows-link t)           
+
+(setq org-return-follows-link t)
 
 (add-hook 'org-mode-hook
           '(lambda ()
@@ -1380,6 +1393,7 @@ To file:
   )
 
 (add-hook 'org-mode-hook 'my/org-mode-hook)
+(add-hook 'org-mode-hook 'ivy-mode)
 
 
 ;; should be able to do the above with this, didn't work though
@@ -1433,28 +1447,6 @@ To file:
                             ;; ("FLAGGED" . ??)
                             )))
 
-(setq org-capture-templates
-      (quote (
-              ;; ("p" "project todo" entry (file org-default-notes-file)
-              ;;   "* TODO %?\n%U\n%a\n")
-              ("t" "todo" entry (file cjm-org-default-notes-file)
-              "* TODO %?\n%T\n%a\n")
-                      ;; "* TODO %?\n  %i\n  %a")
-              ;; ("m" "meeting" entry (file org-default-notes-file)
-              ;;  "* MEETING with %? :MEETING:\n%U")
-              ("i" "idea" entry (file cjm-org-default-notes-file)
-                "* %? :IDEA:\n%U\n%a\n")
-              ("n" "note" entry (file cjm-org-default-notes-file)
-                "* %? :NOTE:\n%U\n%a\n")
-              ("d" "dig totdo" entry (file cjm-dig-capture-file)
-               "* TODO %?\n %t\n %a\n")
-              ("q" "quant_data totdo" entry (file cjm-quant-data-capture-file)
-               ;; "* TODO %?\n%T\n%a\n")
-              "* TODO %?\n %t\n %a\n")
-
-              ;; ("h" "habit" entry (file cjm/org-default-habits-file)
-              ;;  "* NEXT %?\n%U\n%a\nSCHEDULED: %(format-time-string \"%<<%Y-%m-%d %a .+1d/3d>>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n"))))
-              )))
 
 ;; refiling
 (setq org-refile-targets (quote ((nil :maxlevel . 9)
@@ -1596,12 +1588,12 @@ Highlight keywords like TODO etc in code.
   ;; ("NOTE"   . "#1E90FF")
   ("NOTE"   . "#eda574")
   ("UPTO"   . "#ff82c3")
-           
+
 ))
-          
- (add-hook 'anaconda-mode-hook 'hl-todo-mode) 
- (add-hook 'anaconda-mode-hook 'hl-todo-mode) 
- 
+
+ (add-hook 'anaconda-mode-hook 'hl-todo-mode)
+ (add-hook 'anaconda-mode-hook 'hl-todo-mode)
+
 )
 
 #+end_src
@@ -1659,7 +1651,7 @@ Add some custom file definitions for syntax checking.
 
 #+begin_src emacs-lisp
   ;; (use-package python-mode)
-  
+
   (use-package cython-mode
   :ensure t
   :mode (("\\.pyx\\'"  . cython-mode)
@@ -1673,11 +1665,11 @@ Add =~/.local/bin= to load path. That's where =virtualenv= is installed, and
 we'll need that for =jedi=.
 #+begin_src emacs-lisp
   (hrs/append-to-path "~/.local/bin")
-  
+
 #+end_src
 
 
-#+begin_src 
+#+begin_src
   (hrs/append-to-path "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev")
 #+end_src
 
@@ -1688,28 +1680,28 @@ https://emacs.stackexchange.com/questions/45883/fold-all-methods-in-a-python-cla
     (use-package anaconda-mode
       :config
       (setq python-shell-interpreter "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/scripts/ipython.exe")
-  
+
       (add-hook 'python-mode-hook 'anaconda-mode)
       (add-hook 'python-mode-hook 'hs-minor-mode)
       (setq-default tab-width 4)
     )
 
     (use-package reformatter
-   :config 
-    
+   :config
+
     (reformatter-define python-isort
       :program "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/Scripts/isort.exe"
       :args (list "-" "-p quant,datastore")
   )
 )
-  
+
     (use-package python-black
       :demand t
       :after python
       :config
       (setq python-black-command "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/Scripts/black.exe")
     )
-  
+
     ;; this needs an epc backend setup
     ;; (use-package company-jedi
     ;; :ensure t
@@ -1775,7 +1767,7 @@ Use =flycheck= for syntax checking:
 
 Configure Jedi along with the associated =company= mode:
 
-#+begin_src 
+#+begin_src
   (use-package company-jedi)
   (add-to-list 'company-backends 'company-jedi)
 
@@ -1788,16 +1780,15 @@ Configure Jedi along with the associated =company= mode:
 Have at least some code folding in for json/javascript.
 #+begin_src emacs-lisp
     (add-hook 'js-mode-hook 'hs-minor-mode)
-#+end_src    
+#+end_src
 
 Finish.
 #+begin_src emacs-lisp
 (message "End Config")
 #+end_src
-** Other	
+** Other
 #+BEGIN_SRC emacs-lisp
-(use-package csharp-mode)	
-	
-  	
+(use-package csharp-mode)
+
+
 #+END_SRC
-	
