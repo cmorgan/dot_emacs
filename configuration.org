@@ -212,8 +212,11 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
        :keymaps 'anaconda-mode-map
        :prefix ","
 
-       "b" 'cjm/python-insert-breakpoint
+       "b" 'python-insert-breakpoint
        "n" 'cjm/python-insert-ifname
+       "t" 'cjm/pytest
+       "x" 'cjm/run-python
+
 
        "r" '(:ignore t :wich-key "Refactor")
        "rb" 'python-black-buffer
@@ -408,8 +411,8 @@ Why not?
 #+begin_src emacs-lisp
 (use-package spacemacs-theme
   :defer t
-  ;; :init (load-theme 'spacemacs-light t)
-  :init (load-theme 'spacemacs-dark t)
+  :init (load-theme 'spacemacs-light t)
+  ;; :init (load-theme 'spacemacs-dark t)
   :config
 
   (let ((line (face-attribute 'mode-line :underline)))
@@ -1071,6 +1074,127 @@ https://emacs.stackexchange.com/questions/58073/how-to-find-inheritance-of-modes
 (setq cjm/python-interpreter (concat cjm/main-conda "Scripts/" "ipython.exe"))
 (setq cjm/src-code-directory (concat cjm/devroot-dir "src/"))
 (setq cjm/python-path (concat cjm/default-env "python.exe"))
+;; org-babel
+;; https://orgmode.org/worg/org-contrib/babel/languages/ob-doc-python.html
+;; https://orgmode.org/manual/Results-of-Evaluation.html#Results-of-Evaluation
+(setq org-babel-python-command cjm/python-path)
+(setq org-confirm-babel-evaluate nil)
+;; https://www.masteringemacs.org/article/compiling-running-scripts-emacs
+;;; Shut up compile saves
+(setq compilation-ask-about-save nil)
+;;; Don't save *anything*
+(setq compilation-save-buffers-predicate '(lambda () nil))
+(add-hook 'shell-mode-hook 'compilation-shell-minor-mode)
+
+
+  (defun my-recompile ()
+    "Run compile and resize the compile window closing the old one if necessary"
+    (interactive)
+    (progn
+      (if (get-buffer "*compilation*") ; If old compile window exists
+  	(progn
+  	  (delete-windows-on (get-buffer "*compilation*")) ; Delete the compilation windows
+  	  (kill-buffer "*compilation*") ; and kill the buffers
+  	  )
+        )
+      (call-interactively 'pytest)
+      (enlarge-window 50)
+      )
+)
+
+;; https://www.masteringemacs.org/article/compiling-running-scripts-emacs
+(defun python--add-debug-highlight ()
+  "Adds a highlighter for use by `python--pdb-breakpoint-string'"
+  (highlight-lines-matching-regexp "## DEBUG ##\\s-*$" 'hi-red-b))
+
+(defvar python--pdb-breakpoint-string "import pdb; pdb.set_trace() ## DEBUG ##"
+  "Python breakpoint string used by `python-insert-breakpoint'")
+
+(defun python-insert-breakpoint ()
+  "Inserts a python breakpoint using `pdb'"
+  (interactive)
+  (back-to-indentation)
+  ;; this preserves the correct indentation in case the line above
+  ;; point is a nested block
+  (split-line)
+  (insert python--pdb-breakpoint-string))
+
+(defadvice compile (before ad-compile-smart activate)
+  "Advises `compile' so it sets the argument COMINT to t
+if breakpoints are present in `python-mode' files"
+(message "test!!!")
+  (when (derived-mode-p major-mode 'python-mode)
+    (save-excursion
+      (save-match-data
+        (goto-char (point-min))
+        (if (re-search-forward (concat "^\\s-*" python--pdb-breakpoint-string "$")
+                               (point-max) t)
+            ;; set COMINT argument to `t'.
+            (ad-set-arg 1 t))))))
+
+(add-hook 'python-mode-hook
+          (lambda ()
+            (local-set-key
+             (kbd "F5")                 ;or whatever
+             'py-do-it)))
+
+(defcustom endless/compile-window-size 105
+  "Width given to the non-compilation window."
+  :type 'integer
+  :group 'endless)
+
+(defun cjm/run-python(comint)
+  (interactive "P")
+  (compile (eval (concat cjm/python-path " " buffer-file-name)) (and comint t))
+)
+
+(defun cjm/pytest (comint)
+  (interactive "P")
+
+      (if (get-buffer "*compilation*") ; If old compile window exists
+  	(progn
+  	  (delete-windows-on (get-buffer "*compilation*")) ; Delete the compilation windows
+  	  (kill-buffer "*compilation*") ; and kill the buffers
+  	  )
+        )
+  (compile (eval (concat cjm/default-env "Scripts/pytest " buffer-file-name)) (and comint t))
+)
+
+;; exit without confirming running process
+(setq confirm-kill-processes nil)
+;; kill buffer with process running confirmation
+(setq kill-buffer-query-functions nil)
+
+
+(defun cjm/compile-please(comint)
+  "Compile without confirmation.
+With a prefix argument, use comint-mode. 
+https://endlessparentheses.com/better-compile-command.html
+"
+  (interactive "P")
+  ;; Do the command without a prompt.
+  (save-window-excursion
+    (compile (eval compile-command) (and comint t)))
+  ;; Create a compile window of the desired width.
+  (pop-to-buffer (get-buffer "*compilation*"))
+  (enlarge-window
+   (- (frame-width)
+      endless/compile-window-size
+      (window-width))
+   'horizontal))
+
+;; https://stackoverflow.com/questions/9324802/running-interactive-python-script-from-emacs
+(add-hook 'python-mode-hook
+          (lambda ()
+              (set (make-local-variable 'compile-command)
+                   (concat cjm/python-path " " buffer-file-name))))
+
+(global-set-key (kbd "<f4>") (lambda () (interactive) (setq current-prefix-arg '(4)) (call-interactively 'compile)))
+(global-set-key (kbd "<f3>") (lambda () (interactive) (recompile)) )
+;; https://stackoverflow.com/questions/443302/emacs-how-to-compile-run-make-without-pressing-enter-for-the-compile-command
+;; this doesn't work
+;; (setq compilation-read-command nil)
+
 
 (defun cjm/zimports()
   (start-process
@@ -1087,7 +1211,18 @@ https://emacs.stackexchange.com/questions/58073/how-to-find-inheritance-of-modes
   )
 
 
-
+(defun cjm/rename-file-and-buffer ()
+  "Rename the current buffer and file it is visiting."
+  (interactive)
+  (let ((filename (buffer-file-name)))
+    (if (not (and filename (file-exists-p filename)))
+        (message "Buffer is not visiting a file!")
+      (let ((new-name (read-file-name "New name: " filename)))
+        (cond
+         ((vc-backend filename) (vc-rename-file filename new-name))
+         (t
+          (rename-file filename new-name t)
+          (set-visited-file-name new-name t t)))))))
 
 (defun cjm/kill-other-buffers ()
     "Kill all other buffers."
@@ -1107,6 +1242,7 @@ https://emacs.stackexchange.com/questions/58073/how-to-find-inheritance-of-modes
           (delete-file filename)
           (message "Deleted file %s" filename)
           (kill-buffer))))))
+
 
 (defun cjm/kill-other-buffers ()
     "Kill all other buffers."
@@ -1192,8 +1328,10 @@ Collapse src blocks by default, and toggle.
   :ensure t
   :custom
     (deft-extensions '("org" "md" "txt"))
-    (deft-directory "~/Dropbox/org/notes")
+    ;; (deft-directory "~/Dropbox/org/notes")
+    (deft-directory "c:/Users/Public/dev/docs/notes")
     (deft-use-filename-as-title t))
+
 
 (defun cjm/inhibit-buffer-messages ()
   "Set `inhibit-message' buffer-locally."
@@ -1204,7 +1342,7 @@ Collapse src blocks by default, and toggle.
   :after deft
   :config (zetteldeft-set-classic-keybindings)
 
-(add-hook 'org-mode-hook 'cjm/inhibit-buffer-messages)
+;; (add-hook 'org-mode-hook 'cjm/inhibit-buffer-messages)
 
 )
 
