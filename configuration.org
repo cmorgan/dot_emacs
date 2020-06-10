@@ -1,5 +1,5 @@
-#+TITLE: Emacs Configuration
-#+OPTIONS: toc:nil num:nil
+#+title: Emacs Configuration
+#+options: toc:nil num:nil
 
 https://gist.github.com/yaodong/532e5b31781724ea2566503edcc498c3
 https://github.com/pcorey/.emacs.d/blob/master/init.el#L279
@@ -26,17 +26,17 @@ on a fresh Debian box and have my whole environment automatically installed. I'm
 not /totally/ sure about that, but we're gettin' close.
 
 #+begin_src emacs-lisp
-  (require 'use-package-ensure)
-  (setq use-package-always-ensure t)
+(require 'use-package-ensure)
+(setq use-package-always-ensure t)
 #+end_src
 
 Always compile packages, and use the newest version available.
 
 #+begin_src emacs-lisp
-  (use-package auto-compile
-    :config (auto-compile-on-load-mode))
+(use-package auto-compile
+  :config (auto-compile-on-load-mode))
 
-  (setq load-prefer-newer t)
+(setq load-prefer-newer t)
 #+end_src
 
 * =evil-mode=
@@ -70,31 +70,30 @@ Install =evil-collection=, which provides evil-friendly bindings for many modes.
 Enable =surround= everywhere.
 
 #+begin_src emacs-lisp
-  (use-package evil-surround
-    :config
-    (global-evil-surround-mode 1))
+(use-package evil-surround
+  :config
+  (global-evil-surround-mode 1))
 #+end_src
 
 Use =evil= with Org agendas.
 
 #+begin_src emacs-lisp
-  (use-package evil-org
-    :after org
-    :config
-    (evil-define-key 'normal evil-org-mode-map "t" 'org-todo)
-    ;; (evil-define-key 'normal evil-org-mode-map (kbd "RET" 'org-)
-    (add-hook 'org-mode-hook 'evil-org-mode)
-    (add-hook 'evil-org-mode-hook
-              (lambda () (evil-org-set-key-theme)))
-    (require 'evil-org-agenda)
+(use-package evil-org
+  :after org
+  :config
+  (evil-define-key 'normal evil-org-mode-map "t" 'org-todo)
+  ;; (evil-define-key 'normal evil-org-mode-map (kbd "RET" 'org-)
+  (add-hook 'org-mode-hook 'evil-org-mode)
+  (add-hook 'evil-org-mode-hook
+            (lambda () (evil-org-set-key-theme)))
+  (require 'evil-org-agenda)
 
-    (with-eval-after-load 'evil-maps
-  (define-key evil-motion-state-map (kbd "SPC") nil)
-  (define-key evil-motion-state-map (kbd "RET") nil)
-  (define-key evil-motion-state-map (kbd "TAB") nil))
+  (with-eval-after-load 'evil-maps
+    (define-key evil-motion-state-map (kbd "SPC") nil)
+    (define-key evil-motion-state-map (kbd "RET") nil)
+    (define-key evil-motion-state-map (kbd "TAB") nil))
 
-    (evil-org-agenda-set-keys))
-
+  (evil-org-agenda-set-keys))
 #+end_src
 
 * UI preferences
@@ -107,10 +106,8 @@ Use =evil= with Org agendas.
 
 
 (defun cjm/load-init()
-(interactive)
-(load user-init-file)
-
-)
+  (interactive)
+  (load user-init-file))
 
 ;; (add-hook 'after-init-hook '(lambda () (w32-send-sys-command #xf030)))
 
@@ -122,40 +119,38 @@ Use =evil= with Org agendas.
 (setq-default mode-line-format nil)
 
 (use-package exec-path-from-shell
-:ensure t
-:config
-(when (memq window-system '(mac ns x))
+  :ensure t
+  :config
+  (when (memq window-system '(mac ns x))
     (exec-path-from-shell-initialize)))
 
 (use-package writeroom-mode
-:ensure t
-)
+  :ensure t)
 
 (use-package which-key
-:ensure t
-:init
-(setq which-key-separator " ")
-(setq which-key-prefix-prefix "+")
-:config
-(which-key-mode))
+  :ensure t
+  :init
+  (setq which-key-separator " ")
+  (setq which-key-prefix-prefix "+")
+  :config
+  (which-key-mode))
 
 (use-package evil-nerd-commenter :ensure t)
 
 (use-package key-chord
-    :ensure t
-    :config
-    (key-chord-mode 1)
-    (key-chord-define evil-insert-state-map "kj" 'evil-normal-state)
-    (key-chord-define evil-insert-state-map "Kj" 'evil-normal-state)
-    (key-chord-define evil-insert-state-map "KJ" 'evil-normal-state)
-    (key-chord-define evil-insert-state-map "kJ" 'evil-normal-state))
+  :ensure t
+  :config
+  (key-chord-mode 1)
+  (key-chord-define evil-insert-state-map "kj" 'evil-normal-state)
+  (key-chord-define evil-insert-state-map "Kj" 'evil-normal-state)
+  (key-chord-define evil-insert-state-map "KJ" 'evil-normal-state)
+  (key-chord-define evil-insert-state-map "kJ" 'evil-normal-state))
 
 (defun toggle-buffers ()
-(interactive)
-(switch-to-buffer nil))
+  (interactive)
+  (switch-to-buffer nil))
 
 (use-package ranger :ensure t)
-
 #+end_src
 
 ** Key bindings
@@ -169,233 +164,232 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
 
 ;; this prevents emacs from being slow on windoes?
 (setq inhibit-compacting-font-caches t)
-  ;; (define-key dired-mode-map (kbd ",") nil)
+;; (define-key dired-mode-map (kbd ",") nil)
 
-    (use-package general
-      :ensure t
-      :config
+(use-package general
+  :ensure t
+  :config
 
-      ;; mode specific
-      ;; orgmode
-      (general-define-key
-       :states '(normal)
-       :keymaps 'org-mode-map
-       :prefix ","
-       "l" '(nil :wk "link")
-       "lc" '(org-cliplink :wk "clip")
-       "li" '(org-insert-link :wk "insert")
-       "lg" '(counsel-org-link :wk "go")
+  ;; mode specific
+  ;; orgmode
+  (general-define-key
+   :states '(normal)
+   :keymaps 'org-mode-map
+   :prefix ","
+   "l" '(nil :wk "link")
+   "lc" '(org-cliplink :wk "clip")
+   "li" '(org-insert-link :wk "insert")
+   "lg" '(counsel-org-link :wk "go")
+
+   "t" '(nil :wk "table")
+   "ti" 'org-table-create
+   "ta" 'org-table-align
+   "tc" 'org-table-insert-column
+   "tr" 'org-table-insert-row
+
+   "s" '(nil :wk "section")
+   "sh" 'org-insert-heading
+   "d" '(nil :wk "date")
+   "dt" 'org-time-stamp-inactive
+
+   "n" '(nil :wk "narrow")
+   "ns" 'org-narrow-to-subtree
+   "nw" 'widen
+
+   "b" '(nil :wk "blocks")
+   "bt" 'org-toggle-blocks
+
+   "w" '(nil :wk "writeroom")
+   "wo" 'cjm/org-writeroom-on
+   "wx" 'cjm/org-writeroom-off)
+
+  ;; python
+  (general-define-key
+   :states '(normal)
+   :keymaps 'anaconda-mode-map
+   :prefix ","
+
+   "b" 'python-insert-breakpoint
+   "n" 'cjm/python-insert-ifname
+   "t" 'cjm/pytest
+   "x" 'cjm/run-python
+
+   "r" '(:ignore t :wich-key "Refactor")
+   "rb" 'python-black-buffer
+   "rs" 'python-isort-buffer
+   "rr" '((lambda () (interactive) (python-isort-buffer)(python-black-buffer)(flycheck-buffer)) :which-key "all")
+   "rz" 'zimports)
+
+  ;; Main menu
+  (general-define-key
+   :states '(normal visual insert emacs)
+   :prefix "SPC"
+   :keymaps 'override
+   :non-normal-prefix "C-SPC"
+   "/"   'counsel-rg
+   ;; "/"   'counsel-grep
+   ;; "/"   'counsel-ag
+   "SPC" 'counsel-M-x
+   "."   'cjm/open-config
+   "\""  'split-window-below
+   "%"  'split-window-right
+   "TAB" 'toggle-buffers
+   "k" 'cjm/kill-current-buffer
+
+   "w" '(nil :wk "writeroom")
+   "wg" 'global-writeroom-mode
+   "ww" 'writeroom-mode
+
+   ;; buffers
+   "b" '(:ignore t :which-key "buffers")
+   "bb"  'ivy-switch-buffer
+
+   ;; emacs
+   "e" '(:ignore t :which-key "emacs")
+   "er"  'restart-emacs
+   "ei"  'cjm/load-init
+   "eb"  'eval-buffer
+   "ev"  'counsel-describe-variable
+   "ef"  'counsel-describe-function
+
+                                        ; projectile
+   "p" '(:ignore t :which-key "projectile")
+   "pi" 'projectile-invalidate-cache
+   "pp" 'projectile-switch-project
+   "pr" 'projectile-recentf
+   "pf" 'counsel-projectile-find-file
+   "pb" 'persp-counsel-switch-buffer
+   "pa" 'projectile-find-file-in-known-projects
+   "pn" 'persp-next
+   "px" 'persp-kill
+
+   ;; files
+   "f" '(:ignore t :which-key "files")
+   "fa" 'bookmark-set
+   "fb" 'counsel-bookmark
+   "fc" 'cjm/copy-file-name-to-clipboard
+   "fd" 'dired-at-point
+   "ff" 'counsel-find-file
+   "fr" 'counsel-recentf
+   "fs" 'save-buffer
+   "fp" 'cjm/copy-current-line-position-to-clipboard
+   "fn" 'cjm/rename-file-and-buffer
+   "fx" 'cjm/delete-file-and-buffer
+
+   ;; code
+   "c" '(:ignore t :which-key "code")
+   "cl" 'evilnc-comment-or-uncomment-lines
+   "cn" 'flycheck-next-error
+   "cp" 'flycheck-previous-error
+   "cf" 'cjm/toggle-fold
+
+   ;; hide
+   "h" '(:ignore t :which-key "hide")
+   "hh" 'hs-toggle-hiding
+   "hs" 'hs-show-all
+
+   ;; apps
+   "a" '(:ignore t :which-key "apps")
+   "ar" 'ranger
+   "ac" 'calendar
+
+   ;; window
+   "w" '(:ignore t :which-key "window")
+   "wl"  'windmove-right
+   "wh"  'windmove-left
+   "wk"  'windmove-up
+   "wj"  'windmove-down
+   "w\""  'split-window-below
+   "w%"  'split-window-right
+   "wx"  'delete-window
+   "wf" 'new-frame
+   "wo" 'other-frame
+
+   ;; search
+   "s" '(:ignore t :which-key "search")
+   "sc" 'evil-ex-nohighlight
+   "sl" 'ivy-resume
+
+   ;; deft
+   "d"  '(nil :wk "deft")
+   "dd" '(deft :wk "deft")
+   "dD" '(zetteldeft-deft-new-search :wk "new search")
+   "dR" '(deft-refresh :wk "refresh")
+   "ds" '(zetteldeft-search-at-point :wk "search at point")
+   "dc" '(zetteldeft-search-current-id :wk "search current id")
+   "df" '(zetteldeft-follow-link :wk "follow link")
+   "dF" '(zetteldeft-avy-file-search-ace-window :wk "avy file other window")
+   "dl" '(zetteldeft-avy-link-search :wk "avy link search")
+   "dt" '(zetteldeft-avy-tag-search :wk "avy tag search")
+   "dT" '(zetteldeft-tag-buffer :wk "tag list")
+   "di" '(zetteldeft-find-file-id-insert :wk "insert id")
+   "dI" '(zetteldeft-find-file-full-title-insert :wk "insert full title")
+   "do" '(zetteldeft-find-file :wk "find file")
+   "dn" '(zetteldeft-new-file :wk "new file")
+   "dN" '(zetteldeft-new-file-and-link :wk "new file & link")
+   "dr" '(zetteldeft-file-rename :wk "rename")
+   "dx" '(zetteldeft-count-words :wk "count words")
+
+   ;;log
+   "l" '(nil :wk "Log")
+   "ll" 'cjm/open-log
+   "lp" 'cjm/open-project))
 
 
-       "t" '(nil :wk "table")
-       "ti" 'org-table-create
-       "ta" 'org-table-align
 
-       "s" '(:ignore t :wich-key "Section")
-       "sh" 'org-insert-heading
-       "dt" 'org-time-stamp-inactive
+;; (global-set-key (kbd "C-x k") 'cjm/kill-current-buffer)
 
-       "ns" 'org-narrow-to-subtree
-       "nw" 'widen
+(define-key evil-motion-state-map (kbd "C-h") 'evil-window-left)
+(define-key evil-motion-state-map (kbd "C-j") 'evil-window-down)
+(define-key evil-motion-state-map (kbd "C-k") 'evil-window-up)
+(define-key evil-motion-state-map (kbd "C-l") 'evil-window-right)
 
-       "b" '(:ignore t :wich-key "Blocks")
-       "bt" 'org-toggle-blocks
+(define-key evil-normal-state-map (kbd "C-h") 'evil-window-left)
+(define-key evil-normal-state-map (kbd "C-j") 'evil-window-down)
+(define-key evil-normal-state-map (kbd "C-k") 'evil-window-up)
+(define-key evil-normal-state-map (kbd "C-l") 'evil-window-right)
 
-       "wo" 'cjm/org-writeroom-on
-       "wx" 'cjm/org-writeroom-off
+(define-key global-map (kbd "C-h") #'evil-window-left)
+(define-key global-map (kbd "C-j") #'evil-window-down)
+(define-key global-map (kbd "C-k") #'evil-window-up)
+(define-key global-map (kbd "C-l") #'evil-window-right)
 
-       )
-
-      ;; python
-      (general-define-key
-       :states '(normal)
-       :keymaps 'anaconda-mode-map
-       :prefix ","
-
-       "b" 'python-insert-breakpoint
-       "n" 'cjm/python-insert-ifname
-       "t" 'cjm/pytest
-       "x" 'cjm/run-python
-
-
-       "r" '(:ignore t :wich-key "Refactor")
-       "rb" 'python-black-buffer
-       "rs" 'python-isort-buffer
-       "rr" '((lambda () (interactive) (python-isort-buffer)(python-black-buffer)(flycheck-buffer)) :which-key "all")
-       "rz" 'zimports
-
-       )
-
-      ;; Main menu
-      (general-define-key
-       :states '(normal visual insert emacs)
-       :prefix "SPC"
-       :keymaps 'override
-       :non-normal-prefix "C-SPC"
-       "/"   'counsel-rg
-       ;; "/"   'counsel-grep
-       ;; "/"   'counsel-ag
-       "SPC" 'counsel-M-x
-       "."   'cjm/open-config
-       "\""  'split-window-below
-       "%"  'split-window-right
-       "TAB" 'toggle-buffers
-       "k" 'cjm/kill-current-buffer
-
-
-       ;; buffers
-       "b" '(:ignore t :which-key "Buffers")
-       "bb"  'ivy-switch-buffer
-
-       ;; emacs
-       "e" '(:ignore t :which-key "Emacs")
-       "er"  'restart-emacs
-       "ei"  'cjm/load-init
-       "eb"  'eval-buffer
-       "ev"  'counsel-describe-variable
-       "ef"  'counsel-describe-function
-
-       ; projectile
-       "p" '(:ignore t :which-key "Projectile")
-       "pi" 'projectile-invalidate-cache
-       "pp" 'projectile-switch-project
-       "pr" 'projectile-recentf
-       "pf" 'counsel-projectile-find-file
-       "pb" 'persp-counsel-switch-buffer
-       "pa" 'projectile-find-file-in-known-projects
-       "pn" 'persp-next
-       "px" 'persp-kill
-
-       ;; files
-       "f" '(:ignore t :which-key "Files")
-       "fa" 'bookmark-set
-       "fb" 'counsel-bookmark
-       "fc" 'cjm/copy-file-name-to-clipboard
-       "fd" 'dired-at-point
-       "ff" 'counsel-find-file
-       "fr" 'counsel-recentf
-       "fs" 'save-buffer
-       "fp" 'cjm/copy-current-line-position-to-clipboard
-
-       ;; code
-       "c" '(:ignore t :which-key "Code")
-       "cl" 'evilnc-comment-or-uncomment-lines
-       "cn" 'flycheck-next-error
-       "cp" 'flycheck-previous-error
-       "cf" 'cjm/toggle-fold
-
-       ;; hide
-       "h" '(:ignore t :which-key "Hide")
-       "hh" 'hs-toggle-hiding
-       "hs" 'hs-show-all
-
-       ;; apps
-       "a" '(:ignore t :which-key "Applications")
-       "ar" 'ranger
-       "ac" 'calendar
-
-       ;; window
-       "w" '(:ignore t :which-key "Window")
-       "wl"  'windmove-right
-       "wh"  'windmove-left
-       "wk"  'windmove-up
-       "wj"  'windmove-down
-       "w\""  'split-window-below
-       "w%"  'split-window-right
-       "wx"  'delete-window
-       "wf" 'new-frame
-       "wo" 'other-frame
-
-       ;; search
-       "s" '(:ignore t :which-key "Search")
-       "sc" 'evil-ex-nohighlight
-       "sl" 'ivy-resume
-
-       ;; deft
-       "d"  '(nil :wk "deft")
-       "dd" '(deft :wk "deft")
-       "dD" '(zetteldeft-deft-new-search :wk "new search")
-        "dR" '(deft-refresh :wk "refresh")
-        "ds" '(zetteldeft-search-at-point :wk "search at point")
-        "dc" '(zetteldeft-search-current-id :wk "search current id")
-        "df" '(zetteldeft-follow-link :wk "follow link")
-        "dF" '(zetteldeft-avy-file-search-ace-window :wk "avy file other window")
-        "dl" '(zetteldeft-avy-link-search :wk "avy link search")
-        "dt" '(zetteldeft-avy-tag-search :wk "avy tag search")
-        "dT" '(zetteldeft-tag-buffer :wk "tag list")
-        "di" '(zetteldeft-find-file-id-insert :wk "insert id")
-        "dI" '(zetteldeft-find-file-full-title-insert :wk "insert full title")
-        "do" '(zetteldeft-find-file :wk "find file")
-        "dn" '(zetteldeft-new-file :wk "new file")
-        "dN" '(zetteldeft-new-file-and-link :wk "new file & link")
-        "dr" '(zetteldeft-file-rename :wk "rename")
-        "dx" '(zetteldeft-count-words :wk "count words")
-
-       ;;log
-       "l" '(nil :wk "Log")
-       "ll" 'cjm/open-log
-       "lp" 'cjm/open-project
-  )
- )
-
-
-  ;; (global-set-key (kbd "C-x k") 'cjm/kill-current-buffer)
-
-  (define-key evil-motion-state-map (kbd "C-h") 'evil-window-left)
-  (define-key evil-motion-state-map (kbd "C-j") 'evil-window-down)
-  (define-key evil-motion-state-map (kbd "C-k") 'evil-window-up)
-  (define-key evil-motion-state-map (kbd "C-l") 'evil-window-right)
-
-  (define-key evil-normal-state-map (kbd "C-h") 'evil-window-left)
-  (define-key evil-normal-state-map (kbd "C-j") 'evil-window-down)
-  (define-key evil-normal-state-map (kbd "C-k") 'evil-window-up)
-  (define-key evil-normal-state-map (kbd "C-l") 'evil-window-right)
-
-  (define-key global-map (kbd "C-h") #'evil-window-left)
-  (define-key global-map (kbd "C-j") #'evil-window-down)
-  (define-key global-map (kbd "C-k") #'evil-window-up)
-  (define-key global-map (kbd "C-l") #'evil-window-right)
-
-  (use-package evil-escape
+(use-package evil-escape
   :config
   (evil-escape-mode 1)
-  (setq evil-escape-key-sequence (kbd "jk"))
-  )
+  (setq evil-escape-key-sequence (kbd "jk")))
 
-  (global-set-key (kbd "M-o") 'next-multiframe-window)
+(global-set-key (kbd "M-o") 'next-multiframe-window)
 
 (use-package perspective
   :config
   (persp-mode)
-  (setq persp-state-default-file (expand-file-name "work" (expand-file-name "persp-confs/" user-emacs-directory))
-)
-)
+  (setq persp-state-default-file (expand-file-name "work" (expand-file-name "persp-confs/" user-emacs-directory))))
 
 (use-package persp-projectile)
-
 #+end_src
 ** Tweak window chrome
 
 I don't usually use the menu or scroll bar, and they take up useful space.
 
 #+begin_src emacs-lisp
-  (tool-bar-mode 0)
-  (menu-bar-mode 0)
-  (scroll-bar-mode -1)
+(tool-bar-mode 0)
+(menu-bar-mode 0)
+(scroll-bar-mode -1)
 #+end_src
 
 There's a tiny scroll bar that appears in the minibuffer window. This disables
 that:
 
 #+begin_src emacs-lisp
-  (set-window-scroll-bars (minibuffer-window) nil nil)
+(set-window-scroll-bars (minibuffer-window) nil nil)
 #+end_src
 
 The default frame title isn't useful. This binds it to the name of the current
 project:
 
 #+begin_src emacs-lisp
-  (setq frame-title-format '((:eval (projectile-project-name))))
+(setq frame-title-format '((:eval (projectile-project-name))))
 #+end_src
 
 ** Use fancy lambdas
@@ -403,7 +397,7 @@ project:
 Why not?
 
 #+begin_src emacs-lisp
-  (global-prettify-symbols-mode t)
+(global-prettify-symbols-mode t)
 #+end_src
 
 ** Theme
@@ -421,8 +415,7 @@ Why not?
     (set-face-attribute 'mode-line-inactive nil :underline  line)
     (set-face-attribute 'mode-line          nil :box        nil)
     (set-face-attribute 'mode-line-inactive nil :box        nil)
-    (set-face-attribute 'mode-line-inactive nil :background "#f9f2d9"))
-)
+    (set-face-attribute 'mode-line-inactive nil :background "#f9f2d9")))
 #+end_src
 
 #+begin_src
@@ -438,26 +431,24 @@ Why not?
     (set-face-attribute 'mode-line-inactive nil :underline  line)
     (set-face-attribute 'mode-line          nil :box        nil)
     (set-face-attribute 'mode-line-inactive nil :box        nil)
-    (set-face-attribute 'mode-line-inactive nil :background "#f9f2d9"))
-)
+    (set-face-attribute 'mode-line-inactive nil :background "#f9f2d9")))
 
  (defun hrs/apply-theme ()
    "Apply the `solarized-light' theme and make frames just slightly transparent."
    (interactive)
    (load-theme 'solarized-light t)
-   (load-theme 'solarized-darkt)
-)
+   (load-theme 'solarized-darkt))
 #+end_src
 
 If this code is being evaluated by =emacs --daemon=, ensure that each subsequent
 frame is themed appropriately.
 
 #+begin_src
-  (if (daemonp)
-      (add-hook 'after-make-frame-functions
-                (lambda (frame)
-                  (with-selected-frame frame (hrs/apply-theme))))
-    (hrs/apply-theme))
+(if (daemonp)
+    (add-hook 'after-make-frame-functions
+              (lambda (frame)
+                (with-selected-frame frame (hrs/apply-theme))))
+  (hrs/apply-theme))
 #+end_src
 
 
@@ -487,7 +478,7 @@ don't even want that (and my Emacs/Mac pair renders it poorly). This disables
 the bell altogether.
 
 #+begin_src emacs-lisp
-  (setq ring-bell-function 'ignore)
+(setq ring-bell-function 'ignore)
 #+end_src
 
 ** Scroll conservatively
@@ -497,7 +488,7 @@ I'm not crazy about that. This changes scrolling behavior to only scroll as far
 as point goes.
 
 #+begin_src emacs-lisp
-  (setq scroll-conservatively 100)
+(setq scroll-conservatively 100)
 #+end_src
 
 ** Set default font and configure font resizing
@@ -513,54 +504,54 @@ Note that this overrides the default font-related keybindings from
 =sensible-defaults=.
 
 #+begin_src emacs-lisp
-  (setq hrs/default-font "Source Code Pro")
-  (setq hrs/default-font-size 11)
-  (setq hrs/current-font-size hrs/default-font-size)
+(setq hrs/default-font "Source Code Pro")
+(setq hrs/default-font-size 11)
+(setq hrs/current-font-size hrs/default-font-size)
 
-  (setq hrs/font-change-increment 1.1)
+(setq hrs/font-change-increment 1.1)
 
-  (defun hrs/font-code ()
-    "Return a string representing the current font (like \"Inconsolata-14\")."
-    (concat hrs/default-font "-" (number-to-string hrs/current-font-size)))
+(defun hrs/font-code ()
+  "Return a string representing the current font (like \"Inconsolata-14\")."
+  (concat hrs/default-font "-" (number-to-string hrs/current-font-size)))
 
-  (defun hrs/set-font-size ()
-    "Set the font to `hrs/default-font' at `hrs/current-font-size'.
+(defun hrs/set-font-size ()
+  "Set the font to `hrs/default-font' at `hrs/current-font-size'.
   Set that for the current frame, and also make it the default for
   other, future frames."
-    (let ((font-code (hrs/font-code)))
-      (if (assoc 'font default-frame-alist)
-          (setcdr (assoc 'font default-frame-alist) font-code)
-        (add-to-list 'default-frame-alist (cons 'font font-code)))
-      (set-frame-font font-code)))
+  (let ((font-code (hrs/font-code)))
+    (if (assoc 'font default-frame-alist)
+        (setcdr (assoc 'font default-frame-alist) font-code)
+      (add-to-list 'default-frame-alist (cons 'font font-code)))
+    (set-frame-font font-code)))
 
-  (defun hrs/reset-font-size ()
-    "Change font size back to `hrs/default-font-size'."
-    (interactive)
-    (setq hrs/current-font-size hrs/default-font-size)
-    (hrs/set-font-size))
+(defun hrs/reset-font-size ()
+  "Change font size back to `hrs/default-font-size'."
+  (interactive)
+  (setq hrs/current-font-size hrs/default-font-size)
+  (hrs/set-font-size))
 
-  (defun hrs/increase-font-size ()
-    "Increase current font size by a factor of `hrs/font-change-increment'."
-    (interactive)
-    (setq hrs/current-font-size
-          (ceiling (* hrs/current-font-size hrs/font-change-increment)))
-    (hrs/set-font-size))
+(defun hrs/increase-font-size ()
+  "Increase current font size by a factor of `hrs/font-change-increment'."
+  (interactive)
+  (setq hrs/current-font-size
+        (ceiling (* hrs/current-font-size hrs/font-change-increment)))
+  (hrs/set-font-size))
 
-  (defun hrs/decrease-font-size ()
-    "Decrease current font size by a factor of `hrs/font-change-increment', down to a minimum size of 1."
-    (interactive)
-    (setq hrs/current-font-size
-          (max 1
-               (floor (/ hrs/current-font-size hrs/font-change-increment))))
-    (hrs/set-font-size))
+(defun hrs/decrease-font-size ()
+  "Decrease current font size by a factor of `hrs/font-change-increment', down to a minimum size of 1."
+  (interactive)
+  (setq hrs/current-font-size
+        (max 1
+             (floor (/ hrs/current-font-size hrs/font-change-increment))))
+  (hrs/set-font-size))
 
-  (define-key global-map (kbd "C-)") 'hrs/reset-font-size)
-  (define-key global-map (kbd "C-+") 'hrs/increase-font-size)
-  (define-key global-map (kbd "C-=") 'hrs/increase-font-size)
-  (define-key global-map (kbd "C-_") 'hrs/decrease-font-size)
-  (define-key global-map (kbd "C--") 'hrs/decrease-font-size)
+(define-key global-map (kbd "C-)") 'hrs/reset-font-size)
+(define-key global-map (kbd "C-+") 'hrs/increase-font-size)
+(define-key global-map (kbd "C-=") 'hrs/increase-font-size)
+(define-key global-map (kbd "C-_") 'hrs/decrease-font-size)
+(define-key global-map (kbd "C--") 'hrs/decrease-font-size)
 
-  (hrs/reset-font-size)
+(hrs/reset-font-size)
 #+end_src
 
 ** Highlight the current line
@@ -570,7 +561,7 @@ containing point. It makes it a bit easier to find point, and it's useful when
 pairing or presenting code.
 
 #+begin_src emacs-lisp
-  (global-hl-line-mode)
+(global-hl-line-mode)
 #+end_src
 
 ** Highlight uncommitted changes
@@ -579,10 +570,10 @@ Use the =diff-hl= package to highlight changed-and-uncommitted lines when
 programming.
 
 #+begin_src
-  (use-package diff-hl
-    :config
-    (add-hook 'prog-mode-hook 'turn-on-diff-hl-mode)
-    (add-hook 'vc-dir-mode-hook 'turn-on-diff-hl-mode))
+(use-package diff-hl
+  :config
+  (add-hook 'prog-mode-hook 'turn-on-diff-hl-mode)
+  (add-hook 'vc-dir-mode-hook 'turn-on-diff-hl-mode))
 #+end_src
 
 
@@ -606,7 +597,7 @@ Install =ag= to provide search within projects (usually through
 =projectile-ag=).
 
 #+begin_src emacs-lisp
-  (use-package ag)
+(use-package ag)
 #+end_src
 
 ** =company=
@@ -614,14 +605,14 @@ Install =ag= to provide search within projects (usually through
 Company gives text completion in buffers etc. Use =company-mode= everywhere.
 
 #+begin_src emacs-lisp
-  (use-package company)
-  (add-hook 'after-init-hook 'global-company-mode)
+(use-package company)
+(add-hook 'after-init-hook 'global-company-mode)
 #+end_src
 
 Use =M-/= for completion.
 
 #+begin_src emacs-lisp
-  (global-set-key (kbd "M-/") 'company-complete-common)
+(global-set-key (kbd "M-/") 'company-complete-common)
 #+end_src
 
 ** =dumb-jump=
@@ -631,31 +622,30 @@ doesn't require any additional setup. I've bound its most useful command to
 =M-.=.
 
 #+begin_src emacs-lisp
-  (use-package dumb-jump
-    :config
-    (define-key evil-normal-state-map (kbd "M-.") 'dumb-jump-go)
-    (setq dumb-jump-selector 'ivy))
+(use-package dumb-jump
+  :config
+  (define-key evil-normal-state-map (kbd "M-.") 'dumb-jump-go)
+  (setq dumb-jump-selector 'ivy))
 #+end_src
 
 ** =flycheck=
 
 Flycheck will have you visit all warnings and whatnot, only visit errors.
- #+begin_src emacs-lisp
+#+begin_src emacs-lisp
 (use-package let-alist)
 (use-package flycheck
   :config
   (setq flycheck-idle-change-delay 7)
   (setq-default flycheck-flake8-maximum-line-length 89)
   (setq flycheck-python-flake8-executable "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/Scripts/flake8.exe")
-   (setq flycheck-check-syntax-automatically '(save)
-         flycheck-idle-change-delay 2
-         ;; flycheck-error-list-minimum-level 'warning
-         flycheck-navigation-minimum-level 'error)
+  (setq flycheck-check-syntax-automatically '(save)
+        flycheck-idle-change-delay 2
+        ;; flycheck-error-list-minimum-level 'warning
+        flycheck-navigation-minimum-level 'error)
 
-      (add-hook 'python-mode-hook 'flycheck-mode)
-      (add-hook 'elisp-mode-hook 'flycheck-mode)
-)
- #+end_src
+  (add-hook 'python-mode-hook 'flycheck-mode)
+  (add-hook 'elisp-mode-hook 'flycheck-mode))
+#+end_src
 
 
 ** =projectile=
@@ -678,27 +668,23 @@ when I'm in a Projectile-defined project. I use the current directory as a
 project root (if I'm not in a "real" project).
 
 #+begin_src emacs-lisp
-  (use-package projectile
-    :config
-    (setq projectile-completion-system 'ivy)
-    (setq projectile-indexing-method 'alien)
-    (setq projectile-sort-order 'recently-active)
-    (projectile-global-mode)
-
-)
+(use-package projectile
+  :config
+  (setq projectile-completion-system 'ivy)
+  (setq projectile-indexing-method 'alien)
+  (setq projectile-sort-order 'recently-active)
+  (projectile-global-mode))
 
 (use-package counsel-projectile)
-
-
 #+end_src
 
 ** =restclient=
 
 #+begin_src emacs-lisp
-  (use-package restclient)
-  (use-package company-restclient
-    :config
-    (add-to-list 'company-backends 'company-restclient))
+(use-package restclient)
+(use-package company-restclient
+  :config
+  (add-to-list 'company-backends 'company-restclient))
 #+end_src
 
 ** =undo-tree=
@@ -706,7 +692,7 @@ project root (if I'm not in a "real" project).
 I like tree-based undo management. I only rarely need it, but when I do, oh boy.
 
 #+begin_src emacs-lisp
-  (use-package undo-tree)
+(use-package undo-tree)
 #+end_src
 
 * Editing settings
@@ -717,28 +703,25 @@ I like tree-based undo management. I only rarely need it, but when I do, oh boy.
 ** General
 
 Install structured text support.
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 
 (use-package markdown-mode)
 
 ;; render links as clickable
 ;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Basic-Major-Modes.html
 (add-hook 'text-mode-hook (lambda ()
-						(goto-address-mode)))
+                            (goto-address-mode)))
 
 (add-hook 'prog-mode-hook (lambda ()
-						(goto-address-mode)))
-
-
-#+END_SRC
+                            (goto-address-mode)))
+#+end_src
 
 
 
-#+BEGIN_SRC
+#+begin_src
 (use-package magit)
 (use-package evil-magit)
-
-#+END_SRC
+#+end_src
 
 
 #+begin_src emacs-lisp
@@ -749,26 +732,22 @@ Install structured text support.
 
 ;; search whatever is highlighted
 (use-package evil-visualstar
-:config
-(global-evil-visualstar-mode)
-)
+  :config
+  (global-evil-visualstar-mode))
 
 
 (use-package smartparens
 
-:config
+  :config
 
-(require 'smartparens-config)
-(smartparens-global-mode t)
-
-)
+  (require 'smartparens-config)
+  (smartparens-global-mode t))
 
 (use-package yaml-mode
 
-:config
-    (add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode))
-    (add-to-list 'auto-mode-alist '("\\.yaml" . yaml-mode))
-)
+  :config
+  (add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode))
+  (add-to-list 'auto-mode-alist '("\\.yaml" . yaml-mode)))
 ;; restart emacs in emacs
 (use-package restart-emacs)
 
@@ -785,26 +764,25 @@ Install structured text support.
 (setq word-wrap t)
 
 (use-package eshell-bookmark
-:after eshell
-:config
-(add-hook 'eshell-mode-hook #'eshell-bookmark-setup)
-)
+  :after eshell
+  :config
+  (add-hook 'eshell-mode-hook #'eshell-bookmark-setup))
 #+end_src
 
 UTF-8 everywhere.
 
 #+begin_src emacs-lisp
 (setq utf-translate-cjk-mode nil) ; disable CJK coding/encoding (Chinese/Japanese/Korean characters)
-  (set-language-environment 'utf-8)
-  (set-keyboard-coding-system 'utf-8-mac) ; For old Carbon emacs on OS X only
-  (setq locale-coding-system 'utf-8)
-  (set-default-coding-systems 'utf-8)
-  (set-terminal-coding-system 'utf-8)
-  (set-selection-coding-system
-    (if (eq system-type 'windows-nt)
-        'utf-16-le  ;; https://rufflewind.com/2014-07-20/pasting-unicode-in-emacs-on-windows
-      'utf-8))
-  (prefer-coding-system 'utf-8)
+(set-language-environment 'utf-8)
+(set-keyboard-coding-system 'utf-8-mac) ; For old Carbon emacs on OS X only
+(setq locale-coding-system 'utf-8)
+(set-default-coding-systems 'utf-8)
+(set-terminal-coding-system 'utf-8)
+(set-selection-coding-system
+ (if (eq system-type 'windows-nt)
+     'utf-16-le  ;; https://rufflewind.com/2014-07-20/pasting-unicode-in-emacs-on-windows
+   'utf-8))
+(prefer-coding-system 'utf-8)
 #+end_src
 
 ** Hide-show
@@ -844,11 +822,11 @@ If `hs-hide-comments-when-hiding-all' is non-nil, also hide the comments."
                (goto-char (match-beginning 1))
                (unless (if 'ttn-hs-hide-level-1
                            (funcall 'ttn-hs-hide-level-1)
-       (hs-hide-block-at-point t))
-     ;; Go to end of matched data to prevent from getting stuck
-     ;; with an endless loop.
+                         (hs-hide-block-at-point t))
+                 ;; Go to end of matched data to prevent from getting stuck
+                 ;; with an endless loop.
                  (when (looking-at hs-block-start-regexp)
-       (goto-char (match-end 0)))))
+                   (goto-char (match-end 0)))))
            ;; found a comment, probably
            (let ((c-reg (hs-inside-comment-p)))
              (when (and c-reg (car c-reg))
@@ -879,11 +857,11 @@ I futz around with my dotfiles a lot. This binds =C-c e= to quickly open my
 Emacs configuration file.
 
 #+begin_src emacs-lisp
-  (defun hrs/visit-emacs-config ()
-    (interactive)
-    (find-file "~/.emacs.d/configuration.org"))
+(defun hrs/visit-emacs-config ()
+  (interactive)
+  (find-file "~/.emacs.d/configuration.org"))
 
-  (global-set-key (kbd "C-c e") 'hrs/visit-emacs-config)
+(global-set-key (kbd "C-c e") 'hrs/visit-emacs-config)
 #+end_src
 
 ** Set up =helpful=
@@ -892,18 +870,18 @@ The =helpful= package provides, among other things, more context in Help
 buffers.
 
 #+begin_src emacs-lisp
-  (use-package helpful)
+(use-package helpful)
 
-  ;; (global-set-key (kbd "C-h f") #'helpful-callable)
-  ;; (global-set-key (kbd "C-h v") #'helpful-variable)
-  ;; (global-set-key (kbd "C-h k") #'helpful-key)
-  (evil-define-key 'normal helpful-mode-map (kbd "q") 'quit-window)
+;; (global-set-key (kbd "C-h f") #'helpful-callable)
+;; (global-set-key (kbd "C-h v") #'helpful-variable)
+;; (global-set-key (kbd "C-h k") #'helpful-key)
+(evil-define-key 'normal helpful-mode-map (kbd "q") 'quit-window)
 #+end_src
 
 ** Look for executables in =/usr/local/bin=
 
 #+begin_src
-  (hrs/append-to-path "/usr/local/bin")
+(hrs/append-to-path "/usr/local/bin")
 #+end_src
 
 ** Save my location within a file
@@ -913,7 +891,7 @@ close the file or close the editor, then later re-open it, point will be at the
 last place I visited.
 
 #+begin_src emacs-lisp
-  (save-place-mode t)
+(save-place-mode t)
 #+end_src
 
 ** Always indent with spaces
@@ -921,7 +899,7 @@ last place I visited.
 Never use tabs. Tabs are the devil’s whitespace.
 
 #+begin_src emacs-lisp
-  (setq-default indent-tabs-mode nil)
+(setq-default indent-tabs-mode nil)
 #+end_src
 
 ** Install and configure =which-key=
@@ -930,8 +908,8 @@ Never use tabs. Tabs are the devil’s whitespace.
 really helpful for some modes (like =projectile=, for example).
 
 #+begin_src emacs-lisp
-  (use-package which-key
-    :config (which-key-mode))
+(use-package which-key
+  :config (which-key-mode))
 #+end_src
 
 ** Configure =yasnippet=
@@ -944,12 +922,11 @@ this looks pretty bad (when indenting org-mode, for example, or trying to guess
 at the correct indentation for Python).
 
 #+begin_src emacs-lisp
-  (use-package yasnippet
-:config
+(use-package yasnippet
+  :config
   (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
   (setq yas-indent-line 'auto)
-  (yas-global-mode 1)
-)
+  (yas-global-mode 1))
 #+end_src
 
 ** Configure =ivy= and =counsel=
@@ -971,8 +948,7 @@ counsel-rg?
 (use-package ivy
 :ensure t
 :config
-(setq ivy-use-virtual-buffers t)
-)
+(setq ivy-use-virtual-buffers t))
 
 ;; fuzzy
 ;; https://oremacs.com/2016/01/06/ivy-flx/
@@ -991,319 +967,352 @@ counsel-rg?
     (projectile-recentf . ivy--regex-fuzzy)
     (projectile-find-file-in-known-projects . ivy--regex-fuzzy)
     (find-file . ivy--regex-fuzzy)
-    (t . ivy--regex-plus)
-  )
-)
+    (t . ivy--regex-plus)))
 
-  (setq )
-  'counsel-find-file
+(setq )
+'counsel-find-file
 
 (use-package flx :ensure t)
 ;; (use-package counsel :ensure t)
 
 
-  (use-package counsel
+(use-package counsel
 
-    :config
-    (use-package flx)
-    (use-package smex)
+:config
+(use-package flx)
+(use-package smex)
 
-    (ivy-mode 1)
-    ;; (setq ivy-use-virtual-buffers t)
-    ;; (setq ivy-count-format "(%d/%d) ")
-    ;; (setq ivy-initial-inputs-alist nil)
-    ;; (setq ivy-re-builders-alist
-    ;;       '((swiper . ivy--regex-plus)
-    ;;         (t . ivy--regex-fuzzy)))
-)
+(ivy-mode 1)
+;; (setq ivy-use-virtual-buffers t)
+;; (setq ivy-count-format "(%d/%d) ")
+;; (setq ivy-initial-inputs-alist nil)
+;; (setq ivy-re-builders-alist
+;;       '((swiper . ivy--regex-plus)
+;;         (t . ivy--regex-fuzzy))))
 ** Use projectile everywhere
 
 #+begin_src emacs-lisp
-  (projectile-mode)
+(projectile-mode)
 #+end_src
 
 * Utility functions
 #+begin_src emacs-lisp
 (message "Utility functions")
 #+end_src
+
+Format elisp in org mode
+https://www.reddit.com/r/emacs/comments/9tp79o/elispformat_in_org_mode/
+#+begin_src emacs-lisp
+(defun edit-src-block (src fn language)
+  "Replace SRC org-element's value property with the result of FN.
+FN is a function that operates on org-element's value and returns a string.
+LANGUAGE is a string referring to one of orb-babel's supported languages.
+(https://orgmode.org/manual/Languages.html#Languages)"
+  (let ((src-language (org-element-property :language src))
+        (value (org-element-property :value src)))
+    (when (string= src-language language)
+      (let ((copy (org-element-copy src)))
+        (org-element-put-property copy :value
+                                  (funcall fn value))
+        (org-element-set-element src copy)))))
+
+(defun format-elisp-string (string)
+  "Indents elisp buffer string and reformats dangling parens."
+  (with-temp-buffer
+    (let ((inhibit-message t))
+      (emacs-lisp-mode)
+      (insert 
+       (replace-regexp-in-string "[[:space:]]*
+[[:space:]]*)" ")" string))
+      (indent-region (point-min) (point-max))
+      (buffer-substring (point-min) (point-max)))))
+
+(defun format-elisp-src-blocks ()
+  "Format Elisp src blocks in the current org buffer"
+  (interactive)
+  (save-mark-and-excursion
+    (let ((AST (org-element-parse-buffer)))
+      (org-element-map AST 'src-block
+        (lambda (element) 
+          (edit-src-block element #'format-elisp-string "emacs-lisp")))
+      (delete-region (point-min) (point-max))
+      (insert (org-element-interpret-data AST)))))
+#+end_src
+
 #+begin_src emacs-lisp
 
-(defun cjm/org-writeroom-on ()
+  (defun cjm/org-writeroom-on ()
 
-  (add-hook 'org-mode-hook 'writeroom-mode)
-(interactive)
-(writeroom-mode))
-
-(defun cjm/org-writeroom-off()
-(remove-hook 'org-mode-hook 'writeroom-mode)
-(interactive)
-(writeroom-mode))
-
-(defun cjm/derived-modes (mode)
-  "Return a list of the ancestor modes that MODE is derived from.
-https://emacs.stackexchange.com/questions/58073/how-to-find-inheritance-of-modes"
-  (let ((modes   ())
-        (parent  nil))
-    (while (setq parent (get mode 'derived-mode-parent))
-      (push parent modes)
-      (setq mode parent))
-    (setq modes  (nreverse modes))))
-;; (derived-modes 'org-mode)
-
- (defun cjm/toggle-fold()
-  "Toggle fold all lines larger than indentation on current line
-  https://stackoverflow.com/questions/1587972/how-to-display-indentation-guides-in-emacs/4459159#4459159
-"
-  (interactive)
-  (let ((col 1))
-    (save-excursion
-      (back-to-indentation)
-      (setq col (+ 1 (current-column)))
-      (set-selective-display
-       (if selective-display nil (or col 1))))))
-
-(setq cjm/devroot-dir "C:/Users/Public/dev/")
-;; C:\Users\Public\dev\bin\dbConda-2019_07-py37\condabin\conda.bat
-(setq cjm/conda-envs (concat cjm/devroot-dir "bin/dbConda-2019_07-py37/envs/"))
-(setq cjm/main-conda (concat cjm/conda-envs "dev/"))
-(setq cjm/default-env (concat cjm/conda-envs "dev/"))
-(setq cjm/black-path (concat cjm/default-env "Scripts/black.exe"))
-(setq cjm/zimports-path (concat cjm/default-env "Scripts/zimports.exe"))
-(setq cjm/zimports-modules (concat cjm/default-env "datastore,dig,db,qis,refinitiv"))
-(setq cjm/latex-path "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/tools/Scripts")
-(setq cjm/python-interpreter (concat cjm/main-conda "Scripts/" "ipython.exe"))
-(setq cjm/src-code-directory (concat cjm/devroot-dir "src/"))
-(setq cjm/python-path (concat cjm/default-env "python.exe"))
-;; org-babel
-;; https://orgmode.org/worg/org-contrib/babel/languages/ob-doc-python.html
-;; https://orgmode.org/manual/Results-of-Evaluation.html#Results-of-Evaluation
-(setq org-babel-python-command cjm/python-path)
-(setq org-confirm-babel-evaluate nil)
-;; https://www.masteringemacs.org/article/compiling-running-scripts-emacs
-;;; Shut up compile saves
-(setq compilation-ask-about-save nil)
-;;; Don't save *anything*
-(setq compilation-save-buffers-predicate '(lambda () nil))
-(add-hook 'shell-mode-hook 'compilation-shell-minor-mode)
-
-
-  (defun my-recompile ()
-    "Run compile and resize the compile window closing the old one if necessary"
+    (add-hook 'org-mode-hook 'writeroom-mode)
     (interactive)
-    (progn
-      (if (get-buffer "*compilation*") ; If old compile window exists
-  	(progn
-  	  (delete-windows-on (get-buffer "*compilation*")) ; Delete the compilation windows
-  	  (kill-buffer "*compilation*") ; and kill the buffers
-  	  )
-        )
-      (call-interactively 'pytest)
-      (enlarge-window 50)
-      )
-)
+    (writeroom-mode))
 
-;; https://www.masteringemacs.org/article/compiling-running-scripts-emacs
-(defun python--add-debug-highlight ()
-  "Adds a highlighter for use by `python--pdb-breakpoint-string'"
-  (highlight-lines-matching-regexp "## DEBUG ##\\s-*$" 'hi-red-b))
-
-(defvar python--pdb-breakpoint-string "import pdb; pdb.set_trace() ## DEBUG ##"
-  "Python breakpoint string used by `python-insert-breakpoint'")
-
-(defun python-insert-breakpoint ()
-  "Inserts a python breakpoint using `pdb'"
-  (interactive)
-  (back-to-indentation)
-  ;; this preserves the correct indentation in case the line above
-  ;; point is a nested block
-  (split-line)
-  (insert python--pdb-breakpoint-string))
-
-(defadvice compile (before ad-compile-smart activate)
-  "Advises `compile' so it sets the argument COMINT to t
-if breakpoints are present in `python-mode' files"
-(message "test!!!")
-  (when (derived-mode-p major-mode 'python-mode)
-    (save-excursion
-      (save-match-data
-        (goto-char (point-min))
-        (if (re-search-forward (concat "^\\s-*" python--pdb-breakpoint-string "$")
-                               (point-max) t)
-            ;; set COMINT argument to `t'.
-            (ad-set-arg 1 t))))))
-
-(add-hook 'python-mode-hook
-          (lambda ()
-            (local-set-key
-             (kbd "F5")                 ;or whatever
-             'py-do-it)))
-
-(defcustom endless/compile-window-size 105
-  "Width given to the non-compilation window."
-  :type 'integer
-  :group 'endless)
-
-(defun cjm/run-python(comint)
-  (interactive "P")
-  (compile (eval (concat cjm/python-path " " buffer-file-name)) (and comint t))
-)
-
-(defun cjm/pytest (comint)
-  (interactive "P")
-
-      (if (get-buffer "*compilation*") ; If old compile window exists
-  	(progn
-  	  (delete-windows-on (get-buffer "*compilation*")) ; Delete the compilation windows
-  	  (kill-buffer "*compilation*") ; and kill the buffers
-  	  )
-        )
-  (compile (eval (concat cjm/default-env "Scripts/pytest " buffer-file-name)) (and comint t))
-)
-
-;; exit without confirming running process
-(setq confirm-kill-processes nil)
-;; kill buffer with process running confirmation
-(setq kill-buffer-query-functions nil)
-
-
-(defun cjm/compile-please(comint)
-  "Compile without confirmation.
-With a prefix argument, use comint-mode. 
-https://endlessparentheses.com/better-compile-command.html
-"
-  (interactive "P")
-  ;; Do the command without a prompt.
-  (save-window-excursion
-    (compile (eval compile-command) (and comint t)))
-  ;; Create a compile window of the desired width.
-  (pop-to-buffer (get-buffer "*compilation*"))
-  (enlarge-window
-   (- (frame-width)
-      endless/compile-window-size
-      (window-width))
-   'horizontal))
-
-;; https://stackoverflow.com/questions/9324802/running-interactive-python-script-from-emacs
-(add-hook 'python-mode-hook
-          (lambda ()
-              (set (make-local-variable 'compile-command)
-                   (concat cjm/python-path " " buffer-file-name))))
-
-(global-set-key (kbd "<f4>") (lambda () (interactive) (setq current-prefix-arg '(4)) (call-interactively 'compile)))
-(global-set-key (kbd "<f3>") (lambda () (interactive) (recompile)) )
-;; https://stackoverflow.com/questions/443302/emacs-how-to-compile-run-make-without-pressing-enter-for-the-compile-command
-;; this doesn't work
-;; (setq compilation-read-command nil)
-
-
-(defun cjm/zimports()
-  (start-process
-   "a"
-   "b"
-   cjm/zimports-path
-   "-m"
-   cjm/zimports-modules
-   (buffer-file-name (window-buffer (minibuffer-selected-window)))))
-
-(defun zimports()
-  (interactive)
-  (cjm/zimports)
-  )
-
-
-(defun cjm/rename-file-and-buffer ()
-  "Rename the current buffer and file it is visiting."
-  (interactive)
-  (let ((filename (buffer-file-name)))
-    (if (not (and filename (file-exists-p filename)))
-        (message "Buffer is not visiting a file!")
-      (let ((new-name (read-file-name "New name: " filename)))
-        (cond
-         ((vc-backend filename) (vc-rename-file filename new-name))
-         (t
-          (rename-file filename new-name t)
-          (set-visited-file-name new-name t t)))))))
-
-(defun cjm/kill-other-buffers ()
-    "Kill all other buffers."
+  (defun cjm/org-writeroom-off()
+    (remove-hook 'org-mode-hook 'writeroom-mode)
     (interactive)
-    (mapc 'kill-buffer
-          (delq (current-buffer)
-                (cl-remove-if-not 'buffer-file-name (buffer-list)))))
+    (writeroom-mode))
 
-(defun cjm/delete-file-and-buffer ()
-  "Kill the current buffer and deletes the file it is visiting."
-  (interactive)
-  (let ((filename (buffer-file-name)))
-    (when filename
-      (if (vc-backend filename)
-          (vc-delete-file filename)
-        (progn
-          (delete-file filename)
-          (message "Deleted file %s" filename)
-          (kill-buffer))))))
+  (defun cjm/derived-modes (mode)
+    "Return a list of the ancestor modes that MODE is derived from.
+  https://emacs.stackexchange.com/questions/58073/how-to-find-inheritance-of-modes"
+    (let ((modes   ())
+          (parent  nil))
+      (while (setq parent (get mode 'derived-mode-parent))
+        (push parent modes)
+        (setq mode parent))
+      (setq modes  (nreverse modes))))
+  ;; (derived-modes 'org-mode)
 
-
-(defun cjm/kill-other-buffers ()
-    "Kill all other buffers."
+  (defun cjm/toggle-fold()
+    "Toggle fold all lines larger than indentation on current line
+    https://stackoverflow.com/questions/1587972/how-to-display-indentation-guides-in-emacs/4459159#4459159
+  "
     (interactive)
-    (mapc 'kill-buffer
-          (delq (current-buffer)
-                (cl-remove-if-not 'buffer-file-name (buffer-list)))))
+    (let ((col 1))
+      (save-excursion
+        (back-to-indentation)
+        (setq col (+ 1 (current-column)))
+        (set-selective-display
+         (if selective-display nil (or col 1))))))
 
-(defun cjm/delete-file-and-buffer ()
-  "Kill the current buffer and deletes the file it is visiting."
-  (interactive)
-  (let ((filename (buffer-file-name)))
-    (when filename
-      (if (vc-backend filename)
-          (vc-delete-file filename)
-        (progn
-          (delete-file filename)
-          (message "Deleted file %s" filename)
-          (kill-buffer))))))
-
-(defun cjm/open-log ()(interactive)(find-file "c:/Users/Public/dev/docs/org/log.org"))
-;; (defun cjm/open-project ()(interactive)(find-file "c:/Users/Public/dev/docs/org/projects/rf2.org"))
-(defun cjm/open-project ()(interactive)(find-file "c:/Users/Public/dev/docs/org/projects/refinitiv.org"))
-(defun cjm/open-config ()(interactive)(find-file (concat (expand-file-name "~/.emacs.d") "/configuration.org")))
-
-(defun cjm/kill-current-buffer ()
-  "Kill the current buffer without prompting."
-  (interactive)
-  (kill-buffer (current-buffer)))
-
-(defun cjm/kill-other-buffers ()
-      "Kill all other buffers."
-      (interactive)
-      (mapc 'kill-buffer (delq (current-buffer) (buffer-list))))
-
-    (defun hrs/append-to-path (path)
-    "Add a path both to the $PATH variable and to Emacs' exec-path."
-    (setenv "PATH" (concat (getenv "PATH") ":" path))
-    (add-to-list 'exec-path path))
+  (setq cjm/devroot-dir "C:/Users/Public/dev/")
+  ;; C:\Users\Public\dev\bin\dbConda-2019_07-py37\condabin\conda.bat
+  (setq cjm/conda-envs (concat cjm/devroot-dir "bin/dbConda-2019_07-py37/envs/"))
+  (setq cjm/main-conda (concat cjm/conda-envs "dev/"))
+  (setq cjm/default-env (concat cjm/conda-envs "dev/"))
+  (setq cjm/black-path (concat cjm/default-env "Scripts/black.exe"))
+  (setq cjm/zimports-path (concat cjm/default-env "Scripts/zimports.exe"))
+  (setq cjm/zimports-modules (concat cjm/default-env "datastore,dig,db,qis,refinitiv"))
+  (setq cjm/latex-path "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/tools/Scripts")
+  (setq cjm/python-interpreter (concat cjm/main-conda "Scripts/" "ipython.exe"))
+  (setq cjm/src-code-directory (concat cjm/devroot-dir "src/"))
+  (setq cjm/python-path (concat cjm/default-env "python.exe"))
+  ;; org-babel
+  ;; https://orgmode.org/worg/org-contrib/babel/languages/ob-doc-python.html
+  ;; https://orgmode.org/manual/Results-of-Evaluation.html#Results-of-Evaluation
+  (setq org-babel-python-command cjm/python-path)
+  (setq org-confirm-babel-evaluate nil)
+  ;; https://www.masteringemacs.org/article/compiling-running-scripts-emacs
+  ;;; Shut up compile saves
+  (setq compilation-ask-about-save nil)
+  ;;; Don't save *anything*
+  (setq compilation-save-buffers-predicate '(lambda () nil))
+  (add-hook 'shell-mode-hook 'compilation-shell-minor-mode)
 
 
-(defun cjm/copy-file-name-to-clipboard ()
-  "Copy the current buffer file name to the clipboard."
-  (interactive)
-  (let ((filename (if (equal major-mode 'dired-mode)
-                      default-directory
-                    (buffer-file-name))))
-    (when filename
-      (kill-new filename)
-      (message "Copied buffer file name '%s' to the clipboard." filename))))
+  ;; (defun my-recompile ()
+  ;;   "Run compile and resize the compile window closing the old one if necessary"
+  ;;   (interactive)
+  ;;   (progn
+  ;;     (if (get-buffer "*compilation*") ; If old compile window exists
+  ;;         (progn
+  ;;           (delete-windows-on (get-buffer "*compilation*")) ; Delete the compilation windows
+  ;;           (kill-buffer "*compilation*") ; and kill the buffers))
+  ;;           (call-interactively 'pytest)
+  ;;           (enlarge-window 50)))
+
+      ;; https://www.masteringemacs.org/article/compiling-running-scripts-emacs
+      (defun python--add-debug-highlight ()
+        "Adds a highlighter for use by `python--pdb-breakpoint-string'"
+        (highlight-lines-matching-regexp "## DEBUG ##\\s-*$" 'hi-red-b))
+
+      (defvar python--pdb-breakpoint-string "import pdb; pdb.set_trace() ## DEBUG ##"
+        "Python breakpoint string used by `python-insert-breakpoint'")
+
+      (defun python-insert-breakpoint ()
+        "Inserts a python breakpoint using `pdb'"
+        (interactive)
+        (back-to-indentation)
+        ;; this preserves the correct indentation in case the line above
+        ;; point is a nested block
+        (split-line)
+        (insert python--pdb-breakpoint-string))
+
+      (defadvice compile (before ad-compile-smart activate)
+        "Advises `compile' so it sets the argument COMINT to t
+  if breakpoints are present in `python-mode' files"
+        (when (derived-mode-p major-mode 'python-mode)
+          (save-excursion
+            (save-match-data
+              (goto-char (point-min))
+              (if (re-search-forward (concat "^\\s-*" python--pdb-breakpoint-string "$")
+                                     (point-max) t)
+                  ;; set COMINT argument to `t'.
+                  (ad-set-arg 1 t))))))
 
 
-(defun cjm/copy-current-line-position-to-clipboard ()
-    "Copy current line in file to clipboard as '</path/to/file>:<line-number>'."
-    (interactive)
-    (let ((path-with-line-number
-           (concat (dired-replace-in-string (getenv "HOME") "~" (buffer-file-name)) "::" (number-to-string (line-number-at-pos)))))
-      (kill-new path-with-line-number)
-      (message (concat path-with-line-number " copied to clipboard"))))
+      (defcustom endless/compile-window-size 105
+        "Width given to the non-compilation window."
+        :type 'integer
+        :group 'endless)
+
+      (defun cjm/run-python(comint)
+        (interactive "P")
+        (compile (eval (concat cjm/python-path " " buffer-file-name)) (and comint t)))
+
+      (defun cjm/pytest (comint)
+        (interactive "P")
+
+        (if (get-buffer "*compilation*") ; If old compile window exists
+            (progn
+              (delete-windows-on (get-buffer "*compilation*")) ; Delete the compilation windows
+              (kill-buffer "*compilation*")) ; and kill the buffers
+              (compile (eval (concat cjm/default-env "Scripts/pytest -s " buffer-file-name)) (and comint t))))
+
+            
+          ;; exit without confirming running process
+          (setq confirm-kill-processes nil)
+          ;; kill buffer with process running confirmation
+          (setq kill-buffer-query-functions nil)
 
 
+          (defun cjm/compile-please(comint)
+            "Compile without confirmation.
+  With a prefix argument, use comint-mode.
+  https://endlessparentheses.com/better-compile-command.html
+  "
+            (interactive "P")
+            ;; Do the command without a prompt.
+            (save-window-excursion
+              (compile (eval compile-command) (and comint t)))
+            ;; Create a compile window of the desired width.
+            (pop-to-buffer (get-buffer "*compilation*"))
+            (enlarge-window
+             (- (frame-width)
+                endless/compile-window-size
+                (window-width))
+             'horizontal))
+
+          ;; https://stackoverflow.com/questions/9324802/running-interactive-python-script-from-emacs
+          (add-hook 'python-mode-hook
+                    (lambda ()
+                      (set (make-local-variable 'compile-command)
+                           (concat cjm/python-path " " buffer-file-name))))
+
+          (global-set-key (kbd "<f4>") (lambda () (interactive) (setq current-prefix-arg '(4)) (call-interactively 'compile)))
+          (global-set-key (kbd "<f3>") (lambda () (interactive) (recompile)) )
+          ;; https://stackoverflow.com/questions/443302/emacs-how-to-compile-run-make-without-pressing-enter-for-the-compile-command
+          ;; this doesn't work
+          ;; (setq compilation-read-command nil)
+
+
+          (defun cjm/zimports()
+            (start-process
+             "a"
+             "b"
+             cjm/zimports-path
+             "-m"
+             cjm/zimports-modules
+             (buffer-file-name (window-buffer (minibuffer-selected-window)))))
+
+          (defun zimports()
+            (interactive)
+            (cjm/zimports))
+
+          (defun cjm/delete-file-and-buffer ()
+            "Kill the current buffer and deletes the file it is visiting."
+            (interactive)
+            (let ((filename (buffer-file-name)))
+              (when filename
+                (if (vc-backend filename)
+                    (vc-delete-file filename)
+                  (progn
+                    (delete-file filename)
+                    (message "Deleted file %s" filename)
+                    (kill-buffer))))))
+
+
+          (defun cjm/rename-file-and-buffer ()
+            "Rename the current buffer and file it is visiting."
+            (interactive)
+            (let ((filename (buffer-file-name)))
+              (if (not (and filename (file-exists-p filename)))
+                  (message "Buffer is not visiting a file!")
+                (let ((new-name (read-file-name "New name: " filename)))
+                  (cond
+                   ((vc-backend filename) (vc-rename-file filename new-name))
+                   (t
+                    (rename-file filename new-name t)
+                    (set-visited-file-name new-name t t)))))))
+
+          (defun cjm/kill-other-buffers ()
+            "Kill all other buffers."
+            (interactive)
+            (mapc 'kill-buffer
+                  (delq (current-buffer)
+                        (cl-remove-if-not 'buffer-file-name (buffer-list)))))
+
+          (defun cjm/delete-file-and-buffer ()
+            "Kill the current buffer and deletes the file it is visiting."
+            (interactive)
+            (let ((filename (buffer-file-name)))
+              (when filename
+                (if (vc-backend filename)
+                    (vc-delete-file filename)
+                  (progn
+                    (delete-file filename)
+                    (message "Deleted file %s" filename)
+                    (kill-buffer))))))
+
+
+          (defun cjm/kill-other-buffers ()
+            "Kill all other buffers."
+            (interactive)
+            (mapc 'kill-buffer
+                  (delq (current-buffer)
+                        (cl-remove-if-not 'buffer-file-name (buffer-list)))))
+
+          (defun cjm/delete-file-and-buffer ()
+            "Kill the current buffer and deletes the file it is visiting."
+            (interactive)
+            (let ((filename (buffer-file-name)))
+              (when filename
+                (if (vc-backend filename)
+                    (vc-delete-file filename)
+                  (progn
+                    (delete-file filename)
+                    (message "Deleted file %s" filename)
+                    (kill-buffer))))))
+
+          (defun cjm/open-log ()(interactive)(find-file "c:/Users/Public/dev/docs/org/log.org"))
+          ;; (defun cjm/open-project ()(interactive)(find-file "c:/Users/Public/dev/docs/org/projects/rf2.org"))
+          (defun cjm/open-project ()(interactive)(find-file "c:/Users/Public/dev/docs/org/projects/refinitiv.org"))
+          (defun cjm/open-config ()(interactive)(find-file (concat (expand-file-name "~/.emacs.d") "/configuration.org")))
+
+          (defun cjm/kill-current-buffer ()
+            "Kill the current buffer without prompting."
+            (interactive)
+            (kill-buffer (current-buffer)))
+
+          (defun cjm/kill-other-buffers ()
+            "Kill all other buffers."
+            (interactive)
+            (mapc 'kill-buffer (delq (current-buffer) (buffer-list))))
+
+          (defun hrs/append-to-path (path)
+            "Add a path both to the $PATH variable and to Emacs' exec-path."
+            (setenv "PATH" (concat (getenv "PATH") ":" path))
+            (add-to-list 'exec-path path))
+
+
+          (defun cjm/copy-file-name-to-clipboard ()
+            "Copy the current buffer file name to the clipboard."
+            (interactive)
+            (let ((filename (if (equal major-mode 'dired-mode)
+                                default-directory
+                              (buffer-file-name))))
+              (when filename
+                (kill-new filename)
+                (message "Copied buffer file name '%s' to the clipboard." filename))))
+
+
+          (defun cjm/copy-current-line-position-to-clipboard ()
+            "Copy current line in file to clipboard as '</path/to/file>:<line-number>'."
+            (interactive)
+            (let ((path-with-line-number
+                   (concat (dired-replace-in-string (getenv "HOME") "~" (buffer-file-name)) "::" (number-to-string (line-number-at-pos)))))
+              (kill-new path-with-line-number)
+              (message (concat path-with-line-number " copied to clipboard"))))
 #+end_src
 
 * Orgmode
@@ -1317,20 +1326,28 @@ Collapse src blocks by default, and toggle.
 
 ;; following https://www.eliasstorms.net/zetteldeft/
 
+;; gives link highlighting on page, used by zetteldeft
+(use-package avy)
+;; ?
+(use-package ace-window)
+
+
 ;; render fragments of latex when cursor leaves them
 (use-package org-fragtog
-:config
-(add-hook 'org-mode-hook 'org-fragtog-mode)
+;; disabled on windows
+  ;; :config
+  ;; (add-hook 'org-mode-hook 'org-fragtog-mode)
 )
 
 
-(use-package deft
-  :ensure t
+(use-package 
+  deft 
+  :ensure t 
   :custom
-    (deft-extensions '("org" "md" "txt"))
-    ;; (deft-directory "~/Dropbox/org/notes")
-    (deft-directory "c:/Users/Public/dev/docs/notes")
-    (deft-use-filename-as-title t))
+  (deft-extensions '("org" "md" "txt"))
+  ;; (deft-directory "~/Dropbox/org/notes") 
+  (deft-directory "c:/Users/Public/dev/docs/notes") 
+  (deft-use-filename-as-title t))
 
 
 (defun cjm/inhibit-buffer-messages ()
@@ -1342,101 +1359,94 @@ Collapse src blocks by default, and toggle.
   :after deft
   :config (zetteldeft-set-classic-keybindings)
 
-;; (add-hook 'org-mode-hook 'cjm/inhibit-buffer-messages)
-
+  ;; (add-hook 'org-mode-hook 'cjm/inhibit-buffer-messages)
 )
 
-;; gives link highlighting on page, used by zetteldeft
-(use-package avy)
-;; ?
-(use-package ace-window)
-
-;; TODO move to orgmode hook
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((dot . t))) ; this line activates dot
+  ;; TODO move to orgmode hook
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((dot . t))) ; this line activates dot
 
 
-(use-package elisp-format)
+  (use-package elisp-format)
 
 
   ;; TODO https://emacs.stackexchange.com/a/30523/16359
   ;; (use-package orglink
   ;;   :config
   ;; )
-    ;; 	(use-package flycheck-aspell)
-    ;; (add-to-list 'flycheck-checkers 'tex-aspell-dynamic)
-            ;; (setq-default ispell-program-name "C:/dev/bin/hunspell-1.3.2-3-w32-bin/bin/hunspell.exe")
-            (setq-default ispell-program-name "c:/Users/Public/dev/bin/hunspell/bin/hunspell.exe")
+  ;; 	(use-package flycheck-aspell)
+  ;; (add-to-list 'flycheck-checkers 'tex-aspell-dynamic)
+  ;; (setq-default ispell-program-name "C:/dev/bin/hunspell-1.3.2-3-w32-bin/bin/hunspell.exe")
+  (setq-default ispell-program-name "c:/Users/Public/dev/bin/hunspell/bin/hunspell.exe")
 
-             (add-to-list 'exec-path "c:/Users/Public/dev/bin/hunspell/bin/")
+  (add-to-list 'exec-path "c:/Users/Public/dev/bin/hunspell/bin/")
 
-           (setq ispell-program-name (locate-file "hunspell"
-                    exec-path exec-suffixes 'file-executable-p))
+  (setq ispell-program-name (locate-file "hunspell"
+                                         exec-path exec-suffixes 'file-executable-p))
 
 
-     ;; (setq ispell-dictionary "en_US,en_GB")
-        ;; ispell-set-spellchecker-params has to be called
-        ;; before ispell-hunspell-add-multi-dic will work
-        ;; (ispell-set-spellchecker-params)
-        ;; (ispell-hunspell-add-multi-dic "en_US,en_GB")
+  ;; (setq ispell-dictionary "en_US,en_GB")
+  ;; ispell-set-spellchecker-params has to be called
+  ;; before ispell-hunspell-add-multi-dic will work
+  ;; (ispell-set-spellchecker-params)
+  ;; (ispell-hunspell-add-multi-dic "en_US,en_GB")
 
-             ;; (setenv "LANG" "en_US ru_RU")
+  ;; (setenv "LANG" "en_US ru_RU")
 
-            (setenv "LANG" "en_US"	)
-            (setenv "DICTPATH" "c:/Users/Public/dev/bin/hunspell/share/hunspell/")
-      ;; (setq-default  ispell-program-name "c:/msys64/mingw64/bin/hunspell.exe")
-     ;;  (with-eval-after-load "ispell"
-     ;;    (setq ispell-really-hunspell t)
-     ;;    ;; (setq ispell-program-name "hunspell")
+  (setenv "LANG" "en_US"	)
+  (setenv "DICTPATH" "c:/Users/Public/dev/bin/hunspell/share/hunspell/")
+  ;; (setq-default  ispell-program-name "c:/msys64/mingw64/bin/hunspell.exe")
+  ;;  (with-eval-after-load "ispell"
+  ;;    (setq ispell-really-hunspell t)
+  ;;    ;; (setq ispell-program-name "hunspell")
 
-     ;;       (setq ispell-program-name (locate-file "hunspell"
-     ;;                exec-path exec-suffixes 'file-executable-p))
+  ;;       (setq ispell-program-name (locate-file "hunspell"
+  ;;                exec-path exec-suffixes 'file-executable-p))
 
-     ;; (setq ispell-dictionary "en_US")
-     ;;    ;; ispell-set-spellchecker-params has to be called
-     ;;    ;; before ispell-hunspell-add-multi-dic will work
-     ;;    ;; (ispell-set-spellchecker-params)
-     ;;    (ispell-hunspell-add-multi-dic "en_US"))
+  ;; (setq ispell-dictionary "en_US")
+  ;;    ;; ispell-set-spellchecker-params has to be called
+  ;;    ;; before ispell-hunspell-add-multi-dic will work
+  ;;    ;; (ispell-set-spellchecker-params)
+  ;;    (ispell-hunspell-add-multi-dic "en_US"))
 
   (setq ispell-local-dictionary "en_US")
   (setq ispell-local-dictionary-alist
-  '(("en_US" "[[:alpha:]]" "[^[:alpha:]]" "[']" nil nil nil utf-8)))
+        '(("en_US" "[[:alpha:]]" "[^[:alpha:]]" "[']" nil nil nil utf-8)))
 
   (setq ispell-dictionary "british")
 
-    ;; get tabs working nicely in babel
-    (setq org-src-tab-acts-natively t)
+  ;; get tabs working nicely in babel
+  (setq org-src-tab-acts-natively t)
 
-    (setq org-edit-src-content-indentation 0)
+  (setq org-edit-src-content-indentation 0)
 
-    (defun my-tab-related-stuff ()
-       ;; (setq indent-tabs-mode t)
-       (setq tab-stop-list (number-sequence 4 200 4))
-       (setq tab-width 2)
-       (setq evil-auto-indent nil)
-       (setq indent-line-function 'insert-tab))
+  (defun my-tab-related-stuff ()
+    ;; (setq indent-tabs-mode t)
+    (setq tab-stop-list (number-sequence 4 200 4))
+    (setq tab-width 2)
+    (setq evil-auto-indent nil)
+    (setq indent-line-function 'insert-tab))
 
-    (add-hook 'org-mode-hook 'my-tab-related-stuff)
-
-
-            (org-babel-do-load-languages
-     'org-babel-load-languages
-     '((python . t)))
-
-    (defvar org-blocks-hidden nil)
-
-    (defun org-toggle-blocks ()
-      (interactive)
-      (if org-blocks-hidden
-          (org-show-block-all)
-        (org-hide-block-all))
-      (setq-local org-blocks-hidden (not org-blocks-hidden)))
+  (add-hook 'org-mode-hook 'my-tab-related-stuff)
 
 
-    (add-hook 'org-mode-hook 'org-toggle-blocks)
-    (add-hook 'org-mode-hook 'auto-fill-mode)
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((python . t)))
 
+  (defvar org-blocks-hidden nil)
+
+  (defun org-toggle-blocks ()
+    (interactive)
+    (if org-blocks-hidden
+        (org-show-block-all)
+      (org-hide-block-all))
+    (setq-local org-blocks-hidden (not org-blocks-hidden)))
+
+
+  (add-hook 'org-mode-hook 'org-toggle-blocks)
+  (add-hook 'org-mode-hook 'auto-fill-mode)
 #+end_src
 
 Note taking in org mode following [[https://blog.jethro.dev/posts/zettelkasten_with_org/][Org-mode Workflow Part 3: Zettelkasten with Org-mode · Jethro Kuan]]
@@ -1445,260 +1455,245 @@ Note taking in org mode following [[https://blog.jethro.dev/posts/zettelkasten_w
 https://github.com/org-roam/org-roam/
 
 copy link to clipboard then org-cliplink inserts with metadata
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package org-cliplink)
-
-#+END_SRC
+#+end_src
 
 To file:
 #+begin_src emacs-lisp
 (setq org-agenda-files '("c:/Users/Public/dev/docs/org/roam"))
 
 (use-package org-roam
-    ;; :hook
-    ;; (after-init . org-roam-mode)
-    ;; :config
+  ;; :hook
+  ;; (after-init . org-roam-mode)
+  ;; :config
 
-    ;; (org-roam-directory "c:/Users/Public/dev/docs/org/roam")
+  ;; (org-roam-directory "c:/Users/Public/dev/docs/org/roam")
 )
 
-;; use / in dired mode to
-(use-package dired-narrow
-  :ensure t
-  :bind (:map dired-mode-map
-              ("/" . dired-narrow)))
+  ;; use / in dired mode to
+  (use-package dired-narrow
+    :ensure t
+    :bind (:map dired-mode-map
+                ("/" . dired-narrow)))
 
-(setq org-return-follows-link t)
+  (setq org-return-follows-link t)
 
-(add-hook 'org-mode-hook
-          '(lambda ()
-             (delete '("\\.pdf\\'" . default) org-file-apps)
-             (add-to-list 'org-file-apps '("\\.pdf\\'" . "evince %s"))))
+  (add-hook 'org-mode-hook
+            '(lambda ()
+               (delete '("\\.pdf\\'" . default) org-file-apps)
+               (add-to-list 'org-file-apps '("\\.pdf\\'" . "evince %s"))))
 
-(setq org-agenda-start-day nil)
-(setq org-agenda-span 'week)
-(setq org-agenda-start-on-weekday nil)
+  (setq org-agenda-start-day nil)
+  (setq org-agenda-span 'week)
+  (setq org-agenda-start-on-weekday nil)
 
-;; set maximum indentation for description lists
-(setq org-list-description-max-indent 5)
+  ;; set maximum indentation for description lists
+  (setq org-list-description-max-indent 5)
 
-;; prevent demoting heading also shifting text inside sections
-(setq org-adapt-indentation nil)
+  ;; prevent demoting heading also shifting text inside sections
+  (setq org-adapt-indentation nil)
 
-;; (setq cjm/home-dir "h:/")
-;; (setq org-directory (concat cjm/home-dir "org/"))
-(setq org-directory "c:/dev/docs/org/")
+  ;; (setq cjm/home-dir "h:/")
+  ;; (setq org-directory (concat cjm/home-dir "org/"))
+  (setq org-directory "c:/dev/docs/org/")
 
-;;(setq cjm-org-directory (concat cjm/home-dir "/org/"))
-;; org-default-notes-file gets set by org-projectile to project root
-(setq cjm-org-default-notes-file (concat org-directory "inbox.org"))
-(setq cjm-dig-capture-file (concat org-directory "dig.org"))
-(setq cjm-quat-data-capture-file (concat org-directory "quant_data.org"))
+  ;;(setq cjm-org-directory (concat cjm/home-dir "/org/"))
+  ;; org-default-notes-file gets set by org-projectile to project root
+  (setq cjm-org-default-notes-file (concat org-directory "inbox.org"))
+  (setq cjm-dig-capture-file (concat org-directory "dig.org"))
+  (setq cjm-quat-data-capture-file (concat org-directory "quant_data.org"))
 
-(require 'org)
-(setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
+  (require 'org)
+  (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
 
-(setq org-enforce-todo-dependencies t)
-(setq org-agenda-dim-blocked-tasks 'invisible)
-(setq org-todo-keywords '((sequence "TODO" "IN-PROGRESS" "DONE")))
+  (setq org-enforce-todo-dependencies t)
+  (setq org-agenda-dim-blocked-tasks 'invisible)
+  (setq org-todo-keywords '((sequence "TODO" "IN-PROGRESS" "DONE")))
 
 ;;; where to open links
-;; default: (setq org-link-frame-setup '((file . find-file-other-window)))
-;; this has a nice snippet for maybe opening links depedning on extension https://stackoverflow.com/questions/17590784/how-to-let-org-mode-open-a-link-like-file-file-org-in-current-window-inste
-;; open links in same window
-;; (setq org-link-frame-setup '((file . find-file)))
-;; open in other window
-(setq org-link-frame-setup '((file . find-file-other-window)))
+  ;; default: (setq org-link-frame-setup '((file . find-file-other-window)))
+  ;; this has a nice snippet for maybe opening links depedning on extension https://stackoverflow.com/questions/17590784/how-to-let-org-mode-open-a-link-like-file-file-org-in-current-window-inste
+  ;; open links in same window
+  ;; (setq org-link-frame-setup '((file . find-file)))
+  ;; open in other window
+  (setq org-link-frame-setup '((file . find-file-other-window)))
 
-(defun copy-current-line-position-to-clipboard ()
-  "Copy current line in file to clipboard as 'file:</path/to/file>::<line-number>'."
-  (interactive)
-  (let ((path-with-line-number
-         (concat "file:" (dired-replace-in-string (getenv "HOME") "~" (buffer-file-name)) "::" (number-to-string (line-number-at-pos)))))
-    (kill-new path-with-line-number)
-    (message (concat path-with-line-number " copied to clipboard"))))
+  (defun copy-current-line-position-to-clipboard ()
+    "Copy current line in file to clipboard as 'file:</path/to/file>::<line-number>'."
+    (interactive)
+    (let ((path-with-line-number
+           (concat "file:" (dired-replace-in-string (getenv "HOME") "~" (buffer-file-name)) "::" (number-to-string (line-number-at-pos)))))
+      (kill-new path-with-line-number)
+      (message (concat path-with-line-number " copied to clipboard"))))
 
-(defun my/org-mode-hook ()
-  "Stop the org-level headers from increasing in height relative to the other text."
-  (dolist (face '(
-                  org-document-title
-                  org-level-1
-                  org-level-2
-                  org-level-3
-                  org-level-4
-                  org-level-5))
-    (set-face-attribute face nil :weight 'semi-bold :height 1.0))
-  )
+  (defun my/org-mode-hook ()
+    "Stop the org-level headers from increasing in height relative to the other text."
+    (dolist (face '(
+                    org-document-title
+                    org-level-1
+                    org-level-2
+                    org-level-3
+                    org-level-4
+                    org-level-5))
+      (set-face-attribute face nil :weight 'semi-bold :height 1.0)))
 
-(add-hook 'org-mode-hook 'my/org-mode-hook)
-(add-hook 'org-mode-hook 'ivy-mode)
-
-
-;; should be able to do the above with this, didn't work though
-;; (setq theming-modifications
-;;       '((spacemacs-dark
-;;          (org-document-title ((t (:weight 'semi-bold :height 1.1))))
-;;          (org-level-1 :weight 'semi-bold :height 1.0)
-;;          (org-level-2 :weight 'semi-bold :height 1.0)
-;;          (org-level-3 :weight 'semi-bold :height 1.0)
-;;          (org-level-4 :weight 'semi-bold :height 1.0)
-;;          (org-level-5 :weight 'semi-bold :height 1.0))))
+  (add-hook 'org-mode-hook 'my/org-mode-hook)
+  (add-hook 'org-mode-hook 'ivy-mode)
 
 
-
-;; (setq org-agenda-files (list org-directory))
-(setq org-agenda-files (list
-                        (concat org-directory "quantdb.org")
-                        (concat org-directory "index.org")
-                        (concat org-directory "research.org")
-                        (concat org-directory "todo.org")
-                        )
-      )
-(setq org-agenda-skip-scheduled-if-done t)
-(setq org-agenda-skip-deadline-if-done t)
-(setq org-closed-keep-when-no-todo t)
-
-(setq org-adapt-indent nil)
-
-;; tags
-;; Tags with fast selection keys
-(setq org-tag-alist (quote (
-                            ;; (:startgroup)
-                            ;; ("@errand" . ?e)
-                            ;; ("@office" . ?o)
-                            ;; ("@home" . ?H)
-                            ;; (:endgroup)
-                            ("WAITING" . ?w)
-                            ("HOLD" . ?h)
-                            ("IDEA" . ?i)
-                            ("reading" . ?r)
-                            ;; ("PERSONAL" . ?P)
-                            ;; ("DRAFT" . ?D)
-                            ;; ("WORK" . ?W)
-                            ("NOTE" . ?n)
-                            ("export" . ?e)
-
-                            ("data" . ?d)
-                            ("model" . ?m)
-                            ("bot" . ?b)
-                            ;; ("CANCELLED" . ?c)
-                            ;; ("FLAGGED" . ??)
-                            )))
+  ;; should be able to do the above with this, didn't work though
+  ;; (setq theming-modifications
+  ;;       '((spacemacs-dark
+  ;;          (org-document-title ((t (:weight 'semi-bold :height 1.1))))
+  ;;          (org-level-1 :weight 'semi-bold :height 1.0)
+  ;;          (org-level-2 :weight 'semi-bold :height 1.0)
+  ;;          (org-level-3 :weight 'semi-bold :height 1.0)
+  ;;          (org-level-4 :weight 'semi-bold :height 1.0)
+  ;;          (org-level-5 :weight 'semi-bold :height 1.0))))
 
 
-;; refiling
-(setq org-refile-targets (quote ((nil :maxlevel . 9)
-                                  (org-agenda-files :maxlevel . 9))))
 
-(defun cjm-org-skip-subtree-if-priority (priority)
-  "Skip an agenda subtree if it has a priority of PRIORITY.
+  ;; (setq org-agenda-files (list org-directory))
+  (setq org-agenda-files (list
+                          (concat org-directory "quantdb.org")
+                          (concat org-directory "index.org")
+                          (concat org-directory "research.org")
+                          (concat org-directory "todo.org")))
+  (setq org-agenda-skip-scheduled-if-done t)
+  (setq org-agenda-skip-deadline-if-done t)
+  (setq org-closed-keep-when-no-todo t)
+
+  (setq org-adapt-indent nil)
+
+  ;; tags
+  ;; Tags with fast selection keys
+  (setq org-tag-alist (quote (
+                              ;; (:startgroup)
+                              ;; ("@errand" . ?e)
+                              ;; ("@office" . ?o)
+                              ;; ("@home" . ?H)
+                              ;; (:endgroup)
+                              ("WAITING" . ?w)
+                              ("HOLD" . ?h)
+                              ("IDEA" . ?i)
+                              ("reading" . ?r)
+                              ;; ("PERSONAL" . ?P)
+                              ;; ("DRAFT" . ?D)
+                              ;; ("WORK" . ?W)
+                              ("NOTE" . ?n)
+                              ("export" . ?e)
+
+                              ("data" . ?d)
+                              ("model" . ?m)
+                              ("bot" . ?b)
+)))
+
+
+                              ;; refiling
+                              (setq org-refile-targets (quote ((nil :maxlevel . 9)
+                                                               (org-agenda-files :maxlevel . 9))))
+
+                              (defun cjm-org-skip-subtree-if-priority (priority)
+                                "Skip an agenda subtree if it has a priority of PRIORITY.
     PRIORITY may be one of the characters ?A, ?B, or ?C."
-  (let ((subtree-end (save-excursion (org-end-of-subtree t)))
-        (pri-value (* 1000 (- org-lowest-priority priority)))
-        (pri-current (org-get-priority (thing-at-point 'line t))))
-    (if (= pri-value pri-current)
-        subtree-end
-      nil)))
+                                (let ((subtree-end (save-excursion (org-end-of-subtree t)))
+                                      (pri-value (* 1000 (- org-lowest-priority priority)))
+                                      (pri-current (org-get-priority (thing-at-point 'line t))))
+                                  (if (= pri-value pri-current)
+                                      subtree-end
+                                    nil)))
 
 
-; custom agenda view
-; composite agenda: supply list of types to show up in agenda
-(setq org-agenda-custom-commands
-'(("c" "Custom agenda"
-    ((tags "PRIORITY=\"A\""
-          ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
-            (org-agenda-overriding-header "High-priority:")))
-    (tags "DEADLINE>=\"<today>\""
-          ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
-            (org-agenda-overriding-header "Deadlines:")))
-    ;; (agenda "")
-    (agenda . " %i %-12:c%?-12t% s")
-    (todo "IN-PROGRESS" ((org-agenda-overriding-header "In-progress")))
+                                        ; custom agenda view
+                                        ; composite agenda: supply list of types to show up in agenda
+                              (setq org-agenda-custom-commands
+                                    '(("c" "Custom agenda"
+                                       ((tags "PRIORITY=\"A\""
+                                              ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                                               (org-agenda-overriding-header "High-priority:")))
+                                        (tags "DEADLINE>=\"<today>\""
+                                              ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                                               (org-agenda-overriding-header "Deadlines:")))
+                                        ;; (agenda "")
+                                        (agenda . " %i %-12:c%?-12t% s")
+                                        (todo "IN-PROGRESS" ((org-agenda-overriding-header "In-progress")))
 
-    (alltodo ""
-              ((org-agenda-skip-function
-                '(or (cjm-org-skip-subtree-if-priority ?A)
-                    (org-agenda-skip-if nil '(scheduled deadline))
-                    (org-agenda-skip-entry-if 'todo '("IN-PROGRESS"))
-                    ))
-              (org-agenda-overriding-header "Other:")
-              ))
-    ))))
+                                        (alltodo ""
+                                                 ((org-agenda-skip-function
+                                                   '(or (cjm-org-skip-subtree-if-priority ?A)
+                                                        (org-agenda-skip-if nil '(scheduled deadline))
+                                                        (org-agenda-skip-entry-if 'todo '("IN-PROGRESS"))))
+                                                  (org-agenda-overriding-header "Other:")))))))
 
-;; https://stackoverflow.com/questions/22888785/is-it-possible-to-get-org-mode-to-show-breadcrumbs-in-agenda-todo-list
-(setq org-agenda-prefix-format '(
-                                 (agenda .
-                                         ;; TODO replace this with %b
-                                         ;; https://emacs.stackexchange.com/questions/19091/how-to-set-org-agenda-prefix-format-before-org-agenda-starts
-                                         " %i %-12:c %(concat \"[ \"(org-format-outline-path (org-get-outline-path)) \" ]\") "
-                                         )
-                                 (todo .
-                                       " %i %-12:c %(concat \"[ \"(org-format-outline-path (org-get-outline-path)) \" ]\") "
-                                       )
-                                 )
-      )
+                              ;; https://stackoverflow.com/questions/22888785/is-it-possible-to-get-org-mode-to-show-breadcrumbs-in-agenda-todo-list
+                              (setq org-agenda-prefix-format '(
+                                                               (agenda .
+                                                                       ;; TODO replace this with %b
+                                                                       ;; https://emacs.stackexchange.com/questions/19091/how-to-set-org-agenda-prefix-format-before-org-agenda-starts
+                                                                       " %i %-12:c %(concat \"[ \"(org-format-outline-path (org-get-outline-path)) \" ]\") ")
+                                                               (todo .
+                                                                     " %i %-12:c %(concat \"[ \"(org-format-outline-path (org-get-outline-path)) \" ]\") ")))
 
-(defun org-agenda-show-custom (&optional arg)
-  (interactive "P")
-  (org-agenda arg "c"))
+                              (defun org-agenda-show-custom (&optional arg)
+                                (interactive "P")
+                                (org-agenda arg "c"))
 
-;; (define-key org-mode-map (kbd "<f8>") 'org-agenda-show-unscheduled)
-(evil-define-key 'normal org-mode-map (kbd "<f8>") 'org-agenda-show-custom)
+                              ;; (define-key org-mode-map (kbd "<f8>") 'org-agenda-show-unscheduled)
+                              (evil-define-key 'normal org-mode-map (kbd "<f8>") 'org-agenda-show-custom)
 
-; defines filter shown on org agenda screen
-(add-to-list 'org-agenda-custom-commands
-              '("D" "Deadlines"
-                tags "DEADLINE>=\"<today>\""))
+                                        ; defines filter shown on org agenda screen
+                              (add-to-list 'org-agenda-custom-commands
+                                           '("D" "Deadlines"
+                                             tags "DEADLINE>=\"<today>\""))
 
 
 
-(setq org-treat-insert-todo-heading-as-state-change t)
+                              (setq org-treat-insert-todo-heading-as-state-change t)
 
-(defun insert-created-date(&rest ignore)
-  (insert (format-time-string
-           (concat "\nCREATED: "
-                   (cdr org-time-stamp-formats))
-           ))
-  ; in org-capture, this folds the entry; when inserting a heading, this moves point back to the heading line
-  (org-back-to-heading)
-  ; when inserting a heading, this moves point to the end of the line
-  (move-end-of-line())
-  )
+                              (defun insert-created-date(&rest ignore)
+                                (insert (format-time-string
+                                         (concat "\nCREATED: "
+                                                 (cdr org-time-stamp-formats))))
+                                        ; in org-capture, this folds the entry; when inserting a heading, this moves point back to the heading line
+                                (org-back-to-heading)
+                                        ; when inserting a heading, this moves point to the end of the line
+                                (move-end-of-line()))
 
-; add to the org-capture hook
-;; (add-hook 'org-capture-before-finalize-hook
-;;           #'insert-created-date
-;;           )
+                                        ; add to the org-capture hook
+                              ;; (add-hook 'org-capture-before-finalize-hook
+                              ;;           #'insert-created-date
+                              ;;           )
 
-; hook it to adding headings with M-S-RET
-; do not add this to org-insert-heading-hook, otherwise this also works in non-TODO items
-; and Org-mode has no org-insert-todo-heading-hook
-;; (advice-add 'org-insert-todo-heading :after #'insert-created-date)
+                                        ; hook it to adding headings with M-S-RET
+                                        ; do not add this to org-insert-heading-hook, otherwise this also works in non-TODO items
+                                        ; and Org-mode has no org-insert-todo-heading-hook
+                              ;; (advice-add 'org-insert-todo-heading :after #'insert-created-date)
 
-;; --- calendar stuff
-;; start on a monday
-(setq calendar-week-start-day 1)
+                              ;; --- calendar stuff
+                              ;; start on a monday
+                              (setq calendar-week-start-day 1)
 
-;; display week number
-(copy-face font-lock-constant-face 'calendar-iso-week-face)
-(set-face-attribute 'calendar-iso-week-face nil
-                    :height 0.7)
-(setq calendar-intermonth-text
-      '(propertize
-        (format "%2d"
-                (car
-                 (calendar-iso-from-absolute
-                  (calendar-absolute-from-gregorian (list month day year)))))
-        'font-lock-face 'calendar-iso-week-face))
+                              ;; display week number
+                              (copy-face font-lock-constant-face 'calendar-iso-week-face)
+                              (set-face-attribute 'calendar-iso-week-face nil
+                                                  :height 0.7)
+                              (setq calendar-intermonth-text
+                                    '(propertize
+                                      (format "%2d"
+                                              (car
+                                               (calendar-iso-from-absolute
+                                                (calendar-absolute-from-gregorian (list month day year)))))
+                                      'font-lock-face 'calendar-iso-week-face))
 
-(copy-face 'default 'calendar-iso-week-header-face)
-(set-face-attribute 'calendar-iso-week-header-face nil
-                    :height 0.7)
-(setq calendar-intermonth-header
-      (propertize "Wk"                  ; or e.g. "KW" in Germany
-                  'font-lock-face 'calendar-iso-week-header-face))
-(set-face-attribute 'calendar-iso-week-face nil
-                    :height 1.0 :foreground "salmon")
+                              (copy-face 'default 'calendar-iso-week-header-face)
+                              (set-face-attribute 'calendar-iso-week-header-face nil
+                                                  :height 0.7)
+                              (setq calendar-intermonth-header
+                                    (propertize "Wk"                  ; or e.g. "KW" in Germany
+                                                'font-lock-face 'calendar-iso-week-header-face))
+                              (set-face-attribute 'calendar-iso-week-face nil
+                                                  :height 1.0 :foreground "salmon")
 #+end_src
 
 * Programming environments
@@ -1719,21 +1714,16 @@ Highlight keywords like TODO etc in code.
 
   (setq hl-todo-keyword-faces
         '(
-  ;; ("TODO"   . "#c7edd1")
-  ("TODO"   . "#9bc7a7")
-  ("FIXME"  . "#FF0000")
-  ;; ("NOTE"   . "#A020F0")
-  ;; ("NOTE"   . "#1E90FF")
-  ("NOTE"   . "#eda574")
-  ("UPTO"   . "#ff82c3")
+          ;; ("TODO"   . "#c7edd1")
+          ("TODO"   . "#9bc7a7")
+          ("FIXME"  . "#FF0000")
+          ;; ("NOTE"   . "#A020F0")
+          ;; ("NOTE"   . "#1E90FF")
+          ("NOTE"   . "#eda574")
+          ("UPTO"   . "#ff82c3")))
 
-))
-
- (add-hook 'anaconda-mode-hook 'hl-todo-mode)
- (add-hook 'anaconda-mode-hook 'hl-todo-mode)
-
-)
-
+  (add-hook 'anaconda-mode-hook 'hl-todo-mode)
+  (add-hook 'anaconda-mode-hook 'hl-todo-mode))
 #+end_src
 
 Evil treat an Emacs symbol as a word. This has the advantage that it
@@ -1742,24 +1732,24 @@ but two symbols (separated by -) in c-mode.
 
 #+begin_src emacs-lisp
 (with-eval-after-load 'evil
-    (defalias #'forward-evil-word #'forward-evil-symbol)
-    ;; make evil-search-word look for symbol rather than word boundaries
-    (setq-default evil-symbol-word-search t))
+  (defalias #'forward-evil-word #'forward-evil-symbol)
+  ;; make evil-search-word look for symbol rather than word boundaries
+  (setq-default evil-symbol-word-search t))
 #+end_src
 
 I like shallow indentation, but tabs are displayed as 8 characters by default.
 This reduces that.
 
 #+begin_src emacs-lisp
-  (setq-default tab-width 2)
+(setq-default tab-width 2)
 #+end_src
 
 Treating terms in CamelCase symbols as separate words makes editing a little
 easier for me, so I like to use =subword-mode= everywhere.
 
 #+begin_src emacs-lisp
-  (use-package subword
-    :config (global-subword-mode 1))
+(use-package subword
+  :config (global-subword-mode 1))
 #+end_src
 
 Compilation output goes to the =*compilation*= buffer. I rarely have that window
@@ -1768,7 +1758,7 @@ This automatically scrolls the compilation window so I can always see the
 output.
 
 #+begin_src emacs-lisp
-  (setq compilation-scroll-output t)
+(setq compilation-scroll-output t)
 #+end_src
 
 Add some custom file definitions for syntax checking.
@@ -1776,9 +1766,8 @@ Add some custom file definitions for syntax checking.
 ;; add extra custom spacemacs config files to emacs-lisp-mode
 (setq auto-mode-alist (append '(
                                 (".spacemacs.*" . emacs-lisp-mode)
-                                ("Rprofile.site" . R-mode)
-                                )
-      auto-mode-alist))
+                                ("Rprofile.site" . R-mode))
+                              auto-mode-alist))
 #+end_src
 
 ** Python
@@ -1788,78 +1777,72 @@ Add some custom file definitions for syntax checking.
 #+end_src
 
 #+begin_src emacs-lisp
-  ;; (use-package python-mode)
+;; (use-package python-mode)
 
-  (use-package cython-mode
+(use-package cython-mode
   :ensure t
   :mode (("\\.pyx\\'"  . cython-mode)
          ("\\.spyx\\'" . cython-mode)
          ("\\.pxd\\'"  . cython-mode)
          ("\\.pxi\\'"  . cython-mode)))
-  (use-package jinja2-mode :config (add-to-list 'auto-mode-alist '("\\.tmpl" . jinja2-mode)))
+(use-package jinja2-mode :config (add-to-list 'auto-mode-alist '("\\.tmpl" . jinja2-mode)))
 #+end_src
 
 Add =~/.local/bin= to load path. That's where =virtualenv= is installed, and
 we'll need that for =jedi=.
 #+begin_src emacs-lisp
-  (hrs/append-to-path "~/.local/bin")
-
+(hrs/append-to-path "~/.local/bin")
 #+end_src
 
 
 #+begin_src
-  (hrs/append-to-path "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev")
+(hrs/append-to-path "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev")
 #+end_src
 
 code folding
 https://emacs.stackexchange.com/questions/45883/fold-all-methods-in-a-python-class-with-evil
 #+begin_src emacs-lisp
 
-    (use-package anaconda-mode
-      :config
-      (setq python-shell-interpreter "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/scripts/ipython.exe")
+(use-package anaconda-mode
+  :config
+  (setq python-shell-interpreter "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/scripts/ipython.exe")
 
-      (add-hook 'python-mode-hook 'anaconda-mode)
-      (add-hook 'python-mode-hook 'hs-minor-mode)
-      (setq-default tab-width 4)
-    )
+  (add-hook 'python-mode-hook 'anaconda-mode)
+  (add-hook 'python-mode-hook 'hs-minor-mode)
+  (setq-default tab-width 4))
 
-    (use-package reformatter
-   :config
+(use-package reformatter
+  :config
 
-    (reformatter-define python-isort
-      :program "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/Scripts/isort.exe"
-      :args (list "-" "-p quant,datastore")
-  )
-)
+  (reformatter-define python-isort
+    :program "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/Scripts/isort.exe"
+    :args (list "-" "-p quant,datastore")))
 
-    (use-package python-black
-      :demand t
-      :after python
-      :config
-      (setq python-black-command "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/Scripts/black.exe")
-    )
+(use-package python-black
+  :demand t
+  :after python
+  :config
+  (setq python-black-command "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/Scripts/black.exe"))
 
-    ;; this needs an epc backend setup
-    ;; (use-package company-jedi
-    ;; :ensure t
-    ;; :init
-    ;;   '(add-to-list 'company-backends 'company-jedi)
-  ;; )
+;; this needs an epc backend setup
+;; (use-package company-jedi
+;; :ensure t
+;; :init
+;;   '(add-to-list 'company-backends 'company-jedi)
+;; )
 
-    ;; this uses Jedi to get completions?
-  ;;   (use-package company-anaconda
-  ;;    :ensure t
-  ;;    :init
-  ;;    (eval-after-load "company"
-  ;;     '(add-to-list 'company-backends '(company-anaconda :with company-capf)))
-  ;; )
+;; this uses Jedi to get completions?
+;;   (use-package company-anaconda
+;;    :ensure t
+;;    :init
+;;    (eval-after-load "company"
+;;     '(add-to-list 'company-backends '(company-anaconda :with company-capf)))
+;; )
 
-     (setq history-length 100)
-    (put 'minibuffer-history 'history-length 50)
-    (put 'evil-ex-history 'history-length 50)
-    (put 'kill-ring 'history-length 25)
-
+(setq history-length 100)
+(put 'minibuffer-history 'history-length 50)
+(put 'evil-ex-history 'history-length 50)
+(put 'kill-ring 'history-length 25)
 #+end_src
 
 Snippets that probably should exist in yas snippet.
@@ -1877,15 +1860,13 @@ Snippets that probably should exist in yas snippet.
   (evil-open-above 1)
   (insert "import pdb")
   ;; (insert "import pdb; pdb.set_trace()  # BREAKPOINT")
-  (evil-normal-state)
-)
+  (evil-normal-state))
 
 (defun cjm/python-insert-ifname ()
   (interactive)
   (evil-open-above 1)
   (insert "if __name__ == '__main__':")
-  (evil-normal-state)
-)
+  (evil-normal-state))
 
 (defun cjm/python-insert-numpy-pandas()
   "Insert Python breakpoint above point."
@@ -1896,8 +1877,7 @@ Snippets that probably should exist in yas snippet.
   (interactive)
   (evil-open-above 1)
   (insert "import pandas as pd")
-  (evil-normal-state)
-  )
+  (evil-normal-state))
 #+end_src
 
 
@@ -1906,18 +1886,18 @@ Use =flycheck= for syntax checking:
 Configure Jedi along with the associated =company= mode:
 
 #+begin_src
-  (use-package company-jedi)
-  (add-to-list 'company-backends 'company-jedi)
+(use-package company-jedi)
+(add-to-list 'company-backends 'company-jedi)
 
-  (add-hook 'python-mode-hook 'jedi:setup)
-  (setq jedi:complete-on-dot t)
+(add-hook 'python-mode-hook 'jedi:setup)
+(setq jedi:complete-on-dot t)
 #+end_src
 
 ** Javascript / JSON
 
 Have at least some code folding in for json/javascript.
 #+begin_src emacs-lisp
-    (add-hook 'js-mode-hook 'hs-minor-mode)
+(add-hook 'js-mode-hook 'hs-minor-mode)
 #+end_src
 
 Finish.
@@ -1925,8 +1905,6 @@ Finish.
 (message "End Config")
 #+end_src
 ** Other
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package csharp-mode)
-
-
-#+END_SRC
+#+end_src
