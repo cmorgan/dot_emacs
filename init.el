@@ -26,7 +26,7 @@
     ("fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" default)))
  '(package-selected-packages
    (quote
-    (org-plus-contrib org-fragtog zetteldeft yasnippet yaml-mode writeroom-mode which-key use-package spacemacs-theme spaceline smartparens restart-emacs ranger python-black persp-projectile org-roam org-cliplink markdown-mode key-chord jinja2-mode hl-todo helpful general flycheck exec-path-from-shell evil-visualstar evil-surround evil-org evil-nerd-commenter evil-escape evil-collection eshell-bookmark elisp-format dumb-jump dired-narrow cython-mode csharp-mode counsel-projectile company-restclient auto-compile anaconda-mode ag ace-window)))
+    (evil-lispy lispy org-plus-contrib org-fragtog zetteldeft yasnippet yaml-mode writeroom-mode which-key use-package spacemacs-theme spaceline smartparens restart-emacs ranger python-black persp-projectile org-roam org-cliplink markdown-mode key-chord jinja2-mode hl-todo helpful general flycheck exec-path-from-shell evil-visualstar evil-surround evil-org evil-nerd-commenter evil-escape evil-collection eshell-bookmark elisp-format dumb-jump dired-narrow cython-mode csharp-mode counsel-projectile company-restclient auto-compile anaconda-mode ag ace-window)))
  '(safe-local-variable-values (quote ((eval org-latex-preview)))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.

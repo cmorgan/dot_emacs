@@ -10,6 +10,13 @@ https://github.com/magnars/.emacs.d/blob/master/settings/setup-org.el
 https://github.com/bling/dotemacs/tree/master/config
 
 (byte-recompile-directory (expand-file-name "~/.emacs.d") 0)
+
+* Variables
+TODO make this platform specific
+#+BEGIN_SRC emacs-lisp
+(setq cjm/note-dir "c:/Users/Public/dev/docs/notes")
+  #+END_SRC
+
 * Configure =use-package=
 
 #+begin_src emacs-lisp
@@ -251,6 +258,7 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    "eb"  'eval-buffer
    "ev"  'counsel-describe-variable
    "ef"  'counsel-describe-function
+   "em"  'lispy-multiline
 
                                         ; projectile
    "p" '(:ignore t :which-key "projectile")
@@ -292,6 +300,8 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    "a" '(:ignore t :which-key "apps")
    "ar" 'ranger
    "ac" 'calendar
+
+   "t" 'org-capture
 
    ;; window
    "w" '(:ignore t :which-key "window")
@@ -364,7 +374,7 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
 (use-package perspective
   :config
   (persp-mode)
-  (setq persp-state-default-file (expand-file-name "work" (expand-file-name "persp-confs/" user-emacs-directory))))
+  (setq persp-state-default-file (expand-file-name "work" (expand-file-name "persp-confs/" user-emacs-directory)))) 
 
 (use-package persp-projectile)
 #+end_src
@@ -1021,7 +1031,7 @@ LANGUAGE is a string referring to one of orb-babel's supported languages.
   (with-temp-buffer
     (let ((inhibit-message t))
       (emacs-lisp-mode)
-      (insert 
+      (insert
        (replace-regexp-in-string "[[:space:]]*
 [[:space:]]*)" ")" string))
       (indent-region (point-min) (point-max))
@@ -1033,7 +1043,7 @@ LANGUAGE is a string referring to one of orb-babel's supported languages.
   (save-mark-and-excursion
     (let ((AST (org-element-parse-buffer)))
       (org-element-map AST 'src-block
-        (lambda (element) 
+        (lambda (element)
           (edit-src-block element #'format-elisp-string "emacs-lisp")))
       (delete-region (point-min) (point-max))
       (insert (org-element-interpret-data AST)))))
@@ -1159,7 +1169,7 @@ LANGUAGE is a string referring to one of orb-babel's supported languages.
               (kill-buffer "*compilation*")) ; and kill the buffers
               (compile (eval (concat cjm/default-env "Scripts/pytest -s " buffer-file-name)) (and comint t))))
 
-            
+
           ;; exit without confirming running process
           (setq confirm-kill-processes nil)
           ;; kill buffer with process running confirmation
@@ -1333,20 +1343,20 @@ Collapse src blocks by default, and toggle.
 
 
 ;; render fragments of latex when cursor leaves them
-(use-package org-fragtog
+;; (use-package org-fragtog
 ;; disabled on windows
   ;; :config
   ;; (add-hook 'org-mode-hook 'org-fragtog-mode)
-)
+;; )
 
 
-(use-package 
-  deft 
-  :ensure t 
+(use-package
+  deft
+  :ensure t
   :custom
   (deft-extensions '("org" "md" "txt"))
-  ;; (deft-directory "~/Dropbox/org/notes") 
-  (deft-directory "c:/Users/Public/dev/docs/notes") 
+  ;; (deft-directory "~/Dropbox/org/notes")
+  (deft-directory cjm/note-dir)
   (deft-use-filename-as-title t))
 
 
@@ -1357,9 +1367,8 @@ Collapse src blocks by default, and toggle.
 (use-package zetteldeft
   :ensure t
   :after deft
-  :config (zetteldeft-set-classic-keybindings)
-
   ;; (add-hook 'org-mode-hook 'cjm/inhibit-buffer-messages)
+  :config (zetteldeft-set-classic-keybindings)
 )
 
   ;; TODO move to orgmode hook
@@ -1459,30 +1468,90 @@ copy link to clipboard then org-cliplink inserts with metadata
 (use-package org-cliplink)
 #+end_src
 
+capturing stuff, org-capture of course:
+#+BEGIN_SRC emacs-lisp
+;; this has nice reformat   (lisp-multiline)
+(use-package lispy)
+(use-package evil-lispy)
+(setq org-capture-templates `(("j" "Journal Note" entry (file ,(concat cjm/note-dir "/ideas.org"))
+                               "* Event: %?\n\n  %i\n\n  From: %a"
+                               :empty-lines 1)
+
+                              ("i" "Idea" entry (file+headline ,(concat cjm/note-dir "/ideas.org")
+                                                                  "Ideas")
+                               "* %u %i%?"
+                               :empty-lines 1)))
+
+;; (setq org-capture-templates
+;;       (("t" "Todo" entry (file "~/org/Refile.org")
+;;                "* TODO %?\n%U\n%a\n" :clock-in t :clock-resume t)
+;;               ;; NOTE state that the function needs evaluating by using comma
+;;               ("i" "Idea" entry (file ,(concat cjm/note-dir "ideas.org")))
+;;               ;; ("i" "Idea" entry (file "c:/Users/Public/dev/docs/notes/ideas.org")
+;;                "* IDEA %?\n%T\n")
+;;               ("d" "Diary" entry (file+datetree "~/org/Diary.org")
+;;                "* %?\n%T\n" :clock-in t :clock-resume t)
+;;               ("j" "Journal" entry (file+datetree+prompt "~/org/Diary.org")
+;;                "* %?\n%T\n" :clock-in t :clock-resume t)
+;;               ("h" "Habit" entry (file "~/git/org/Refile.org")
+;;                "* NEXT %?\n%U\n%a\nSCHEDULED: %(format-time-string \"<%Y-%m-%d %a .+1d/3d>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n")))
+
+(general-define-key
+ :keymaps 'org-capture-mode-map
+ "<M-return>" 'org-capture-kill
+ "<C-return>" 'org-capture-finalize)
+
+(setq org-capture-templates
+      (quote(
+;; %u inactive datetime, %t active
+;; %i%? insert?
+;; https://gist.github.com/mrbig033/bcf387e3a56cdf19f6c618756f0c358c#file-packages-el
+  ;; ("i" "Idea" entry (file ,(concat cjm/note-dir "tofile.org")) "* %u %i%?" :empty-lines 1)
+
+  ("i" "Idea" entry (file ,(concat cjm/note-dir "ideas.org"))
+	("s" "Social" entry  (file+headline "~/org/Creative/Social/Public/social_public.org" "Refile") "* %u %i%?")
+	("r" "Refile" entry  (file+headline "~/org/Planning/planning.org" "Refile") "* %u %i%?" :empty-lines 1)
+	("0" "Daily"  entry  (file+headline "~/org/Planning/planning.org" "Daily")  "* TODO %u %i%?")
+	("1" "Agora"  entry  (file+headline "~/org/Planning/planning.org" "Agora")  "* TODO %u %i%?")
+	("2" "Logo"   entry  (file+headline "~/org/Planning/planning.org" "Logo")   "* TODO %u %i%?")
+	("3" "Depois" entry  (file+headline "~/org/Planning/planning.org" "Depois") "* TODO %u %i%?")
+	("4" "Um Dia" entry  (file+headline "~/org/Planning/planning.org" "Um Dia") "* TODO %u %i%?")))))
+
+
+
+;; (require 'org)
+;; (add-to-list 'org-capture-templates
+;;              '("1" "Ideas"  entry
+;;                (file "c:/Users/Public/dev/docs/notes/ideas.org")
+;;                ;; (file eval(concat cjm/note-dir "/ideas.org"))
+;;                "* IDEA %?" :empty-lines 1))
+
+  #+END_SRC
+
 To file:
 #+begin_src emacs-lisp
 (setq org-agenda-files '("c:/Users/Public/dev/docs/org/roam"))
 
-(use-package org-roam
+;; (use-package org-roam
   ;; :hook
   ;; (after-init . org-roam-mode)
   ;; :config
 
   ;; (org-roam-directory "c:/Users/Public/dev/docs/org/roam")
-)
+;; )
 
   ;; use / in dired mode to
-  (use-package dired-narrow
-    :ensure t
-    :bind (:map dired-mode-map
-                ("/" . dired-narrow)))
+(use-package dired-narrow
+  :ensure t
+  :bind (:map dired-mode-map
+              ("/" . dired-narrow)))
 
-  (setq org-return-follows-link t)
+(setq org-return-follows-link t)
 
-  (add-hook 'org-mode-hook
-            '(lambda ()
-               (delete '("\\.pdf\\'" . default) org-file-apps)
-               (add-to-list 'org-file-apps '("\\.pdf\\'" . "evince %s"))))
+(add-hook 'org-mode-hook
+'(lambda ()
+    (delete '("\\.pdf\\'" . default) org-file-apps)
+    (add-to-list 'org-file-apps '("\\.pdf\\'" . "evince %s")) ))
 
   (setq org-agenda-start-day nil)
   (setq org-agenda-span 'week)
@@ -1586,8 +1655,7 @@ To file:
 
                               ("data" . ?d)
                               ("model" . ?m)
-                              ("bot" . ?b)
-)))
+                              ("bot" . ?b))))
 
 
                               ;; refiling
