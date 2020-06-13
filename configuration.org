@@ -216,16 +216,24 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    :keymaps 'anaconda-mode-map
    :prefix ","
 
-   "b" 'python-insert-breakpoint
-   "n" 'cjm/python-insert-ifname
-   "t" 'cjm/pytest
+   "b" '(python-insert-breakpoint :wk "breakpoint")
+   "n" '(cjm/python-insert-ifname :wk "ifname")
+   "t" '(cjm/pytest :wk "pytest")
    "x" 'cjm/run-python
 
-   "r" '(:ignore t :wich-key "Refactor")
+   "r" '(:ignore t :wk "refactor")
    "rb" 'python-black-buffer
    "rs" 'python-isort-buffer
    "rr" '((lambda () (interactive) (python-isort-buffer)(python-black-buffer)(flycheck-buffer)) :which-key "all")
    "rz" 'zimports)
+
+  ;; Main menu
+  (general-define-key
+   :states '(normal)
+   :keymaps 'override
+   "ff" 'ace-window
+
+  )
 
   ;; Main menu
   (general-define-key
@@ -242,6 +250,7 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    "%"  'split-window-right
    "TAB" 'toggle-buffers
    "k" 'cjm/kill-current-buffer
+   "n" 'ace-window
 
    "w" '(nil :wk "writeroom")
    "wg" 'global-writeroom-mode
@@ -270,6 +279,7 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    "pa" 'projectile-find-file-in-known-projects
    "pn" 'persp-next
    "px" 'persp-kill
+   "ps" 'persp-switch
 
    ;; files
    "f" '(:ignore t :which-key "files")
@@ -314,6 +324,8 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    "wx"  'delete-window
    "wf" 'new-frame
    "wo" 'other-frame
+   "ws" 'ace-swap-window
+   "ww" 'ace-window
 
    ;; search
    "s" '(:ignore t :which-key "search")
@@ -344,8 +356,6 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    "l" '(nil :wk "Log")
    "ll" 'cjm/open-log
    "lp" 'cjm/open-project))
-
-
 
 ;; (global-set-key (kbd "C-x k") 'cjm/kill-current-buffer)
 
@@ -415,8 +425,8 @@ Why not?
 #+begin_src emacs-lisp
 (use-package spacemacs-theme
   :defer t
-  :init (load-theme 'spacemacs-light t)
-  ;; :init (load-theme 'spacemacs-dark t)
+  ;; :init (load-theme 'spacemacs-light t)
+  :init (load-theme 'spacemacs-dark t)
   :config
 
   (let ((line (face-attribute 'mode-line :underline)))
@@ -1121,6 +1131,21 @@ LANGUAGE is a string referring to one of orb-babel's supported languages.
   ;;           (call-interactively 'pytest)
   ;;           (enlarge-window 50)))
 
+(defun remove-py-debug ()  
+  "remove py debug code, if found"  
+  (interactive)  
+  (let ((x (line-number-at-pos))  
+    (cur (point)))  
+    (search-forward-regexp python--pdb-breakpoint-string)  
+    (if (= x (line-number-at-pos))  
+    (let ()  
+      (move-beginning-of-line 1)  
+      (kill-line 1)  
+      (move-beginning-of-line 1))  
+      (goto-char cur))))  
+
+(local-set-key (kbd "C c <f9>") 'remove-py-debug)
+
       ;; https://www.masteringemacs.org/article/compiling-running-scripts-emacs
       (defun python--add-debug-highlight ()
         "Adds a highlighter for use by `python--pdb-breakpoint-string'"
@@ -1162,18 +1187,13 @@ LANGUAGE is a string referring to one of orb-babel's supported languages.
 
       (defun cjm/pytest (comint)
         (interactive "P")
-
-        (if (get-buffer "*compilation*") ; If old compile window exists
-            (progn
-              (delete-windows-on (get-buffer "*compilation*")) ; Delete the compilation windows
-              (kill-buffer "*compilation*")) ; and kill the buffers
-              (compile (eval (concat cjm/default-env "Scripts/pytest -s " buffer-file-name)) (and comint t))))
-
+        (compile (eval (concat cjm/default-env "Scripts/pytest -s " buffer-file-name)) (and comint t)))
 
           ;; exit without confirming running process
           (setq confirm-kill-processes nil)
           ;; kill buffer with process running confirmation
           (setq kill-buffer-query-functions nil)
+          (setq compilation-always-kill t)
 
 
           (defun cjm/compile-please(comint)
@@ -1459,13 +1479,17 @@ Collapse src blocks by default, and toggle.
 #+end_src
 
 Note taking in org mode following [[https://blog.jethro.dev/posts/zettelkasten_with_org/][Org-mode Workflow Part 3: Zettelkasten with Org-mode · Jethro Kuan]]
-[[https://blog.jethro.dev/posts/how_to_take_smart_notes_org/][How To Take Smart Notes With Org-mode · Jethro Kuan]]
 
+[[https://blog.jethro.dev/posts/how_to_take_smart_notes_org/][How To Take Smart Notes With Org-mode · Jethro Kuan]]
 https://github.com/org-roam/org-roam/
 
-copy link to clipboard then org-cliplink inserts with metadata
+Note taking tools in emacs
+org-cliplink: copy link to clipboard then org-cliplink inserts with metadata
+org-download: web images
+
 #+begin_src emacs-lisp
 (use-package org-cliplink)
+(use-package org-download)
 #+end_src
 
 capturing stuff, org-capture of course:
