@@ -14,8 +14,67 @@ https://github.com/bling/dotemacs/tree/master/config
 * Variables
 TODO make this platform specific
 #+BEGIN_SRC emacs-lisp
-(setq cjm/note-dir "c:/Users/Public/dev/docs/notes")
-  #+END_SRC
+
+;; detect platform
+
+(setq cjm/is-windows nil)
+(cond
+ ((string-equal system-type "windows-nt") ; Microsoft Windows
+  (message "Microsoft Windows")
+(setq cjm/is-windows t)
+
+  (setq cjm/note-dir "c:/Users/Public/dev/docs/notes")
+  (setq cjm/ipython-path "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/scripts/ipython.exe")
+
+  (setq cjm/devroot-dir "C:/Users/Public/dev/")
+  ;; C:\Users\Public\dev\bin\dbConda-2019_07-py37\condabin\conda.bat
+  (setq cjm/conda-envs (concat cjm/devroot-dir "bin/dbConda-2019_07-py37/envs/"))
+  (setq cjm/main-conda (concat cjm/conda-envs "dev/"))
+  (setq cjm/default-env (concat cjm/conda-envs "dev/"))
+  (setq cjm/black-path (concat cjm/default-env "Scripts/black.exe"))
+  (setq cjm/zimports-path (concat cjm/default-env "Scripts/zimports.exe"))
+  (setq cjm/zimports-modules (concat cjm/default-env "datastore,dig,db,qis,refinitiv"))
+  (setq cjm/latex-path "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/tools/Scripts")
+  (setq cjm/python-interpreter (concat cjm/main-conda "Scripts/" "ipython.exe"))
+  (setq cjm/src-code-directory (concat cjm/devroot-dir "src/"))
+  (setq cjm/python-path (concat cjm/default-env "python.exe"))
+  (setq cjm/pytest_cmd (concat cjm/default-env "Scripts/pytest"))
+  (setq cjm/flake8-path "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/Scripts/flake8.exe")
+  (setq cjm/isort-path "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/Scripts/isort.exe")
+  (setq cjm/black-path "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/Scripts/black.exe")
+
+  (setq org-directory "c:/dev/docs/org/")
+  (setq org-agenda-files (list
+                          (concat org-directory "quantdb.org")
+                          (concat org-directory "index.org")
+                          (concat org-directory "research.org")
+                          (concat org-directory "todo.org")))
+
+)
+ ((string-equal system-type "darwin") ; Mac OS X
+    (message "Mac OS X"))
+ ((string-equal system-type "gnu/linux") ; linux
+    (message "Linux")
+    (setq cjm/note-dir "/home/chris/Dropbox/org/notes")
+    
+    (setq cjm/python-path "/home/chris/miniconda3/envs/new/bin/python")
+    (setq cjm/ipython-path "/home/chris/miniconda3/envs/new/bin/ipython")
+    (setq cjm/pytest_cmd "/home/chris/miniconda3/envs/dev/bin/pytest")
+    (setq cjm/flake8-path "/home/chris/miniconda3/envs/dev/bin/flake8")
+    (setq cjm/isort-path "/home/chris/miniconda3/envs/dev/bin/isort")
+    (setq cjm/black-path "/home/chris/miniconda3/envs/dev/bin/black")
+
+  ;; (setq org-startup-latex-with-latex-preview t)
+  ;; (setq org-preview-latex-fragment t)
+
+  (setq org-directory "c:/dev/docs/org/")
+  (setq org-agenda-files '("~/org"))
+
+
+))
+
+
+#+END_SRC
 
 * Configure =use-package=
 
@@ -177,6 +236,12 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
   :ensure t
   :config
 
+  (general-define-key
+   :states '(normal)
+   :keymaps 'org-mode-map
+    "<S-return>" 'cjm/org-open-at-point
+)
+
   ;; mode specific
   ;; orgmode
   (general-define-key
@@ -187,7 +252,7 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    "lc" '(org-cliplink :wk "clip")
    "li" '(org-insert-link :wk "insert")
    "lg" '(counsel-org-link :wk "go")
-
+    
    "t" '(nil :wk "table")
    "ti" 'org-table-create
    "ta" 'org-table-align
@@ -208,7 +273,12 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
 
    "w" '(nil :wk "writeroom")
    "wo" 'cjm/org-writeroom-on
-   "wx" 'cjm/org-writeroom-off)
+   "wx" 'cjm/org-writeroom-off
+
+   "a" '(nil :wk "agenda")
+   "at" 'org-todo-list
+   "aa" 'org-agenda
+)
 
   ;; python
   (general-define-key
@@ -232,6 +302,7 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    :states '(normal)
    :keymaps 'override
    "ff" 'ace-window
+   "tt" 'writeroom-mode
 
   )
 
@@ -425,8 +496,8 @@ Why not?
 #+begin_src emacs-lisp
 (use-package spacemacs-theme
   :defer t
-  ;; :init (load-theme 'spacemacs-light t)
-  :init (load-theme 'spacemacs-dark t)
+  :init (load-theme 'spacemacs-light t)
+  ;; :init (load-theme 'spacemacs-dark t)
   :config
 
   (let ((line (face-attribute 'mode-line :underline)))
@@ -657,8 +728,8 @@ Flycheck will have you visit all warnings and whatnot, only visit errors.
   :config
   (setq flycheck-idle-change-delay 7)
   (setq-default flycheck-flake8-maximum-line-length 89)
-  (setq flycheck-python-flake8-executable "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/Scripts/flake8.exe")
-  (setq flycheck-check-syntax-automatically '(save)
+  (setq flycheck-python-flake8-executable cjm/flake8-path)
+  (setq flycheck-check-syntax-automatically '(save idle-change)
         flycheck-idle-change-delay 2
         ;; flycheck-error-list-minimum-level 'warning
         flycheck-navigation-minimum-level 'error)
@@ -1061,6 +1132,22 @@ LANGUAGE is a string referring to one of orb-babel's supported languages.
 
 #+begin_src emacs-lisp
 
+
+(defun cjm/org-open-at-point ()
+  "Open file link or URL at mouse."
+  ;; (interactive "e")
+  ;; (interactive)
+  ;; (mouse-set-point ev)
+  ;; (if (eq major-mode 'org-agenda-mode)
+  ;;     (org-agenda-copy-local-variable 'org-link-abbrev-alist-local))
+        (interactive)
+  (let ((org-link-frame-setup
+         '((vm . vm-visit-folder)
+           (gnus . gnus)
+           (file . find-file))))
+    (org-open-at-point))
+  )
+
   (defun cjm/org-writeroom-on ()
 
     (add-hook 'org-mode-hook 'writeroom-mode)
@@ -1095,18 +1182,6 @@ LANGUAGE is a string referring to one of orb-babel's supported languages.
         (set-selective-display
          (if selective-display nil (or col 1))))))
 
-  (setq cjm/devroot-dir "C:/Users/Public/dev/")
-  ;; C:\Users\Public\dev\bin\dbConda-2019_07-py37\condabin\conda.bat
-  (setq cjm/conda-envs (concat cjm/devroot-dir "bin/dbConda-2019_07-py37/envs/"))
-  (setq cjm/main-conda (concat cjm/conda-envs "dev/"))
-  (setq cjm/default-env (concat cjm/conda-envs "dev/"))
-  (setq cjm/black-path (concat cjm/default-env "Scripts/black.exe"))
-  (setq cjm/zimports-path (concat cjm/default-env "Scripts/zimports.exe"))
-  (setq cjm/zimports-modules (concat cjm/default-env "datastore,dig,db,qis,refinitiv"))
-  (setq cjm/latex-path "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/tools/Scripts")
-  (setq cjm/python-interpreter (concat cjm/main-conda "Scripts/" "ipython.exe"))
-  (setq cjm/src-code-directory (concat cjm/devroot-dir "src/"))
-  (setq cjm/python-path (concat cjm/default-env "python.exe"))
   ;; org-babel
   ;; https://orgmode.org/worg/org-contrib/babel/languages/ob-doc-python.html
   ;; https://orgmode.org/manual/Results-of-Evaluation.html#Results-of-Evaluation
@@ -1187,7 +1262,8 @@ LANGUAGE is a string referring to one of orb-babel's supported languages.
 
       (defun cjm/pytest (comint)
         (interactive "P")
-        (compile (eval (concat cjm/default-env "Scripts/pytest -s " buffer-file-name)) (and comint t)))
+        (if cjm/is-windows nil (save-buffer))
+        (compile (eval (concat cjm/pytest_cmd  " -s " buffer-file-name)) (and comint t)))
 
           ;; exit without confirming running process
           (setq confirm-kill-processes nil)
@@ -1363,11 +1439,10 @@ Collapse src blocks by default, and toggle.
 
 
 ;; render fragments of latex when cursor leaves them
-;; (use-package org-fragtog
-;; disabled on windows
-  ;; :config
-  ;; (add-hook 'org-mode-hook 'org-fragtog-mode)
-;; )
+(use-package org-fragtog
+  :config
+(if cjm/is-windows nil (add-hook 'org-mode-hook 'org-fragtog-mode))
+)
 
 
 (use-package
@@ -1394,9 +1469,11 @@ Collapse src blocks by default, and toggle.
   ;; TODO move to orgmode hook
   (org-babel-do-load-languages
    'org-babel-load-languages
-   '((dot . t))) ; this line activates dot
+   '((dot . t) 
+     (python . t))
+) ; this line activates dot
 
-
+(setq org-src-tab-acts-natively t)
   (use-package elisp-format)
 
 
@@ -1476,6 +1553,7 @@ Collapse src blocks by default, and toggle.
 
   (add-hook 'org-mode-hook 'org-toggle-blocks)
   (add-hook 'org-mode-hook 'auto-fill-mode)
+(setq org-startup-with-inline-images t)
 #+end_src
 
 Note taking in org mode following [[https://blog.jethro.dev/posts/zettelkasten_with_org/][Org-mode Workflow Part 3: Zettelkasten with Org-mode · Jethro Kuan]]
@@ -1586,10 +1664,10 @@ To file:
 
   ;; prevent demoting heading also shifting text inside sections
   (setq org-adapt-indentation nil)
+  (setq org-src-preserve-indentation t)
 
   ;; (setq cjm/home-dir "h:/")
   ;; (setq org-directory (concat cjm/home-dir "org/"))
-  (setq org-directory "c:/dev/docs/org/")
 
   ;;(setq cjm-org-directory (concat cjm/home-dir "/org/"))
   ;; org-default-notes-file gets set by org-projectile to project root
@@ -1598,7 +1676,7 @@ To file:
   (setq cjm-quat-data-capture-file (concat org-directory "quant_data.org"))
 
   (require 'org)
-  (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
+  (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.5))
 
   (setq org-enforce-todo-dependencies t)
   (setq org-agenda-dim-blocked-tasks 'invisible)
@@ -1648,11 +1726,6 @@ To file:
 
 
   ;; (setq org-agenda-files (list org-directory))
-  (setq org-agenda-files (list
-                          (concat org-directory "quantdb.org")
-                          (concat org-directory "index.org")
-                          (concat org-directory "research.org")
-                          (concat org-directory "todo.org")))
   (setq org-agenda-skip-scheduled-if-done t)
   (setq org-agenda-skip-deadline-if-done t)
   (setq org-closed-keep-when-no-todo t)
@@ -1897,7 +1970,11 @@ https://emacs.stackexchange.com/questions/45883/fold-all-methods-in-a-python-cla
 
 (use-package anaconda-mode
   :config
-  (setq python-shell-interpreter "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/scripts/ipython.exe")
+  ;; (setq python-shell-interpreter "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/scripts/ipython.exe")
+  (setq python-shell-interpreter cjm/ipython-path)
+ (setq python-shell-interpreter-args " -i")
+   ;; (setq python-shell-completion-native-enable nil)
+;; (setq comint-process-echoes t) 
 
   (add-hook 'python-mode-hook 'anaconda-mode)
   (add-hook 'python-mode-hook 'hs-minor-mode)
@@ -1907,14 +1984,14 @@ https://emacs.stackexchange.com/questions/45883/fold-all-methods-in-a-python-cla
   :config
 
   (reformatter-define python-isort
-    :program "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/Scripts/isort.exe"
+    :program cjm/isort-path
     :args (list "-" "-p quant,datastore")))
 
 (use-package python-black
   :demand t
   :after python
   :config
-  (setq python-black-command "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/Scripts/black.exe"))
+  (setq python-black-command cjm/black-path))
 
 ;; this needs an epc backend setup
 ;; (use-package company-jedi
