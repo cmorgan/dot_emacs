@@ -21,11 +21,11 @@ TODO make this platform specific
 (cond
  ((string-equal system-type "windows-nt") ; Microsoft Windows
   (message "Microsoft Windows")
-(setq cjm/is-windows t)
-
+  (setq cjm/is-windows t) 
+  (setq cjm/flycheck-triggers '(save))
+  ;; (setq cjm/flycheck-triggers '())
   (setq cjm/note-dir "c:/Users/Public/dev/docs/notes")
   (setq cjm/ipython-path "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/scripts/ipython.exe")
-
   (setq cjm/devroot-dir "C:/Users/Public/dev/")
   ;; C:\Users\Public\dev\bin\dbConda-2019_07-py37\condabin\conda.bat
   (setq cjm/conda-envs (concat cjm/devroot-dir "bin/dbConda-2019_07-py37/envs/"))
@@ -63,6 +63,7 @@ TODO make this platform specific
     (setq cjm/flake8-path "/home/chris/miniconda3/envs/dev/bin/flake8")
     (setq cjm/isort-path "/home/chris/miniconda3/envs/dev/bin/isort")
     (setq cjm/black-path "/home/chris/miniconda3/envs/dev/bin/black")
+    (setq cjm/flycheck-triggers '(save idle-change))
 
   ;; (setq org-startup-latex-with-latex-preview t)
   ;; (setq org-preview-latex-fragment t)
@@ -313,6 +314,7 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    :keymaps 'override
    :non-normal-prefix "C-SPC"
    "/"   'counsel-rg
+   "'"   'cjm/counsel-rg-here
    ;; "/"   'counsel-grep
    ;; "/"   'counsel-ag
    "SPC" 'counsel-M-x
@@ -340,7 +342,7 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    "ef"  'counsel-describe-function
    "em"  'lispy-multiline
 
-                                        ; projectile
+   ;; projectile
    "p" '(:ignore t :which-key "projectile")
    "pi" 'projectile-invalidate-cache
    "pp" 'projectile-switch-project
@@ -369,8 +371,10 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    "c" '(:ignore t :which-key "code")
    "cl" 'evilnc-comment-or-uncomment-lines
    "cn" 'flycheck-next-error
+   "cb" 'flycheck-buffer
    "cp" 'flycheck-previous-error
    "cf" 'cjm/toggle-fold
+
 
    ;; hide
    "h" '(:ignore t :which-key "hide")
@@ -402,6 +406,8 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    "s" '(:ignore t :which-key "search")
    "sc" 'evil-ex-nohighlight
    "sl" 'ivy-resume
+   ;; search all open buffers 
+   "sb" 'swiper-all
 
    ;; deft
    "d"  '(nil :wk "deft")
@@ -497,6 +503,7 @@ Why not?
 (use-package spacemacs-theme
   :defer t
   :init (load-theme 'spacemacs-light t)
+  ;; :init (load-theme 'spacemacs-dark t)
   ;; :init (load-theme 'spacemacs-dark t)
   :config
 
@@ -729,7 +736,8 @@ Flycheck will have you visit all warnings and whatnot, only visit errors.
   (setq flycheck-idle-change-delay 7)
   (setq-default flycheck-flake8-maximum-line-length 89)
   (setq flycheck-python-flake8-executable cjm/flake8-path)
-  (setq flycheck-check-syntax-automatically '(save idle-change)
+  ;; (setq flycheck-check-syntax-automatically '(save idle-change)
+  (setq flycheck-check-syntax-automatically cjm/flycheck-triggers
         flycheck-idle-change-delay 2
         ;; flycheck-error-list-minimum-level 'warning
         flycheck-navigation-minimum-level 'error)
@@ -760,7 +768,15 @@ project root (if I'm not in a "real" project).
 
 #+begin_src emacs-lisp
 (use-package projectile
+
   :config
+
+
+(projectile-register-project-type 'python-pkg '("setup.py")
+                                  :compile cjm/pytest_cmd
+                                  :test "python -m unittest discover"
+                                  :test-prefix "test_"
+                                  :test-suffix"_test")
   (setq projectile-completion-system 'ivy)
   (setq projectile-indexing-method 'alien)
   (setq projectile-sort-order 'recently-active)
@@ -828,10 +844,20 @@ Install structured text support.
 
 
 (use-package smartparens
-
   :config
 
   (require 'smartparens-config)
+  ;; turn off annyoing stuff in orgmode
+  (sp-local-pair 'org-mode "\\[" "\\]")
+  (sp-local-pair 'org-mode "$" "$")
+  (sp-local-pair 'org-mode "'" "'" :actions '(rem))
+  (sp-local-pair 'org-mode "*" "*" :actions '(rem))
+  (sp-local-pair 'org-mode "=" "=" :actions '(rem))
+  (sp-local-pair 'org-mode "\\left(" "\\right)" :trigger "\\l(" :post-handlers '(sp-latex-insert-spaces-inside-pair))
+  (sp-local-pair 'org-mode "\\left[" "\\right]" :trigger "\\l[" :post-handlers '(sp-latex-insert-spaces-inside-pair))
+  (sp-local-pair 'org-mode "\\left\\{" "\\right\\}" :trigger "\\l{" :post-handlers '(sp-latex-insert-spaces-inside-pair))
+  (sp-local-pair 'org-mode "\\left|" "\\right|" :trigger "\\l|" :post-handlers '(sp-latex-insert-spaces-inside-pair))
+
   (smartparens-global-mode t))
 
 (use-package yaml-mode
@@ -1132,7 +1158,6 @@ LANGUAGE is a string referring to one of orb-babel's supported languages.
 
 #+begin_src emacs-lisp
 
-
 (defun cjm/org-open-at-point ()
   "Open file link or URL at mouse."
   ;; (interactive "e")
@@ -1147,6 +1172,11 @@ LANGUAGE is a string referring to one of orb-babel's supported languages.
            (file . find-file))))
     (org-open-at-point))
   )
+
+(defun cjm/counsel-rg-here ()
+    "Like `counsel-rg' but always searches from the cwd, not project root."
+    (interactive)
+    (counsel-rg nil default-directory))
 
   (defun cjm/org-writeroom-on ()
 
