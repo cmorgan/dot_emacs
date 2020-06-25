@@ -1,4 +1,4 @@
-#+title: Emacs Configuration
+#+title: Emacs import pdb; pdb.set_trace() ## DEBUG ##
 #+options: toc:nil num:nil
 
 https://gist.github.com/yaodong/532e5b31781724ea2566503edcc498c3
@@ -38,7 +38,8 @@ TODO make this platform specific
   (setq cjm/python-interpreter (concat cjm/main-conda "Scripts/" "ipython.exe"))
   (setq cjm/src-code-directory (concat cjm/devroot-dir "src/"))
   (setq cjm/python-path (concat cjm/default-env "python.exe"))
-  (setq cjm/pytest_cmd (concat cjm/default-env "Scripts/pytest"))
+  ;; (setq cjm/pytest_cmd (concat cjm/default-env "Scripts/pytest"))
+  (setq cjm/pytest_cmd "pytest")
   (setq cjm/flake8-path "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/Scripts/flake8.exe")
   (setq cjm/isort-path "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/Scripts/isort.exe")
   (setq cjm/black-path "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/Scripts/black.exe")
@@ -241,6 +242,8 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    :states '(normal)
    :keymaps 'org-mode-map
     "<S-return>" 'cjm/org-open-at-point
+;; TODO fix this
+    ;; "/" 'cjm/search
 )
 
   ;; mode specific
@@ -289,8 +292,14 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
 
    "b" '(python-insert-breakpoint :wk "breakpoint")
    "n" '(cjm/python-insert-ifname :wk "ifname")
-   "t" '(cjm/pytest :wk "pytest")
+   "t" '(:ignore t :wk "test")
+   "tt" '(cjm/pytest :wk "file")
+   "tf" '(cjm/pytest :wk "function")
+
    "x" 'cjm/run-python
+
+   "c" '(:ignore t :wk "conda")
+   "ca" 'conda-env-activate
 
    "r" '(:ignore t :wk "refactor")
    "rb" 'python-black-buffer
@@ -1158,6 +1167,10 @@ LANGUAGE is a string referring to one of orb-babel's supported languages.
 
 #+begin_src emacs-lisp
 
+(defun cjm/search ()
+  (interactive)
+  (counsel-rg (thing-at-point 'word t)))
+
 (defun cjm/org-open-at-point ()
   "Open file link or URL at mouse."
   ;; (interactive "e")
@@ -1288,11 +1301,13 @@ LANGUAGE is a string referring to one of orb-babel's supported languages.
 
       (defun cjm/run-python(comint)
         (interactive "P")
+        (save-buffer)
         (compile (eval (concat cjm/python-path " " buffer-file-name)) (and comint t)))
 
       (defun cjm/pytest (comint)
         (interactive "P")
-        (if cjm/is-windows nil (save-buffer))
+        (save-buffer)
+        ;; (if cjm/is-windows nil (save-buffer))
         (compile (eval (concat cjm/pytest_cmd  " -s " buffer-file-name)) (and comint t)))
 
           ;; exit without confirming running process
@@ -1998,10 +2013,28 @@ code folding
 https://emacs.stackexchange.com/questions/45883/fold-all-methods-in-a-python-class-with-evil
 #+begin_src emacs-lisp
 
+
+(use-package conda
+  :config
+
+  (conda-env-initialize-interactive-shells)
+(conda-env-initialize-eshell)
+(conda-env-autoactivate-mode t)
+
+ (setq conda-anaconda-home "C:/Users/Public/dev/bin/dbConda-2019_07-py37/")
+(setq conda-env-home-directory "C:/Users/Public/dev/bin/dbConda-2019_07-py37/")
+
+)
+
+;; (conda-env-candidates-from-dir "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/")
+;; (conda-env-candidates)
+;; (conda-env-default-location)
+
 (use-package anaconda-mode
   :config
   ;; (setq python-shell-interpreter "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/scripts/ipython.exe")
-  (setq python-shell-interpreter cjm/ipython-path)
+  ;; (setq python-shell-interpreter cjm/ipython-path)
+  (setq python-shell-interpreter "ipython")
  (setq python-shell-interpreter-args " -i")
    ;; (setq python-shell-completion-native-enable nil)
 ;; (setq comint-process-echoes t) 
@@ -2077,6 +2110,9 @@ Snippets that probably should exist in yas snippet.
   (evil-open-above 1)
   (insert "import pandas as pd")
   (evil-normal-state))
+
+(use-package python-pytest)
+
 #+end_src
 
 
