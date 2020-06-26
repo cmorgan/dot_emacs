@@ -15,7 +15,8 @@ projectile-bookmarks.eld
 places
 url
 
-eshell 
+eshell/history
+eshell/lastdir
 \#*\# 
 transient
 persp-confs

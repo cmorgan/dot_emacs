@@ -293,8 +293,9 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    "b" '(python-insert-breakpoint :wk "breakpoint")
    "n" '(cjm/python-insert-ifname :wk "ifname")
    "t" '(:ignore t :wk "test")
-   "tt" '(cjm/pytest :wk "file")
-   "tf" '(cjm/pytest :wk "function")
+   "tt" '(python-pytest-file :wk "file")
+   "tf" '(python-pytest-function :wk "function")
+   "tr" '(python-pytest-repeat :wk "repeat")
 
    "x" 'cjm/run-python
 
@@ -1166,6 +1167,12 @@ LANGUAGE is a string referring to one of orb-babel's supported languages.
 #+end_src
 
 #+begin_src emacs-lisp
+(defun cjm/python-pytest-repeat ()
+(interactive)
+  (save-some-buffers t)
+(python-pytest-repeat)
+
+)
 
 (defun cjm/search ()
   (interactive)
@@ -1304,11 +1311,14 @@ LANGUAGE is a string referring to one of orb-babel's supported languages.
         (save-buffer)
         (compile (eval (concat cjm/python-path " " buffer-file-name)) (and comint t)))
 
+;; I ended up not using this as python-pytest package is quite nice. However, leaving this here as example of comint and regex
+;; Also this method is nice as it uses the compilation buffer rather than a shell
       (defun cjm/pytest (comint)
         (interactive "P")
         (save-buffer)
         ;; (if cjm/is-windows nil (save-buffer))
         (compile (eval (concat cjm/pytest_cmd  " -s " buffer-file-name)) (and comint t)))
+
 
           ;; exit without confirming running process
           (setq confirm-kill-processes nil)
@@ -2111,7 +2121,12 @@ Snippets that probably should exist in yas snippet.
   (insert "import pandas as pd")
   (evil-normal-state))
 
-(use-package python-pytest)
+(use-package python-pytest
+:config
+(setq python-pytest-unsaved-buffers-behavior 'save-all)
+)
+
+
 
 #+end_src
 
