@@ -256,6 +256,19 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    :states '(normal)
    :keymaps 'org-journal-mode-map
   "hh" 'org-journal-previous-entry
+  "ll" 'org-journal-next-entry)
+
+  (general-define-key
+   :states '(normal)
+   :keymaps 'calendar-mode-map
+  "o" 'org-journal-read-entry
+  "n" 'org-journal-next-entry
+  "p" 'org-journal-previous-entry)
+
+  (general-define-key
+   :states '(normal)
+   :keymaps 'edebug-mode-map
+  "s" 'edebug-step-mode
 )
 
   ;; orgmode
@@ -1718,7 +1731,8 @@ org-download: web images
   (setq org-journal-dir journal-directory
         org-journal-file-format "%Y%m%d.org"
         org-journal-find-file 'find-file
-        org-journal-file-type "=daily="))
+        org-journal-file-type "daily")
+)
 
 (use-package org-pomodoro)
 
@@ -1727,8 +1741,8 @@ org-download: web images
 capturing stuff, org-capture of course:
 #+BEGIN_SRC emacs-lisp
 ;; this has nice reformat   (lisp-multiline)
-(use-package lispy)
-(use-package evil-lispy)
+;;(use-package lispy)
+;;(use-package evil-lispy)
 (setq org-capture-templates `(("j" "Journal Note" entry (file ,(concat cjm/note-dir "/ideas.org"))
                                "* Event: %?\n\n  %i\n\n  From: %a"
                                :empty-lines 1)
