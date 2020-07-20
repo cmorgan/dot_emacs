@@ -1,4 +1,5 @@
-#+title: Emacs import pdb; pdb.set_trace() ## DEBUG ##
+
+#+title: Emacs
 #+options: toc:nil num:nil
 
 https://gist.github.com/yaodong/532e5b31781724ea2566503edcc498c3
@@ -22,8 +23,8 @@ TODO make this platform specific
  ((string-equal system-type "windows-nt") ; Microsoft Windows
   (message "Microsoft Windows")
   (setq cjm/is-windows t) 
-  (setq cjm/flycheck-triggers '(save))
-  ;; (setq cjm/flycheck-triggers '())
+  ;; (setq cjm/flycheck-triggers '(save))
+  (setq cjm/flycheck-triggers '())
   (setq cjm/note-dir "c:/Users/Public/dev/docs/notes")
   (setq cjm/ipython-path "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/scripts/ipython.exe")
   (setq cjm/devroot-dir "C:/Users/Public/dev/")
@@ -44,36 +45,35 @@ TODO make this platform specific
   (setq cjm/isort-path "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/Scripts/isort.exe")
   (setq cjm/black-path "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/Scripts/black.exe")
 
-  (setq org-directory "c:/dev/docs/org/")
+  (setq org-directory "c:/users/public/dev/docs/org/"
+        journal-directory (concat org-directory "journal/")
+        )
   (setq org-agenda-files (list
                           (concat org-directory "quantdb.org")
                           (concat org-directory "index.org")
                           (concat org-directory "research.org")
-                          (concat org-directory "todo.org")))
+                          (concat org-directory "todo.org"))))
 
-)
  ((string-equal system-type "darwin") ; Mac OS X
-    (message "Mac OS X"))
+  (message "Mac OS X"))
  ((string-equal system-type "gnu/linux") ; linux
-    (message "Linux")
-    (setq cjm/note-dir "/home/chris/Dropbox/org/notes")
-    
-    (setq cjm/python-path "/home/chris/miniconda3/envs/new/bin/python")
-    (setq cjm/ipython-path "/home/chris/miniconda3/envs/new/bin/ipython")
-    (setq cjm/pytest_cmd "/home/chris/miniconda3/envs/dev/bin/pytest")
-    (setq cjm/flake8-path "/home/chris/miniconda3/envs/dev/bin/flake8")
-    (setq cjm/isort-path "/home/chris/miniconda3/envs/dev/bin/isort")
-    (setq cjm/black-path "/home/chris/miniconda3/envs/dev/bin/black")
-    (setq cjm/flycheck-triggers '(save idle-change))
+  (message "Linux")
+  (setq cjm/note-dir "/home/chris/Dropbox/org/notes")
+  
+  (setq cjm/python-path "/home/chris/miniconda3/envs/new/bin/python")
+  (setq cjm/ipython-path "/home/chris/miniconda3/envs/new/bin/ipython")
+  (setq cjm/pytest_cmd "/home/chris/miniconda3/envs/dev/bin/pytest")
+  (setq cjm/flake8-path "/home/chris/miniconda3/envs/dev/bin/flake8")
+  (setq cjm/isort-path "/home/chris/miniconda3/envs/dev/bin/isort")
+  (setq cjm/black-path "/home/chris/miniconda3/envs/dev/bin/black")
+  (setq cjm/flycheck-triggers '(save idle-change))
 
   ;; (setq org-startup-latex-with-latex-preview t)
   ;; (setq org-preview-latex-fragment t)
 
   (setq org-directory "c:/dev/docs/org/")
   (setq org-agenda-files '("~/org"))
-
-
-))
+  ))
 
 
 #+END_SRC
@@ -223,7 +223,10 @@ Use =evil= with Org agendas.
 
 ** Key bindings
 
+[[http://ergoemacs.org/emacs/keystroke_rep.html][Emacs's Key Syntax Explained]]
+
 Inspired by Spacemacs use SPC as main keybinding and comma as mode specific menu.
+
 
 https://github.com/noctuid/general.el#evil-examples
 https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
@@ -247,6 +250,14 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
 )
 
   ;; mode specific
+  ;;journal
+
+  (general-define-key
+   :states '(normal)
+   :keymaps 'org-journal-mode-map
+  "hh" 'org-journal-previous-entry
+)
+
   ;; orgmode
   (general-define-key
    :states '(normal)
@@ -265,6 +276,8 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
 
    "s" '(nil :wk "section")
    "sh" 'org-insert-heading
+   "st" 'counsel-org-tag
+
    "d" '(nil :wk "date")
    "dt" 'org-time-stamp-inactive
 
@@ -282,6 +295,8 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    "a" '(nil :wk "agenda")
    "at" 'org-todo-list
    "aa" 'org-agenda
+
+
 )
 
   ;; python
@@ -331,9 +346,11 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    "."   'cjm/open-config
    "\""  'split-window-below
    "%"  'split-window-right
-   "TAB" 'toggle-buffers
+   ;; "TAB" 'toggle-buffers
+   ;; "TAB" 'ido-switch-buffer
+   "TAB" 'cjm/switch-to-last-buffer
    "k" 'cjm/kill-current-buffer
-   "n" 'ace-window
+   "x"  'delete-window
 
    "w" '(nil :wk "writeroom")
    "wg" 'global-writeroom-mode
@@ -362,7 +379,8 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    "pa" 'projectile-find-file-in-known-projects
    "pn" 'persp-next
    "px" 'persp-kill
-   "ps" 'persp-switch
+   "p TAB" 'persp-switch
+   "ps" 'projectile-run-eshell
 
    ;; files
    "f" '(:ignore t :which-key "files")
@@ -373,6 +391,7 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    "ff" 'counsel-find-file
    "fr" 'counsel-recentf
    "fs" 'save-buffer
+   "fS" 'save-all
    "fp" 'cjm/copy-current-line-position-to-clipboard
    "fn" 'cjm/rename-file-and-buffer
    "fx" 'cjm/delete-file-and-buffer
@@ -385,7 +404,6 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    "cp" 'flycheck-previous-error
    "cf" 'cjm/toggle-fold
 
-
    ;; hide
    "h" '(:ignore t :which-key "hide")
    "hh" 'hs-toggle-hiding
@@ -393,6 +411,19 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
 
    ;; apps
    "a" '(:ignore t :which-key "apps")
+   "ar" 'ranger
+   "ac" 'calendar
+   "ap" 'org-pomodoro
+
+
+   ;; journal 
+   "j" '(nil :wk "journal")
+   "jj" '(org-journal-new-entry :wk "new")
+   "jo" '(org-journal-open-current-journal-file :wk "new")
+   "jp" '(org-journal-previous-entry :wk "previous")
+   "jn" '(org-journal-next-entry :wk "next")
+
+   "w" '(nil :wk "writeroom")
    "ar" 'ranger
    "ac" 'calendar
 
@@ -411,6 +442,8 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    "wo" 'other-frame
    "ws" 'ace-swap-window
    "ww" 'ace-window
+   "wm" 'cjm/frame-min
+   "wa" 'cjm/frame-max
 
    ;; search
    "s" '(:ignore t :which-key "search")
@@ -741,6 +774,7 @@ doesn't require any additional setup. I've bound its most useful command to
 Flycheck will have you visit all warnings and whatnot, only visit errors.
 #+begin_src emacs-lisp
 (use-package let-alist)
+
 (use-package flycheck
   :config
   (setq flycheck-idle-change-delay 7)
@@ -755,7 +789,6 @@ Flycheck will have you visit all warnings and whatnot, only visit errors.
   (add-hook 'python-mode-hook 'flycheck-mode)
   (add-hook 'elisp-mode-hook 'flycheck-mode))
 #+end_src
-
 
 ** =projectile=
 
@@ -822,6 +855,15 @@ I like tree-based undo management. I only rarely need it, but when I do, oh boy.
 Install structured text support.
 #+begin_src emacs-lisp
 
+(use-package bug-hunter)
+;; Auto refresh buffers
+(global-auto-revert-mode 1)
+
+;; Also auto refresh dired, but be quiet about it
+(setq global-auto-revert-non-file-buffers t)
+(setq auto-revert-verbose nil)
+
+
 (use-package markdown-mode)
 
 ;; render links as clickable
@@ -833,25 +875,25 @@ Install structured text support.
                             (goto-address-mode)))
 #+end_src
 
-
-
 #+begin_src
 (use-package magit)
 (use-package evil-magit)
 #+end_src
-
 
 #+begin_src emacs-lisp
 
 ;; don't ask to update buffer when file changed
 (global-auto-revert-mode t)
 
+;; recent files are useful
+(recentf-mode 1)
+(setq recentf-max-menu-items 100)
+(setq recentf-max-saved-items 100)
 
 ;; search whatever is highlighted
 (use-package evil-visualstar
   :config
   (global-evil-visualstar-mode))
-
 
 (use-package smartparens
   :config
@@ -1074,8 +1116,20 @@ counsel-rg?
 
 (use-package ivy
 :ensure t
+:init
+  (ivy-mode 1)                          ; enable ivy globally at startup
+:bind (:map ivy-minibuffer-map        ; bind in the ivy buffer
+       ("RET" . ivy-alt-done)
+       ; ("s-<"   . ivy-avy)
+       ; ("s->"   . ivy-dispatching-done)
+       ; ("s-+"   . ivy-call)
+       ("C-<return>"   . ivy-immediate-done)
+       ; ("s-["   . ivy-previous-history-element)
+       ; ("s-]"   . ivy-next-history-element)
+)
 :config
-(setq ivy-use-virtual-buffers t))
+(setq ivy-use-virtual-buffers t)
+)
 
 ;; fuzzy
 ;; https://oremacs.com/2016/01/06/ivy-flx/
@@ -1130,6 +1184,7 @@ counsel-rg?
 Format elisp in org mode
 https://www.reddit.com/r/emacs/comments/9tp79o/elispformat_in_org_mode/
 #+begin_src emacs-lisp
+(defun save-all () (interactive) (save-some-buffers t))
 (defun edit-src-block (src fn language)
   "Replace SRC org-element's value property with the result of FN.
 FN is a function that operates on org-element's value and returns a string.
@@ -1167,6 +1222,26 @@ LANGUAGE is a string referring to one of orb-babel's supported languages.
 #+end_src
 
 #+begin_src emacs-lisp
+
+(defun cjm/frame-min()
+  (interactive)
+  (delete-other-windows)
+  (toggle-frame-fullscreen)
+  )
+
+(defun cjm/frame-max()
+  (interactive)
+  (split-window-right)
+  (toggle-frame-fullscreen)
+
+  )
+
+(defun cjm/switch-to-last-buffer ()
+;;https://www.reddit.com/r/emacs/comments/2jzkz7/quickly_switch_to_previous_buffer/
+;; https://emacsredux.com/blog/2013/04/28/switch-to-previous-buffer/
+  (interactive)
+  (switch-to-buffer nil))
+
 (defun cjm/python-pytest-repeat ()
 (interactive)
   (save-some-buffers t)
@@ -1623,6 +1698,30 @@ org-download: web images
 #+begin_src emacs-lisp
 (use-package org-cliplink)
 (use-package org-download)
+;; (use-package org-journal
+;;   :init
+;;   (setq org-journal-dir journal-directory
+;;         org-journal-file-format "%Y%m%d.org"
+;;         org-journal-find-file 'find-file
+;;         org-journal-file-type "=weekly="
+        
+;;         )
+;;   :config
+
+;; (org-journal-update-auto-mode-alist)
+;;   )
+
+(use-package org-journal
+  :ensure t
+  :defer t
+  :config
+  (setq org-journal-dir journal-directory
+        org-journal-file-format "%Y%m%d.org"
+        org-journal-find-file 'find-file
+        org-journal-file-type "=daily="))
+
+(use-package org-pomodoro)
+
 #+end_src
 
 capturing stuff, org-capture of course:
@@ -1658,21 +1757,21 @@ capturing stuff, org-capture of course:
  "<M-return>" 'org-capture-kill
  "<C-return>" 'org-capture-finalize)
 
-(setq org-capture-templates
-      (quote(
+;; (setq org-capture-templates
+;;       (quote(
 ;; %u inactive datetime, %t active
 ;; %i%? insert?
 ;; https://gist.github.com/mrbig033/bcf387e3a56cdf19f6c618756f0c358c#file-packages-el
   ;; ("i" "Idea" entry (file ,(concat cjm/note-dir "tofile.org")) "* %u %i%?" :empty-lines 1)
 
-  ("i" "Idea" entry (file ,(concat cjm/note-dir "ideas.org"))
-	("s" "Social" entry  (file+headline "~/org/Creative/Social/Public/social_public.org" "Refile") "* %u %i%?")
-	("r" "Refile" entry  (file+headline "~/org/Planning/planning.org" "Refile") "* %u %i%?" :empty-lines 1)
-	("0" "Daily"  entry  (file+headline "~/org/Planning/planning.org" "Daily")  "* TODO %u %i%?")
-	("1" "Agora"  entry  (file+headline "~/org/Planning/planning.org" "Agora")  "* TODO %u %i%?")
-	("2" "Logo"   entry  (file+headline "~/org/Planning/planning.org" "Logo")   "* TODO %u %i%?")
-	("3" "Depois" entry  (file+headline "~/org/Planning/planning.org" "Depois") "* TODO %u %i%?")
-	("4" "Um Dia" entry  (file+headline "~/org/Planning/planning.org" "Um Dia") "* TODO %u %i%?")))))
+  ;; ("i" "Idea" entry (file ,(concat cjm/note-dir "ideas.org"))
+  ;;   ("s" "Social" entry  (file+headline "~/org/Creative/Social/Public/social_public.org" "Refile") "* %u %i%?")
+  ;;   ("r" "Refile" entry  (file+headline "~/org/Planning/planning.org" "Refile") "* %u %i%?" :empty-lines 1)
+  ;;   ("0" "Daily"  entry  (file+headline "~/org/Planning/planning.org" "Daily")  "* TODO %u %i%?")
+  ;;   ("1" "Agora"  entry  (file+headline "~/org/Planning/planning.org" "Agora")  "* TODO %u %i%?")
+  ;;   ("2" "Logo"   entry  (file+headline "~/org/Planning/planning.org" "Logo")   "* TODO %u %i%?")
+  ;;   ("3" "Depois" entry  (file+headline "~/org/Planning/planning.org" "Depois") "* TODO %u %i%?")
+  ;;   ("4" "Um Dia" entry  (file+headline "~/org/Planning/planning.org" "Um Dia") "* TODO %u %i%?")))))
 
 
 
@@ -1778,8 +1877,6 @@ To file:
   ;;          (org-level-4 :weight 'semi-bold :height 1.0)
   ;;          (org-level-5 :weight 'semi-bold :height 1.0))))
 
-
-
   ;; (setq org-agenda-files (list org-directory))
   (setq org-agenda-skip-scheduled-if-done t)
   (setq org-agenda-skip-deadline-if-done t)
@@ -1795,20 +1892,22 @@ To file:
                               ;; ("@office" . ?o)
                               ;; ("@home" . ?H)
                               ;; (:endgroup)
-                              ("WAITING" . ?w)
-                              ("HOLD" . ?h)
-                              ("IDEA" . ?i)
-                              ("reading" . ?r)
+                              ;; ("WAITING" . ?w)
+                              ;; ("HOLD" . ?h)
+                              ;; ("IDEA" . ?i)
+                              ;; ("reading" . ?r)
                               ;; ("PERSONAL" . ?P)
                               ;; ("DRAFT" . ?D)
                               ;; ("WORK" . ?W)
-                              ("NOTE" . ?n)
-                              ("export" . ?e)
+                              ;; ("NOTE" . ?n)
+                              ;; ("export" . ?e)
 
-                              ("data" . ?d)
-                              ("model" . ?m)
-                              ("bot" . ?b))))
-
+                              ;; ("data" . ?d)
+                              ;; ("model" . ?m)
+                              ("team-meeting" . ?t)
+                              ("vendor-meeting" . ?v)
+                              ;; ("bot" . ?b)
+)))
 
                               ;; refiling
                               (setq org-refile-targets (quote ((nil :maxlevel . 9)
@@ -1823,7 +1922,6 @@ To file:
                                   (if (= pri-value pri-current)
                                       subtree-end
                                     nil)))
-
 
                                         ; custom agenda view
                                         ; composite agenda: supply list of types to show up in agenda
@@ -1910,7 +2008,7 @@ To file:
                               (set-face-attribute 'calendar-iso-week-header-face nil
                                                   :height 0.7)
                               (setq calendar-intermonth-header
-                                    (propertize "Wk"                  ; or e.g. "KW" in Germany
+                                    (propertize "Wk" ; or e.g. "KW" in Germany
                                                 'font-lock-face 'calendar-iso-week-header-face))
                               (set-face-attribute 'calendar-iso-week-face nil
                                                   :height 1.0 :foreground "salmon")
@@ -1989,6 +2087,24 @@ Add some custom file definitions for syntax checking.
                                 ("Rprofile.site" . R-mode))
                               auto-mode-alist))
 #+end_src
+
+** Shell
+
+https://emacs.stackexchange.com/questions/27849/how-can-i-setup-eshell-to-use-ivy-for-tab-completion
+#+BEGIN_SRC emacs-lisp
+
+;; (add-hook 'eshell-mode-hook
+;;   (lambda () 
+;;     (define-key eshell-mode-map (kbd "<tab>")
+;;       (lambda () (interactive) (pcomplete-std-complete)))))
+
+(add-hook 'eshell-mode-hook
+  (lambda () 
+    (define-key eshell-mode-map (kbd "<tab>") 'completion-at-point)
+))
+
+
+  #+END_SRC
 
 ** Python
 
@@ -2125,9 +2241,6 @@ Snippets that probably should exist in yas snippet.
 :config
 (setq python-pytest-unsaved-buffers-behavior 'save-all)
 )
-
-
-
 #+end_src
 
 

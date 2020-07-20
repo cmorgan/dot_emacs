@@ -1,3 +1,4 @@
-alias openo find-file-other-window $1
-alias open find-file $1
+alias gitl git log --reverse HEAD~10... $*
 alias ll ls -l $*
+alias open find-file $1
+alias openo find-file-other-window $1
