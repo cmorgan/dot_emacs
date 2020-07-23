@@ -46,7 +46,7 @@ TODO make this platform specific
   (setq cjm/black-path "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/Scripts/black.exe")
 
   (setq org-directory "c:/users/public/dev/docs/org/"
-        journal-directory (concat org-directory "journal/")
+        org-journal-dir (concat org-directory "journal/")
         )
   (setq org-agenda-files (list
                           (concat org-directory "quantdb.org")
@@ -245,31 +245,19 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    :states '(normal)
    :keymaps 'org-mode-map
     "<S-return>" 'cjm/org-open-at-point
-;; TODO fix this
-    ;; "/" 'cjm/search
+  ;; TODO fix this
+  ;; "/" 'cjm/search
 )
 
-  ;; mode specific
-  ;;journal
-
   (general-define-key
-   :states '(normal)
-   :keymaps 'org-journal-mode-map
-  "hh" 'org-journal-previous-entry
-  "ll" 'org-journal-next-entry)
-
-  (general-define-key
-   :states '(normal)
-   :keymaps 'calendar-mode-map
-  "o" 'org-journal-read-entry
-  "n" 'org-journal-next-entry
-  "p" 'org-journal-previous-entry)
+   :keymaps 'ivy-minibuffer-map
+   "RET"  'ivy-alt-done
+   "<S-return>"   'ivy-immediate-done)
 
   (general-define-key
    :states '(normal)
    :keymaps 'edebug-mode-map
-  "s" 'edebug-step-mode
-)
+  "s" 'edebug-step-mode)
 
   ;; orgmode
   (general-define-key
@@ -286,6 +274,8 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    "ta" 'org-table-align
    "tc" 'org-table-insert-column
    "tr" 'org-table-insert-row
+   "tx" 'org-table-delete-column
+
 
    "s" '(nil :wk "section")
    "sh" 'org-insert-heading
@@ -307,10 +297,7 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
 
    "a" '(nil :wk "agenda")
    "at" 'org-todo-list
-   "aa" 'org-agenda
-
-
-)
+   "aa" 'org-agenda)
 
   ;; python
   (general-define-key
@@ -342,7 +329,6 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    :keymaps 'override
    "ff" 'ace-window
    "tt" 'writeroom-mode
-
   )
 
   ;; Main menu
@@ -431,10 +417,7 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
 
    ;; journal 
    "j" '(nil :wk "journal")
-   "jj" '(org-journal-new-entry :wk "new")
-   "jo" '(org-journal-open-current-journal-file :wk "new")
-   "jp" '(org-journal-previous-entry :wk "previous")
-   "jn" '(org-journal-next-entry :wk "next")
+   "jj" '(journal-file-week :wk "open")
 
    "w" '(nil :wk "writeroom")
    "ar" 'ranger
@@ -2181,6 +2164,7 @@ https://emacs.stackexchange.com/questions/45883/fold-all-methods-in-a-python-cla
 
   (add-hook 'python-mode-hook 'anaconda-mode)
   (add-hook 'python-mode-hook 'hs-minor-mode)
+  (add-hook 'cython-mode-hook 'hs-minor-mode)
   (setq-default tab-width 4))
 
 (use-package reformatter
@@ -2285,3 +2269,62 @@ Finish.
 #+begin_src emacs-lisp
 (use-package csharp-mode)
 #+end_src
+*  Productivity
+screen
+https://emacs.stackexchange.com/questions/30420/resize-emacs-gui-window-to-exactly-half-the-screen
+** Journaling
+
+Inspired by [[http://www.howardism.org/Technical/Emacs/journaling-org.html][Journaling with org-mode]] from Howardism, I have a journal
+file per week.
+
+org-journal looked good but didn't seem to work out of the box, I
+found it difficult to debug the code.
+
+This creates a journal file per week, with days ready to fill in.
+
+#+BEGIN_SRC emacs-lisp
+(defun get-journal-file-this-week()
+  "Return filename for today's journal entry."
+  (let ((daily-name (format-time-string "%Y-%W")))
+    (expand-file-name (concat org-journal-dir daily-name ".org"))))
+
+
+(defun journal-file-week()
+  "Create and load a journal file based on today's date."
+  (interactive)
+  (find-file (get-journal-file-this-week)))
+
+
+;; (defun journal-file-insert ()
+;;   (interactive)
+;;   (insert (concat "#+TITLE: Journal Entry - " (buffer-name))))
+
+
+(defun journal-file-insert ()
+  (interactive)
+  (insert (concat "#+TITLE: Journal Entry - " (buffer-name)
+                  "\n"
+                  "\n" "* Friday"
+                  "\n"
+                  "\n" "* Thursday"
+                  "\n"
+                  "\n" "* Wednesday"
+                  "\n"
+                  "\n" "* Tuesday"
+                  "\n"
+                  "\n" "* Monday"
+                  )))
+
+(use-package autoinsert
+  :ensure t
+  :init
+  ;; Don't want to be prompted before insertion:
+  (setq auto-insert-query nil)
+
+  (add-hook 'find-file-hook 'auto-insert)
+  (auto-insert-mode 1)
+  (add-to-list 'auto-insert-alist '(".*/[0-9]*-[0-9]*.org$" . journal-file-insert))
+
+)
+  #+END_SRC
+
