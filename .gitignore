@@ -21,3 +21,6 @@ eshell/lastdir
 transient
 persp-confs
 custom.el
+session.*
+anaconda-mode
+out.file

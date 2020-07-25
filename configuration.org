@@ -44,6 +44,9 @@ TODO make this platform specific
   (setq cjm/flake8-path "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/Scripts/flake8.exe")
   (setq cjm/isort-path "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/Scripts/isort.exe")
   (setq cjm/black-path "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/Scripts/black.exe")
+  (setq 
+     conda-anaconda-home "C:/Users/Public/dev/bin/dbConda-2019_07-py37/"
+     conda-env-home-directory "C:/Users/Public/dev/bin/dbConda-2019_07-py37/")
 
   (setq org-directory "c:/users/public/dev/docs/org/"
         org-journal-dir (concat org-directory "journal/")
@@ -67,6 +70,10 @@ TODO make this platform specific
   (setq cjm/isort-path "/home/chris/miniconda3/envs/dev/bin/isort")
   (setq cjm/black-path "/home/chris/miniconda3/envs/dev/bin/black")
   (setq cjm/flycheck-triggers '(save idle-change))
+  (setq 
+     conda-anaconda-home "/home/chris/miniconda3"
+     conda-env-home-directory "/home/chris/miniconda3"
+)
 
   ;; (setq org-startup-latex-with-latex-preview t)
   ;; (setq org-preview-latex-fragment t)
@@ -2144,8 +2151,8 @@ https://emacs.stackexchange.com/questions/45883/fold-all-methods-in-a-python-cla
 (conda-env-initialize-eshell)
 (conda-env-autoactivate-mode t)
 
- (setq conda-anaconda-home "C:/Users/Public/dev/bin/dbConda-2019_07-py37/")
-(setq conda-env-home-directory "C:/Users/Public/dev/bin/dbConda-2019_07-py37/")
+;; (setq conda-anaconda-home "C:/Users/Public/dev/bin/dbConda-2019_07-py37/")
+;; (setq conda-env-home-directory "C:/Users/Public/dev/bin/dbConda-2019_07-py37/")
 
 )
 
@@ -2204,6 +2211,7 @@ https://emacs.stackexchange.com/questions/45883/fold-all-methods-in-a-python-cla
 Snippets that probably should exist in yas snippet.
 
 #+begin_src emacs-lisp
+
 (defun cjm/python-insert-breakpoint ()
   "Insert Python breakpoint above point."
   (interactive)
