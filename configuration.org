@@ -82,6 +82,9 @@ TODO make this platform specific
   (setq org-agenda-files '("~/org"))
   ))
 
+;; fixes echoing of variables
+;; https://emacs.stackexchange.com/questions/24453/weird-shell-output-when-using-ipython-5
+(setq python-shell-interpreter-args "--simple-prompt -i")
 
 #+END_SRC
 
