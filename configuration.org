@@ -84,7 +84,6 @@ TODO make this platform specific
 
 ;; fixes echoing of variables
 ;; https://emacs.stackexchange.com/questions/24453/weird-shell-output-when-using-ipython-5
-(setq python-shell-interpreter-args "--simple-prompt -i")
 
 #+END_SRC
 
@@ -2167,8 +2166,9 @@ https://emacs.stackexchange.com/questions/45883/fold-all-methods-in-a-python-cla
   :config
   ;; (setq python-shell-interpreter "C:/Users/Public/dev/bin/dbConda-2019_07-py37/envs/dev/scripts/ipython.exe")
   ;; (setq python-shell-interpreter cjm/ipython-path)
-  (setq python-shell-interpreter "ipython")
- (setq python-shell-interpreter-args " -i")
+ ;; (setq python-shell-interpreter-args " -i")
+  (setq python-shell-interpreter "ipython"
+        python-shell-interpreter-args "--simple-prompt -i")
    ;; (setq python-shell-completion-native-enable nil)
 ;; (setq comint-process-echoes t) 
 
