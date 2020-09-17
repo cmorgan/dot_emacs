@@ -285,7 +285,6 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    "tr" 'org-table-insert-row
    "tx" 'org-table-delete-column
 
-
    "s" '(nil :wk "section")
    "sh" 'org-insert-heading
    "st" 'counsel-org-tag
@@ -1025,19 +1024,6 @@ If `hs-hide-comments-when-hiding-all' is non-nil, also hide the comments."
 (define-key evil-normal-state-map (kbd "zl") 'cjm/hs-hide-all)
 
 ;; (define-key evil-normal-state-map (kbd "zl") 'hs-hide-leafs)
-#+end_src
-
-** Quickly visit Emacs configuration
-
-I futz around with my dotfiles a lot. This binds =C-c e= to quickly open my
-Emacs configuration file.
-
-#+begin_src emacs-lisp
-(defun hrs/visit-emacs-config ()
-  (interactive)
-  (find-file "~/.emacs.d/configuration.org"))
-
-(global-set-key (kbd "C-c e") 'hrs/visit-emacs-config)
 #+end_src
 
 ** Set up =helpful=
