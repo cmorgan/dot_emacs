@@ -78,7 +78,10 @@ TODO make this platform specific
   ;; (setq org-startup-latex-with-latex-preview t)
   ;; (setq org-preview-latex-fragment t)
 
-  (setq org-directory "c:/dev/docs/org/")
+  (setq org-directory "~/Dropbox/org/"
+        org-journal-dir (concat org-directory "journal/")
+        )
+
   (setq org-agenda-files '("~/org"))
   ))
 
@@ -2280,7 +2283,7 @@ Finish.
 #+begin_src emacs-lisp
 (use-package csharp-mode)
 #+end_src
-*  Productivity
+* Productivity
 screen
 https://emacs.stackexchange.com/questions/30420/resize-emacs-gui-window-to-exactly-half-the-screen
 ** Journaling
@@ -2296,7 +2299,7 @@ This creates a journal file per week, with days ready to fill in.
 #+BEGIN_SRC emacs-lisp
 (defun get-journal-file-this-week()
   "Return filename for today's journal entry."
-  (let ((daily-name (format-time-string "%Y-%W")))
+  (let ((daily-name (format-time-string "%Y-%V")))
     (expand-file-name (concat org-journal-dir daily-name ".org"))))
 
 
@@ -2309,7 +2312,6 @@ This creates a journal file per week, with days ready to fill in.
 ;; (defun journal-file-insert ()
 ;;   (interactive)
 ;;   (insert (concat "#+TITLE: Journal Entry - " (buffer-name))))
-
 
 (defun journal-file-insert ()
   (interactive)
@@ -2338,4 +2340,35 @@ This creates a journal file per week, with days ready to fill in.
 
 )
   #+END_SRC
+
+
+** Bibliography
+
+#+BEGIN_SRC emacs-lisp
+(use-package org-ref
+ :init 
+ (setq org-ref-default-bibliography '("~/Dropbox/org/bibliography/references.bib"))
+ :config (require 'org-ref-ivy-cite))
+
+
+(use-package ivy-bibtex
+  :config
+  (setq bibtex-completion-notes-path "~/Dropbox/org/bibliography/notes.org"
+        bibtex-completion-bibliography '("~/Dropbox/org/bibliography/references.bib")
+        ;; bibtex-completion-library-path '("~/Dropbox/E-Library")
+        bibtex-completion-pdf-open-function
+         (lambda (fpath)
+           (call-process "open" nil 0 nil fpath)))
+)
+
+(use-package org-ref
+  :init
+  (setq reftex-default-bibliography '("~/Dropbox/org/bibliography/references.bib"))
+  (setq org-ref-bibliography-notes "~/Dropbox/org/bibliography/notes.org"
+        org-ref-default-bibliography '("~/Dropbox/org/bibliography/references.bib")
+        org-ref-pdf-directory "~/Dropbox/library/pdf"
+        org-ref-completion-library 'org-ref-ivy-bibtex)
+)
+
+#+END_SRC
 
