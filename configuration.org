@@ -288,7 +288,6 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    "tr" 'org-table-insert-row
    "tx" 'org-table-delete-column
 
-
    "s" '(nil :wk "section")
    "sh" 'org-insert-heading
    "st" 'counsel-org-tag
@@ -430,6 +429,8 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    ;; journal 
    "j" '(nil :wk "journal")
    "jj" '(journal-file-week :wk "open")
+   "jn" '(get-next-journal-file :wk "next")
+   "jp" '(get-previous-journal-file :wk "prev")
 
    "w" '(nil :wk "writeroom")
    "ar" 'ranger
@@ -1028,19 +1029,6 @@ If `hs-hide-comments-when-hiding-all' is non-nil, also hide the comments."
 ;; (define-key evil-normal-state-map (kbd "zl") 'hs-hide-leafs)
 #+end_src
 
-** Quickly visit Emacs configuration
-
-I futz around with my dotfiles a lot. This binds =C-c e= to quickly open my
-Emacs configuration file.
-
-#+begin_src emacs-lisp
-(defun hrs/visit-emacs-config ()
-  (interactive)
-  (find-file "~/.emacs.d/configuration.org"))
-
-(global-set-key (kbd "C-c e") 'hrs/visit-emacs-config)
-#+end_src
-
 ** Set up =helpful=
 
 The =helpful= package provides, among other things, more context in Help
@@ -1389,6 +1377,7 @@ LANGUAGE is a string referring to one of orb-babel's supported languages.
         :type 'integer
         :group 'endless)
 
+;; NOTE: comint mode is: C-u before command
       (defun cjm/run-python(comint)
         (interactive "P")
         (save-buffer)
@@ -2303,6 +2292,49 @@ This creates a journal file per week, with days ready to fill in.
     (expand-file-name (concat org-journal-dir daily-name ".org"))))
 
 
+
+(defun get-previous-journal-file()
+  (interactive)
+  (string-match "\\(.*\\)\\-\\(.*\\).org"
+                   (buffer-name))
+     (setq 
+          first-part (match-string 1 (buffer-name))
+          second-part (match-string 2 (buffer-name)))
+
+  (setq second-part (number-to-string (- (string-to-number second-part) 1)))
+
+
+  (let ((daily-name (concat first-part "-" second-part)))
+    (find-file (expand-file-name (concat org-journal-dir daily-name ".org")))
+)
+)
+
+
+(defun get-next-journal-file()
+  (interactive)
+  (string-match "\\(.*\\)\\-\\(.*\\).org"
+                   (buffer-name))
+     (setq 
+          first-part (match-string 1 (buffer-name))
+          second-part (match-string 2 (buffer-name)))
+
+  (setq second-part (number-to-string (+ (string-to-number second-part) 1)))
+
+
+  (let ((daily-name (concat first-part "-" second-part)))
+    (find-file (expand-file-name (concat org-journal-dir daily-name ".org")))
+)
+)
+
+
+
+(defun open-previous-journal()
+ (string-match "(.*-).org" "2012-37.org")
+(messsage (match-string 1))
+(buffer-name)
+".*/[0-9]*-[0-9]*.org$"
+)
+
 (defun journal-file-week()
   "Create and load a journal file based on today's date."
   (interactive)
@@ -2336,6 +2368,7 @@ This creates a journal file per week, with days ready to fill in.
 
   (add-hook 'find-file-hook 'auto-insert)
   (auto-insert-mode 1)
+  ;; autoinsert content from function journal-file-insert which matches regex
   (add-to-list 'auto-insert-alist '(".*/[0-9]*-[0-9]*.org$" . journal-file-insert))
 
 )
