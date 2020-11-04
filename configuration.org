@@ -11,7 +11,7 @@ https://github.com/magnars/.emacs.d/blob/master/settings/setup-org.el
 https://github.com/bling/dotemacs/tree/master/config
 
 (byte-recompile-directory (expand-file-name "~/.emacs.d") 0)
-
+  
 * Variables
 TODO make this platform specific
 #+BEGIN_SRC emacs-lisp
@@ -239,11 +239,11 @@ Use =evil= with Org agendas.
 
 Inspired by Spacemacs use SPC as main keybinding and comma as mode specific menu.
 
-
 https://github.com/noctuid/general.el#evil-examples
 https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
 
 #+begin_src emacs-lisp
+
 
 ;; this prevents emacs from being slow on windoes?
 (setq inhibit-compacting-font-caches t)
@@ -257,6 +257,7 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    :states '(normal)
    :keymaps 'org-mode-map
     "<S-return>" 'cjm/org-open-at-point
+    "<S-M-return>" 'org-open-at-point
   ;; TODO fix this
   ;; "/" 'cjm/search
 )
@@ -281,7 +282,7 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    "li" '(org-insert-link :wk "insert")
    "lg" '(counsel-org-link :wk "go")
     
-   "t" '(nil :wk "table")
+   "t" '(:ignore t :wk "table")
    "ti" 'org-table-create
    "ta" 'org-table-align
    "tc" 'org-table-insert-column
@@ -291,13 +292,12 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    "s" '(nil :wk "section")
    "sh" 'org-insert-heading
    "st" 'counsel-org-tag
+   "se" '(cjm/insert-heading-inactive-timestamp :wk "entry")
+   "sn" 'org-narrow-to-subtree
+   "sw" 'widen
 
    "d" '(nil :wk "date")
    "dt" 'org-time-stamp-inactive
-
-   "n" '(nil :wk "narrow")
-   "ns" 'org-narrow-to-subtree
-   "nw" 'widen
 
    "b" '(nil :wk "blocks")
    "bt" 'org-toggle-blocks
@@ -308,7 +308,11 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
 
    "a" '(nil :wk "agenda")
    "at" 'org-todo-list
-   "aa" 'org-agenda)
+   "aa" 'org-agenda
+  
+   "o" '(
+(lambda () (interactive)(org-sort-list nil nil t)) :wk "agenda")
+  )
 
   ;; python
   (general-define-key
@@ -340,6 +344,7 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    :keymaps 'override
    "ff" 'ace-window
    "tt" 'writeroom-mode
+   "<f5>" 'recompile
   )
 
   ;; Main menu
@@ -359,7 +364,7 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    ;; "TAB" 'toggle-buffers
    ;; "TAB" 'ido-switch-buffer
    "TAB" 'cjm/switch-to-last-buffer
-   "k" 'cjm/kill-current-buffer
+   "k" '(cjm/kill-current-buffer :wk "kill buffer")
    "x"  'delete-window
 
    "w" '(nil :wk "writeroom")
@@ -372,11 +377,11 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
 
    ;; emacs
    "e" '(:ignore t :which-key "emacs")
-   "er"  'restart-emacs
-   "ei"  'cjm/load-init
+   "er"  '(restart-emacs :wk "restart")
+   "ei"  '(cjm/load-init :wk "init")
    "eb"  'eval-buffer
-   "ev"  'counsel-describe-variable
-   "ef"  'counsel-describe-function
+   "ev"  '(counsel-describe-variable :wk "desc. variable")
+   "ef"  '(counsel-describe-function :wk "desc. func.")
    "em"  'lispy-multiline
 
    ;; projectile
@@ -755,8 +760,19 @@ Install =ag= to provide search within projects (usually through
 Company gives text completion in buffers etc. Use =company-mode= everywhere.
 
 #+begin_src emacs-lisp
-(use-package company)
-(add-hook 'after-init-hook 'global-company-mode)
+(use-package company
+:hook (prog-mode . company-mode)
+:custom
+(company-backends '(company-capf)))
+;; (add-hook 'after-init-hook 'global-company-mode)
+;;https://www.reddit.com/r/emacs/comments/fp150t/simple_c_lsp_setup_with_clangd/
+(use-package lsp-mode
+  :ensure t
+  :hook (prog-mode . lsp-deferred)
+  :custom
+  (lsp-prefer-capf t)
+  (lsp-auto-guess-root t)             
+  (lsp-keep-workspace-alive nil))
 #+end_src
 
 Use =M-/= for completion.
@@ -882,6 +898,7 @@ Install structured text support.
 
 (add-hook 'prog-mode-hook (lambda ()
                             (goto-address-mode)))
+
 #+end_src
 
 #+begin_src
@@ -896,8 +913,8 @@ Install structured text support.
 
 ;; recent files are useful
 (recentf-mode 1)
-(setq recentf-max-menu-items 100)
-(setq recentf-max-saved-items 100)
+(setq recentf-max-menu-items 500)
+(setq recentf-max-saved-items 500)
 
 ;; search whatever is highlighted
 (use-package evil-visualstar
@@ -1693,6 +1710,8 @@ org-cliplink: copy link to clipboard then org-cliplink inserts with metadata
 org-download: web images
 
 #+begin_src emacs-lisp
+;; open directories using nautilus
+(setq org-file-apps (cons '(directory . "nautilus file://%s") org-file-apps))
 (use-package org-cliplink)
 (use-package org-download)
 ;; (use-package org-journal
@@ -2257,6 +2276,13 @@ Configure Jedi along with the associated =company= mode:
 (setq jedi:complete-on-dot t)
 #+end_src
 
+** C++
+#+BEGIN_SRC emacs-lisp 
+(use-package modern-cpp-font-lock 
+:ensure t
+) 
+#+END_SRC
+
 ** Javascript / JSON
 
 Have at least some code folding in for json/javascript.
@@ -2286,6 +2312,21 @@ found it difficult to debug the code.
 This creates a journal file per week, with days ready to fill in.
 
 #+BEGIN_SRC emacs-lisp
+
+(defun cjm/insert-inactive-timestamp()
+(interactive)
+(org-insert-time-stamp nil t t nil nil nil))
+
+(defun cjm/insert-heading-inactive-timestamp ()
+(interactive)
+;; (save-excursion
+(org-insert-heading)
+(cjm/insert-inactive-timestamp)
+(org-return)
+(evil-insert-state)
+;; )
+)
+
 (defun get-journal-file-this-week()
   "Return filename for today's journal entry."
   (let ((daily-name (format-time-string "%Y-%V")))
@@ -2373,7 +2414,6 @@ This creates a journal file per week, with days ready to fill in.
 
 )
   #+END_SRC
-
 
 ** Bibliography
 

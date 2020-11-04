@@ -24,3 +24,6 @@ custom.el
 session.*
 anaconda-mode
 out.file
+.emacs.desktop
+history
+request
