@@ -243,8 +243,6 @@ https://github.com/noctuid/general.el#evil-examples
 https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
 
 #+begin_src emacs-lisp
-
-
 ;; this prevents emacs from being slow on windoes?
 (setq inhibit-compacting-font-caches t)
 ;; (define-key dired-mode-map (kbd ",") nil)
@@ -383,6 +381,8 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    "ev"  '(counsel-describe-variable :wk "desc. variable")
    "ef"  '(counsel-describe-function :wk "desc. func.")
    "em"  'lispy-multiline
+   "el"  'elisp-index-search
+   "ee"  'emacs-index-search
 
    ;; projectile
    "p" '(:ignore t :which-key "projectile")
@@ -485,6 +485,7 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    "dN" '(zetteldeft-new-file-and-link :wk "new file & link")
    "dr" '(zetteldeft-file-rename :wk "rename")
    "dx" '(zetteldeft-count-words :wk "count words")
+   "db" '(cjm/zetteldeft-backlinks-to-here :wk "backlinks")
 
    ;;log
    "l" '(nil :wk "Log")
@@ -492,7 +493,6 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    "lp" 'cjm/open-project))
 
 ;; (global-set-key (kbd "C-x k") 'cjm/kill-current-buffer)
-
 (define-key evil-motion-state-map (kbd "C-h") 'evil-window-left)
 (define-key evil-motion-state-map (kbd "C-j") 'evil-window-down)
 (define-key evil-motion-state-map (kbd "C-k") 'evil-window-up)
@@ -757,13 +757,29 @@ Install =ag= to provide search within projects (usually through
 
 ** =company=
 
-Company gives text completion in buffers etc. Use =company-mode= everywhere.
+[[http://company-mode.github.io/][Company]] is a text completion framework for Emacs. The name stands for "complete
+anything". It uses pluggable back-ends and front-ends to retrieve and display
+completion candidates.
 
 #+begin_src emacs-lisp
 (use-package company
-:hook (prog-mode . company-mode)
-:custom
-(company-backends '(company-capf)))
+
+  :ensure t
+  :hook (prog-mode . company-mode)
+
+  :config
+    (setq company-tooltip-align-annotations t)
+    (eval-after-load 'company
+      '(progn
+        ;; (add-hook 'prog-mode-hook 'company-mode)
+        (add-to-list 'company-frontends 'company-tng-frontend)
+        (define-key company-active-map (kbd "TAB") 'company-complete-common-or-cycle)
+        (define-key company-active-map [tab] 'company-complete-common-or-cycle)
+        (define-key company-active-map (kbd "S-TAB") 'company-select-previous)
+        (define-key company-active-map (kbd "<backtab>") 'company-select-previous)
+        (define-key company-mode-map (kbd "C-<SPC>") 'company-complete))))
+
+
 ;; (add-hook 'after-init-hook 'global-company-mode)
 ;;https://www.reddit.com/r/emacs/comments/fp150t/simple_c_lsp_setup_with_clangd/
 (use-package lsp-mode
@@ -1189,6 +1205,8 @@ counsel-rg?
 (projectile-mode)
 #+end_src
 
+** Desktop layout
+(desktop-save-mode 1)
 * Utility functions
 #+begin_src emacs-lisp
 (message "Utility functions")
@@ -1589,19 +1607,17 @@ Collapse src blocks by default, and toggle.
 )
 
 
-(use-package
-  deft
+(defun cjm/inhibit-buffer-messages ()
+  "Set `inhibit-message' buffer-locally."
+  (setq-local inhibit-message t))
+
+(use-package deft
   :ensure t
   :custom
   (deft-extensions '("org" "md" "txt"))
   ;; (deft-directory "~/Dropbox/org/notes")
   (deft-directory cjm/note-dir)
   (deft-use-filename-as-title t))
-
-
-(defun cjm/inhibit-buffer-messages ()
-  "Set `inhibit-message' buffer-locally."
-  (setq-local inhibit-message t))
 
 (use-package zetteldeft
   :ensure t
@@ -1611,15 +1627,14 @@ Collapse src blocks by default, and toggle.
 )
 
   ;; TODO move to orgmode hook
-  (org-babel-do-load-languages
-   'org-babel-load-languages
-   '((dot . t) 
-     (python . t))
-) ; this line activates dot
+(org-babel-do-load-languages
+  'org-babel-load-languages
+  '((dot . t) 
+  (python . t))
+)
 
 (setq org-src-tab-acts-natively t)
-  (use-package elisp-format)
-
+(use-package elisp-format)
 
   ;; TODO https://emacs.stackexchange.com/a/30523/16359
   ;; (use-package orglink
@@ -1699,6 +1714,64 @@ Collapse src blocks by default, and toggle.
   (add-hook 'org-mode-hook 'auto-fill-mode)
 (setq org-startup-with-inline-images t)
 #+end_src
+
+** Note taking
+#+begin_src emacs-lisp
+(message "Notes")
+#+end_src
+
+*** zetteldeft
+
+Zetteldeft can generate lists of notes based on search terms.
+
+To make updating these lists a little more convenient, you can create
+a function that you can then call straight from an org codeblock.
+
+#+begin_src emacs-lisp
+(defun efls/zetteldeft-links (str &optional missing silent)
+  "Crude attempt to automate `zetteldeft-insert-list-links-missing'.
+Meant to be called from a source block.
+Replaces the list below the block with an updated list.
+When MISSING is t, use `zetteldeft-insert-list-links-missing'.
+With MISSING as t, suppress the timestamp at the end."
+  (save-excursion
+    (org-forward-element)
+    ; Delete any existing list
+    (when (org-in-item-p) (delete-region (point) (org-end-of-item-list)))
+    ; New line & insert links
+    (if missing
+        (progn 
+          (save-buffer)
+          (deft-refresh)
+          (zetteldeft-insert-list-links-missing str))
+      (zetteldeft-insert-list-links str))
+    (unless silent
+      (org-return-indent)
+      (insert (current-time-string) "\n"))))
+#+end_src
+
+Like it says in the doc string, this function is meant to be called from an org code block.
+
+In a Zetteldeft note you can then:
+"#+begin_src emacs-lisp :results silent
+(efls/zetteldeft-links "#zetteldeft")
+"#+end_src
+
+Link to active note:
+
+#+BEGIN_SRC emacs-lisp :results silent
+(defun cjm/zetteldeft-backlinks-to-here ()
+  
+  (interactive)
+  ;; all backlinks
+  (efls/zetteldeft-links (zetteldeft--current-id) nil 'silent )
+  ;; backlinks which don't have parent
+  ;; (efls/zetteldeft-links (zetteldeft--current-id) t 'silent )
+)
+#+END_SRC
+
+*** other
+
 
 Note taking in org mode following [[https://blog.jethro.dev/posts/zettelkasten_with_org/][Org-mode Workflow Part 3: Zettelkasten with Org-mode · Jethro Kuan]]
 
@@ -2277,11 +2350,34 @@ Configure Jedi along with the associated =company= mode:
 #+end_src
 
 ** C++
+Use modern C++ syntax highlighting.
+
 #+BEGIN_SRC emacs-lisp 
 (use-package modern-cpp-font-lock 
 :ensure t
 ) 
 #+END_SRC
+
+
+First of all lets set the indentation mode to the one you are used
+to. Personally I prefer the one Stroustrup follows.
+
+#+BEGIN_SRC emacs-lisp
+(add-hook 'c++-mode-hook (lambda () (c-set-style "stroustrup")))
+(add-hook 'c++-mode-hook 'hs-minor-mode)
+#+END_SRC
+
+*** =cmake-mode=
+This package provides syntax highlight in =CMakeLists.txt= files and
+completions via =company-cmake= backend. Very useful when creating the =CMake=
+files.
+
+#+BEGIN_SRC emacs-lisp
+(use-package cmake-mode
+  :ensure t)
+#+END_SRC
+
+*** TODO Apply more C++ config from here http://tuhdo.github.io/c-ide.html#sec-2
 
 ** Javascript / JSON
 
