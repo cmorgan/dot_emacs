@@ -1,4 +1,3 @@
-
 #+title: Emacs
 #+options: toc:nil num:nil
 
@@ -120,7 +119,7 @@ Always compile packages, and use the newest version available.
 #+end_src
 
 * =evil-mode=
-
+  
 #+begin_src emacs-lisp
 (message "=evil-mode=")
 #+end_src
@@ -243,7 +242,7 @@ https://github.com/noctuid/general.el#evil-examples
 https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
 
 #+begin_src emacs-lisp
-;; this prevents emacs from being slow on windoes?
+;; this prevents emacs from being slow on windows?
 (setq inhibit-compacting-font-caches t)
 ;; (define-key dired-mode-map (kbd ",") nil)
 
@@ -386,16 +385,18 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
 
    ;; projectile
    "p" '(:ignore t :which-key "projectile")
-   "pi" 'projectile-invalidate-cache
-   "pp" 'projectile-switch-project
-   "pr" 'projectile-recentf
-   "pf" 'counsel-projectile-find-file
-   "pb" 'persp-counsel-switch-buffer
-   "pa" 'projectile-find-file-in-known-projects
-   "pn" 'persp-next
-   "px" 'persp-kill
-   "p TAB" 'persp-switch
-   "ps" 'projectile-run-eshell
+   "pa" '(projectile-find-file-in-known-projects :wk "global-find-file")
+   "pb" '(persp-counsel-switch-buffer :wk "switch-buffer")
+   "pc" '(projectile-compile-project :wk "compile")
+   "pf" '(counsel-projectile-find-file :wk "find-file")
+   "pi" '(projectile-invalidate-cache :wk "kill cache")
+   "pn" '(persp-next :wk "next")
+   "pp" '(projectile-switch-project :wk "switch")
+   "pr" '(projectile-recentf :wk "recentf")
+   "ps" '(projectile-run-eshell :wk "eshell")
+   "px" '(persp-kill :wk "kill")
+   "p TAB" '(persp-switch :wk "switch")
+   "pl" '(projectile-repeat-last-command :wk "repeat")
 
    ;; files
    "f" '(:ignore t :which-key "files")
@@ -2358,12 +2359,29 @@ Use modern C++ syntax highlighting.
 ) 
 #+END_SRC
 
+Get the ~compilation~ buffer with correct color highlighting.
+https://stackoverflow.com/questions/3072648/cucumbers-ansi-colors-messing-up-emacs-compilation-buffer/63710493#63710493
+#+BEGIN_SRC emacs-lisp
+
+(use-package xterm-color
+  :ensure t
+  :init
+  (setq compilation-environment '("TERM=xterm-256color"))
+  (defun my/advice-compilation-filter (f proc string)
+  (funcall f proc (xterm-color-filter string)))
+  (advice-add 'compilation-filter :around #'my/advice-compilation-filter)
+  )
+
+
+#+END_SRC
+
 
 First of all lets set the indentation mode to the one you are used
 to. Personally I prefer the one Stroustrup follows.
 
 #+BEGIN_SRC emacs-lisp
-(add-hook 'c++-mode-hook (lambda () (c-set-style "stroustrup")))
+;; (add-hook 'c++-mode-hook (lambda () (c-set-style "stroustrup")))
+(setq-default c-basic-offset 2)
 (add-hook 'c++-mode-hook 'hs-minor-mode)
 #+END_SRC
 
