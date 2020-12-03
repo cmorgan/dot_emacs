@@ -4,7 +4,7 @@
 *.elc
 # autogenerates from org
 configuration.el
-elpa
+#elpa
 *~
 auto-save-list
 smex-items
