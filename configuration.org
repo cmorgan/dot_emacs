@@ -10,7 +10,13 @@ https://github.com/magnars/.emacs.d/blob/master/settings/setup-org.el
 https://github.com/bling/dotemacs/tree/master/config
 
 (byte-recompile-directory (expand-file-name "~/.emacs.d") 0)
-  
+
+* TODO better buffer switching for projectile
+try this https://github.com/joostkremers/nswbuff
+
+* TODO reference database with ebib
+https://github.com/joostkremers/ebib
+
 * Variables
 TODO make this platform specific
 #+BEGIN_SRC emacs-lisp
@@ -246,6 +252,7 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
 (setq inhibit-compacting-font-caches t)
 ;; (define-key dired-mode-map (kbd ",") nil)
 
+
 (use-package general
   :ensure t
   :config
@@ -254,7 +261,8 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    :states '(normal)
    :keymaps 'org-mode-map
     "<S-return>" 'cjm/org-open-at-point
-    "<S-M-return>" 'org-open-at-point
+    ;; useful in table to open at point, however this conflicts with another binding
+    ;; "<S-M-return>" 'org-open-at-point
   ;; TODO fix this
   ;; "/" 'cjm/search
 )
@@ -267,7 +275,31 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
   (general-define-key
    :states '(normal)
    :keymaps 'edebug-mode-map
-  "s" 'edebug-step-mode)
+    "s" 'edebug-step-mode)
+
+
+  ;; python
+  (general-define-key
+   :states '(normal)
+   :keymaps 'anaconda-mode-map
+   :prefix ","
+   "b" '(python-insert-breakpoint :wk "breakpoint")
+   "n" '(cjm/python-insert-ifname :wk "ifname")
+   "t" '(:ignore t :wk "test")
+   "tt" '(python-pytest-file :wk "file")
+   "tf" '(python-pytest-function :wk "function")
+   "tr" '(python-pytest-repeat :wk "repeat")
+
+   "x" 'cjm/run-python
+
+   "c" '(:ignore t :wk "conda")
+   "ca" 'conda-env-activate
+
+   "r" '(:ignore t :wk "refactor")
+   "rb" 'python-black-buffer
+   "rs" 'python-isort-buffer
+   "rr" '((lambda () (interactive) (python-isort-buffer)(python-black-buffer)(flycheck-buffer)) :which-key "all")
+   "rz" 'zimports)
 
   ;; orgmode
   (general-define-key
@@ -306,34 +338,12 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    "a" '(nil :wk "agenda")
    "at" 'org-todo-list
    "aa" 'org-agenda
+
+   "meta" '(nil :wk "meta")
   
    "o" '(
 (lambda () (interactive)(org-sort-list nil nil t)) :wk "agenda")
   )
-
-  ;; python
-  (general-define-key
-   :states '(normal)
-   :keymaps 'anaconda-mode-map
-   :prefix ","
-
-   "b" '(python-insert-breakpoint :wk "breakpoint")
-   "n" '(cjm/python-insert-ifname :wk "ifname")
-   "t" '(:ignore t :wk "test")
-   "tt" '(python-pytest-file :wk "file")
-   "tf" '(python-pytest-function :wk "function")
-   "tr" '(python-pytest-repeat :wk "repeat")
-
-   "x" 'cjm/run-python
-
-   "c" '(:ignore t :wk "conda")
-   "ca" 'conda-env-activate
-
-   "r" '(:ignore t :wk "refactor")
-   "rb" 'python-black-buffer
-   "rs" 'python-isort-buffer
-   "rr" '((lambda () (interactive) (python-isort-buffer)(python-black-buffer)(flycheck-buffer)) :which-key "all")
-   "rz" 'zimports)
 
   ;; Main menu
   (general-define-key
@@ -386,7 +396,7 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    ;; projectile
    "p" '(:ignore t :which-key "projectile")
    "pa" '(projectile-find-file-in-known-projects :wk "global-find-file")
-   "pb" '(persp-counsel-switch-buffer :wk "switch-buffer")
+   "pb" '(counsel-projectile-switch-to-buffer :wk "switch-buffer")
    "pc" '(projectile-compile-project :wk "compile")
    "pf" '(counsel-projectile-find-file :wk "find-file")
    "pi" '(projectile-invalidate-cache :wk "kill cache")
@@ -465,7 +475,10 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    "sc" 'evil-ex-nohighlight
    "sl" 'ivy-resume
    ;; search all open buffers 
-   "sb" 'swiper-all
+   "sa" 'swiper-all
+   ;; smartparens
+   "sb" 'sp-beginning-of-sexp 
+   "se" 'sp-end-of-sexp
 
    ;; deft
    "d"  '(nil :wk "deft")
@@ -491,9 +504,9 @@ https://github.com/sondr3/dotfiles/blob/master/home/emacs/core/am-keybindings.el
    ;;log
    "l" '(nil :wk "Log")
    "ll" 'cjm/open-log
+   "ld" 'cjm/open-diary
    "lp" 'cjm/open-project))
 
-;; (global-set-key (kbd "C-x k") 'cjm/kill-current-buffer)
 (define-key evil-motion-state-map (kbd "C-h") 'evil-window-left)
 (define-key evil-motion-state-map (kbd "C-j") 'evil-window-down)
 (define-key evil-motion-state-map (kbd "C-k") 'evil-window-up)
@@ -1544,6 +1557,7 @@ LANGUAGE is a string referring to one of orb-babel's supported languages.
                     (kill-buffer))))))
 
           (defun cjm/open-log ()(interactive)(find-file "c:/Users/Public/dev/docs/org/log.org"))
+          (defun cjm/open-diary ()(interactive)(find-file "~/Dropbox/org/d.org.gpg"))
           ;; (defun cjm/open-project ()(interactive)(find-file "c:/Users/Public/dev/docs/org/projects/rf2.org"))
           (defun cjm/open-project ()(interactive)(find-file "c:/Users/Public/dev/docs/org/projects/refinitiv.org"))
           (defun cjm/open-config ()(interactive)(find-file (concat (expand-file-name "~/.emacs.d") "/configuration.org")))
@@ -1592,21 +1606,23 @@ TODO https://github.com/vspinu/company-math
 
 Collapse src blocks by default, and toggle.
 #+begin_src emacs-lisp
-
 ;; following https://www.eliasstorms.net/zetteldeft/
-
 ;; gives link highlighting on page, used by zetteldeft
 (use-package avy)
 ;; ?
 (use-package ace-window)
 
+;; In older Emacsen, you can do the same thing with `eval-after-load'
+;; and '(progn ..) form.
+(with-eval-after-load 'org       
+  ;; (setq org-startup-indented t) 
+  (add-hook 'org-mode-hook #'visual-line-mode))
 
 ;; render fragments of latex when cursor leaves them
 (use-package org-fragtog
   :config
 (if cjm/is-windows nil (add-hook 'org-mode-hook 'org-fragtog-mode))
 )
-
 
 (defun cjm/inhibit-buffer-messages ()
   "Set `inhibit-message' buffer-locally."
@@ -2362,7 +2378,6 @@ Use modern C++ syntax highlighting.
 Get the ~compilation~ buffer with correct color highlighting.
 https://stackoverflow.com/questions/3072648/cucumbers-ansi-colors-messing-up-emacs-compilation-buffer/63710493#63710493
 #+BEGIN_SRC emacs-lisp
-
 (use-package xterm-color
   :ensure t
   :init
@@ -2371,10 +2386,7 @@ https://stackoverflow.com/questions/3072648/cucumbers-ansi-colors-messing-up-ema
   (funcall f proc (xterm-color-filter string)))
   (advice-add 'compilation-filter :around #'my/advice-compilation-filter)
   )
-
-
 #+END_SRC
-
 
 First of all lets set the indentation mode to the one you are used
 to. Personally I prefer the one Stroustrup follows.
@@ -2384,6 +2396,84 @@ to. Personally I prefer the one Stroustrup follows.
 (setq-default c-basic-offset 2)
 (add-hook 'c++-mode-hook 'hs-minor-mode)
 #+END_SRC
+
+*** Compiling
+the mode map is useful
+https://github.com/emacs-mirror/emacs/blob/master/lisp/progmodes/compile.el#L2089
+
+Don't show the compilation buffer if successfull, if we do show it
+then focus.
+https://stackoverflow.com/questions/17659212/dont-display-compilation-buffer-in-emacs-until-the-process-exits-with-error-o
+#+BEGIN_SRC
+(defun brian-compile-finish (buffer outstr)
+  (unless (string-match "finished" outstr)
+    (switch-to-buffer-other-window buffer))
+  t)
+
+(setq compilation-finish-functions 'brian-compile-finish)
+
+(require 'cl)
+
+(defadvice compilation-start
+  (around inhibit-display
+      (command &optional mode name-function highlight-regexp)) 
+  (if (not (string-match "^\\(find\\|grep\\)" command))
+      (flet ((display-buffer)
+         (set-window-point)
+         (goto-char)) 
+    (fset 'display-buffer 'ignore)
+    (fset 'goto-char 'ignore)
+    (fset 'set-window-point 'ignore)
+    (save-window-excursion 
+      ad-do-it))
+    ad-do-it))
+
+(ad-activate 'compilation-start)
+
+
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(defun brian-compile-finish (buffer outstr)
+  (unless (string-match "finished" outstr)
+    (switch-to-buffer-other-window buffer))
+  t)
+
+(setq compilation-finish-functions 'brian-compile-finish)
+
+(defadvice compilation-start
+  (around inhibit-display
+      (command &optional mode name-function highlight-regexp))
+  (if (not (string-match "^\\(find\\|grep\\)" command))
+      (cl-letf ((display-buffer   #'ignore)
+                (set-window-point #'ignoreco)
+                (goto-char        #'ignore))
+        (save-window-excursion
+          ad-do-it))
+    ad-do-it))
+
+(ad-activate 'compilation-start)
+
+(provide 'only-display-compile-on-error)
+
+  #+END_SRC
+
+
+For project specific compile commands they can be stored in
+~.dir-locals.el~ file like:
+
+#+BEGIN_SRC 
+((nil .
+      ((projectile-project-compilation-cmd . "make test && ./test"))))
+  #+END_SRC
+
+To facilitate this a list of safe variable names is useful:
+#+BEGIN_SRC emacs-lisp
+(put 'projectile-project-compilation-cmd 'safe-local-variable #'stringp) 
+#+END_SRC
+
+Compile command:
+https://docs.projectile.mx/projectile/projects.html#storing-project-settings
 
 *** =cmake-mode=
 This package provides syntax highlight in =CMakeLists.txt= files and
@@ -2437,6 +2527,7 @@ This creates a journal file per week, with days ready to fill in.
 (org-insert-heading)
 (cjm/insert-inactive-timestamp)
 (org-return)
+(org-narrow-to-subtree)
 (evil-insert-state)
 ;; )
 )
