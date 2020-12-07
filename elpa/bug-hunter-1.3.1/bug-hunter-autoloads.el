@@ -28,6 +28,11 @@ ASSERTION.
 
 ;;;***
 
+;;;### (autoloads nil nil ("bug-hunter-pkg.el" "bug-hunter-test.el")
+;;;;;;  (0 0 0 0))
+
+;;;***
+
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t
